@@ -1,6 +1,13 @@
+import io
+import os.path
 import re
 import logging
 import functools
+import shutil
+
+import aiofiles as aiofiles
+import s3fs
+import asyncio
 
 from lithops.storage import Storage as LithopsStorage
 from lithops.storage.utils import StorageNoSuchKeyError
@@ -21,52 +28,59 @@ logger = logging.getLogger(__name__)
 
 
 class CloudObjectBase:
-    def __init__(self, bucket, storage, key):
-        self.bucket = bucket
-        self.storage = storage
-        self.key = key
+    def __init__(self, cloud_object):
+        self.cloud_object = cloud_object
 
 
 class CloudObject:
-    def __init__(self, cls, path):
+    def __init__(self, cls, path, s3_config=None):
         if not key_regex.match(path):
             raise Exception(f'CloudObject path must satisfy regex {key_regex.pattern}')
-        self._meta = {}
+        self._meta = None
         self._path = path
         self._cls = cls
 
-        self._backend, _ = path.split('://')
-        self._bucket, self._key = path.split('://')[1].split('/', 1)
-        self._meta_key = self._key + '.meta'
+        if s3_config is None:
+            s3_config = {}
 
-        self._storage = LithopsStorage(backend=self._backend, config={'bucket': self._bucket})
-        self._obj_meta = self._storage.head_object(bucket=self._bucket, key=self._key)
+        self.s3 = s3fs.S3FileSystem(
+            key=s3_config.get('aws_access_key_id'),
+            secret=s3_config.get('aws_secret_access_key'),
+            client_kwargs=s3_config.get('s3_client_kwargs', None),
+            config_kwargs=s3_config.get('s3_config_kwargs', None),
+        )
 
-        try:
-            self._storage.head_object(bucket=self._bucket, key=self._meta_key)
-            self._staged = True
-            logger.info('Object meta found')
-        except StorageNoSuchKeyError:
-            logger.info('Object meta not found')
-            self._staged = False
+        self._bucket, self._key, self._version = self.s3.split_path(path)
+        self._full_path = os.path.join(self._bucket, self._key)
+        self._full_meta_path = self._full_path + '.meta'
 
-        self._child = cls(self._bucket, self._storage, self._key)
+        logger.debug(f'{self._bucket=},{self._key=},{self._version=}')
 
-    def __getstate__(self):
+        self._child = cls(self)
+
+    def exists(self):
+        if not self._meta:
+            self.fetch()
+        return bool(self._meta)
+
+    def is_staged(self):
+        return self.s3.exists(self._full_meta_path)
+
+    def fetch(self):
+        if not self._meta:
+            logger.debug('fetching object')
+            self._meta = self.s3.info(self._full_path)
+            logger.debug(self._meta)
         return self._meta
 
-    def __setstate__(self, state):
-        self._meta = state
+    def new_from_file(self, file):
+        if self.exists():
+            raise Exception('Object already exists')
 
-    def preprocess(self):
-        if self._staged:
-            logger.info('Object already staged')
-        logger.info('Object meta not prepared')
-        self._child.preprocess()
+        if isinstance(file, str):
+            stream = open(file, 'rb')
+        else:
+            stream = file
 
-    def partition(self, strategy, **kwargs):
-        print(strategy.__name__)
-        return self
-
-    def apply_parallel(self, func):
-        pass
+        with self.s3.open(self._full_path, 'wb') as f:
+            shutil.copyfileobj(stream, f)
