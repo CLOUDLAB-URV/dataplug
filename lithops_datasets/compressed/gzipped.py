@@ -1,3 +1,4 @@
+import asyncio
 import threading
 
 from ..cloudobjectbase import CloudObjectBase, partitioner_strategy
@@ -9,20 +10,34 @@ class GZippedBlob(CloudObjectBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def preprocess(self):
-        streaming_body = self.storage.get_object(bucket=self.bucket, key=self.key, stream=True)
-        pipe = subprocess.Popen(['/home/lab144/.local/bin/gztool', '-i', '-x', '-s' '10'], stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    async def preprocess(self):
+        with self.cloud_object.s3.open(self.cloud_object.full_obj_key, 'rb') as co:
 
-        def _write_feeder():
-            chunk = streaming_body.read(65536)
-            while chunk != b"":
-                pipe.stdin.write(chunk)
-                chunk = streaming_body.read(65536)
+            proc = await asyncio.create_subprocess_exec('/home/lab144/.local/bin/gztool', '-i', '-x', '-s', '10',
+                                                        stdin=asyncio.subprocess.PIPE,
+                                                        stdout=asyncio.subprocess.PIPE,
+                                                        stderr=asyncio.subprocess.PIPE)
 
-        write_feeder = threading.Thread(target=_write_feeder)
-        write_feeder.start()
-        write_feeder.join()
+            async def input_writer():
+                input_chunk = await co.read(65536)
+                while input_chunk != b"":
+                    proc.stdin.write(input_chunk)
+                    input_chunk = await self.input_stream.read(65536)
+                logger.debug('done writing input')
+
+            async def output_reader():
+                output_chunk = await proc.stdout.read()
+                while output_chunk != b"":
+                    await self.response.send(output_chunk)
+                    output_chunk = await proc.stdout.read()
+                logger.debug('done reading output')
+
+            await asyncio.gather(input_writer(), output_reader())
+
+            pipe = subprocess.Popen(['/home/lab144/.local/bin/gztool', ],
+                                    stdin=subprocess.PIPE,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
         stdout, stderr = pipe.communicate()
         print(stdout, stderr)
 
