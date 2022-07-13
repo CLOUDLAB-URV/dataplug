@@ -1,51 +1,43 @@
-import asyncio
-import threading
-
-from ..cloudobjectbase import CloudObjectBase, partitioner_strategy
+import logging
+import os
+from ..cloudobjectbase import CloudObjectBase
 
 import subprocess
+
+logger = logging.getLogger(__name__)
 
 
 class GZippedBlob(CloudObjectBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    async def preprocess(self):
-        with self.cloud_object.s3.open(self.cloud_object.full_obj_key, 'rb') as co:
+    def preprocess(self):
+        with self.cloud_object.s3.open(self.cloud_object.path, 'rb') as co:
+            r, w = os.pipe()
 
-            proc = await asyncio.create_subprocess_exec('/home/lab144/.local/bin/gztool', '-i', '-x', '-s', '10',
-                                                        stdin=asyncio.subprocess.PIPE,
-                                                        stdout=asyncio.subprocess.PIPE,
-                                                        stderr=asyncio.subprocess.PIPE)
+            proc = subprocess.Popen(['/home/lab144/.local/bin/gztool', '-i', '-x', '-s', '10'],
+                                    stdin=r)
+            pipe = os.fdopen(w, 'wb')
 
-            async def input_writer():
-                input_chunk = await co.read(65536)
-                while input_chunk != b"":
-                    proc.stdin.write(input_chunk)
-                    input_chunk = await self.input_stream.read(65536)
-                logger.debug('done writing input')
+            chunk = co.read(65536)
+            while chunk != b"":
+                pipe.write(chunk)
+                chunk = co.read(65536)
 
-            async def output_reader():
-                output_chunk = await proc.stdout.read()
-                while output_chunk != b"":
-                    await self.response.send(output_chunk)
-                    output_chunk = await proc.stdout.read()
-                logger.debug('done reading output')
+            stdout, stderr = proc.communicate()
+            assert stderr == b""
 
-            await asyncio.gather(input_writer(), output_reader())
+        # TODO
+        # add creation of text index file
+        # upload both index file and text index file to object storage
 
-            pipe = subprocess.Popen(['/home/lab144/.local/bin/gztool', ],
-                                    stdin=subprocess.PIPE,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
-        stdout, stderr = pipe.communicate()
-        print(stdout, stderr)
+    def partition_even_lines(self, lines_per_chunk):
+        # TODO
+        # make use of index to get the ranges of the chunks partitioned by number of lines per chunk
+        # return list of range tuples [(chunk0-range0, chunk-0range1), ...]
+        pass
 
 
 class GZippedText(GZippedBlob):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    @partitioner_strategy
-    def even_lines(self):
-        pass
