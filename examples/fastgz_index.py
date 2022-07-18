@@ -1,7 +1,7 @@
 import logging
 
-from lithops_datasets import CloudObject
-from lithops_datasets.genomics import FASTQGZip
+from cloudnative_datasets import CloudObject
+from cloudnative_datasets.genomics import FASTQGZip
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -25,8 +25,16 @@ def main():
 
     is_staged = co.is_staged()
     print(is_staged)
-
+    if not is_staged:
+        co.preprocess()
     co.preprocess()
+
+    total_lines = co.get_attribute('total_lines')
+    print(total_lines)
+
+    it = co.call(FASTQGZip.get_line_range, 1, 125000)
+    it.setup()
+
 
 
 if __name__ == '__main__':
