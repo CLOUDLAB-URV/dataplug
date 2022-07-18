@@ -20,10 +20,10 @@ def main():
     }
 
     co = CloudObject.new_from_s3(FASTQGZip, 's3://genomics/1c-12S_S96_L001_R1_001.fastq.gz', s3_config=config)
-    meta = co.cloud_object.fetch()
+    meta = co.fetch()
     print(meta)
 
-    is_staged = co.cloud_object.is_staged()
+    is_staged = co.is_staged()
     print(is_staged)
 
     co.preprocess()
