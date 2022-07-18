@@ -1,3 +1,4 @@
+import inspect
 import os.path
 import re
 import logging
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class CloudObjectBase:
     def __init__(self, cloud_object):
-        self.cloud_object = cloud_object
+        self.cloud_object: CloudObject = cloud_object
 
     def preprocess(self, object_stream: BinaryIO) -> Tuple[bytes, Dict[str, str]]:
         raise NotImplementedError()
@@ -26,7 +27,8 @@ class CloudObject:
     def __init__(self, cloud_object_class, s3_path, s3_config=None):
         if not key_regex.match(s3_path):
             raise Exception(f'CloudObject path must satisfy regex {key_regex.pattern}')
-        self._meta = None
+        self._obj_meta = None
+        self._meta_meta = None
         self._s3_path = s3_path
         self._cls = cloud_object_class
 
@@ -84,20 +86,45 @@ class CloudObject:
         with co_instance.s3.open(co_instance._full_key, 'wb') as f:
             shutil.copyfileobj(stream, f)
 
+    def _update_attrs(self):
+        print(self._meta_meta)
+
+        self._attributes = {key: value for key, value in self._meta_meta['Metadata'].items()}
+
     def exists(self):
-        if not self._meta:
+        if not self._obj_meta:
             self.fetch()
-        return bool(self._meta)
+        return bool(self._obj_meta)
 
     def is_staged(self):
         return self.s3.exists(self._full_meta_key)
 
+    def get_attribute(self, key):
+        if not self.is_staged():
+            raise Exception('Object is not staged')
+
+        if 'Metadata' not in self._meta_meta:
+            self.fetch()
+            if 'Metadata' not in self._meta_meta:
+                raise KeyError(key)
+
+        if key not in self._meta_meta['Metadata']:
+            self.fetch()
+            if key not in self._meta_meta['Metadata']:
+                raise KeyError(key)
+
+        return self._meta_meta['Metadata'][key]
+
     def fetch(self):
-        if not self._meta:
+        if not self._obj_meta:
             logger.debug('fetching object')
-            self._meta = self.s3.info(self._full_key)
-            logger.debug(self._meta)
-        return self._meta
+            self._obj_meta = self.s3.info(self._full_key)
+            res = self.s3_client.head_object(Bucket=self._bucket, Key=self._meta_key)
+            del res['ResponseMetadata']
+            self._meta_meta = res
+            logger.debug(self._obj_meta)
+            logger.debug(self._meta_meta)
+        return self._obj_meta
 
     def preprocess(self):
         with self.s3.open(self._full_key) as input_stream:
@@ -108,3 +135,17 @@ class CloudObject:
             Key=self._meta_key,
             Metadata=meta
         )
+
+    def get_meta_obj(self):
+        return self.s3.open(self._full_meta_key)
+
+    def call(self, f, *args, **kwargs):
+        if isinstance(f, str):
+            func_name = f
+        elif inspect.ismethod(f) or inspect.isfunction(f):
+            func_name = f.__name__
+        else:
+            raise Exception(f)
+
+        attr = getattr(self._child, func_name)
+        return attr.__call__(*args, **kwargs)
