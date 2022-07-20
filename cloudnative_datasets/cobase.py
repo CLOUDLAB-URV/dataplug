@@ -25,15 +25,14 @@ class CloudObject:
         self._s3_path = s3_path
         self._cls = cloud_object_class
         self._obj_attrs = {}
+        self._s3_config = s3_config or {}
 
-        if s3_config is None:
-            s3_config = {}
-
-        self.s3_client = boto3.client('s3', aws_access_key_id=s3_config.get('aws_access_key_id'),
-                                      aws_secret_access_key=s3_config.get('aws_secret_access_key'),
-                                      region_name=s3_config.get('region_name'),
-                                      endpoint_url=s3_config.get('endpoint_url'),
-                                      config=botocore.client.Config(**s3_config.get('s3_config_kwargs', {})))
+        self._s3 = boto3.client('s3',
+                                aws_access_key_id=self._s3_config.get('aws_access_key_id'),
+                                aws_secret_access_key=self._s3_config.get('aws_secret_access_key'),
+                                region_name=self._s3_config.get('region_name'),
+                                endpoint_url=self._s3_config.get('endpoint_url'),
+                                config=botocore.client.Config(**self._s3_config.get('s3_config_kwargs', {})))
 
         self._obj_bucket, self._key = split_s3_path(s3_path)
         self._meta_bucket = self._obj_bucket + '.meta'
@@ -45,6 +44,18 @@ class CloudObject:
     @property
     def path(self):
         return self._s3_path
+
+    @property
+    def meta_bucket(self):
+        return self._meta_bucket
+
+    @property
+    def obj_bucket(self):
+        return self._obj_bucket
+
+    @property
+    def s3(self):
+        return self._s3
 
     @classmethod
     def new_from_s3(cls, cloud_object_class, s3_path, s3_config=None):
@@ -60,7 +71,7 @@ class CloudObject:
 
         bucket, key = split_s3_path(cloud_path)
 
-        co_instance.s3_client.upload_file(Filename=file_path, Bucket=bucket, Key=key)
+        co_instance._s3.upload_file(Filename=file_path, Bucket=bucket, Key=key)
 
     def _update_attrs(self):
         print(self._meta_meta)
@@ -73,7 +84,7 @@ class CloudObject:
 
     def is_staged(self):
         try:
-            self.s3_client.head_object(Bucket=self._meta_bucket, Key=self._key)
+            self._s3.head_object(Bucket=self._meta_bucket, Key=self._key)
             return True
         except botocore.exceptions.ClientError as e:
             logger.debug(e.response)
@@ -89,7 +100,7 @@ class CloudObject:
         if not self._obj_meta:
             logger.debug('fetching object head')
             try:
-                head_res = self.s3_client.head_object(Bucket=self._obj_bucket, Key=self._key)
+                head_res = self._s3.head_object(Bucket=self._obj_bucket, Key=self._key)
                 del head_res['ResponseMetadata']
                 self._obj_meta = head_res
             except botocore.exceptions.ClientError as e:
@@ -100,7 +111,7 @@ class CloudObject:
         if not self._meta_meta:
             logger.debug('fetching meta head')
             try:
-                head_res = self.s3_client.head_object(Bucket=self._meta_bucket, Key=self._key)
+                head_res = self._s3.head_object(Bucket=self._meta_bucket, Key=self._key)
                 del head_res['ResponseMetadata']
                 self._meta_meta = head_res
                 if 'Metadata' in head_res:
@@ -113,10 +124,10 @@ class CloudObject:
         return self._obj_meta, self._meta_meta
 
     def preprocess(self):
-        get_res = self.s3_client.get_object(Bucket=self._obj_bucket, Key=self._key)
+        get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._key)
         logger.debug(get_res)
         body, meta = self._child.preprocess(object_stream=get_res['Body'])
-        put_res = self.s3_client.put_object(
+        put_res = self._s3.put_object(
             Body=body,
             Bucket=self._meta_bucket,
             Key=self._key,
@@ -126,7 +137,7 @@ class CloudObject:
         self._obj_attrs.update(meta)
 
     def get_meta_obj(self):
-        get_res = self.s3_client.get_object(Bucket=self._meta_bucket, Key=self._key)
+        get_res = self._s3.get_object(Bucket=self._meta_bucket, Key=self._key)
         return get_res['Body']
 
     def call(self, f, *args, **kwargs):
@@ -139,3 +150,7 @@ class CloudObject:
 
         attr = getattr(self._child, func_name)
         return attr.__call__(*args, **kwargs)
+
+    def partition(self, strategy, *args, **kwargs):
+        return self.call(strategy, *args, **kwargs)
+

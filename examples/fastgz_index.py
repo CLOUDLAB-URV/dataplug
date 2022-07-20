@@ -29,7 +29,7 @@ def main():
     total_lines = co.get_attribute('total_lines')
     print(total_lines)
 
-    it = co.call(FASTQGZip.get_line_range, 1, 125000)
+    it = co.partition(FASTQGZip.partition_chunk_lines, 100_000, strategy='merge')
     it.setup()
 
 
