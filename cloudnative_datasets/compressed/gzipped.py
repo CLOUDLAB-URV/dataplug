@@ -27,12 +27,14 @@ class GZippedText(CloudObjectBase):
         self._index_key = self.cloud_object._key + 'i'
 
     def preprocess(self, object_stream: BinaryIO):
-        tmp_file_name = tempfile.mktemp()
-        # try:
-        #     os.remove(tmp_file_name)
-        # except FileNotFoundError:
-        #     pass
-        index_proc = subprocess.Popen([GZTOOL_PATH, '-i', '-x', '-s', '1', '-I', tmp_file_name],
+        tmp_index_file_name = tempfile.mktemp()
+        try:
+            os.remove(tmp_index_file_name)
+        except FileNotFoundError:
+            pass
+
+        # Create index
+        index_proc = subprocess.Popen([GZTOOL_PATH, '-i', '-x', '-s', '1', '-I', tmp_index_file_name],
                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         chunk = object_stream.read(CHUNK_SIZE)
@@ -46,12 +48,12 @@ class GZippedText(CloudObjectBase):
         logger.debug(stderr.decode('utf-8'))
         assert index_proc.returncode == 0
 
-        with open(tmp_file_name, 'rb') as index_f:
+        with open(tmp_index_file_name, 'rb') as index_f:
             index_bin = index_f.read()
-            output = subprocess.check_output([GZTOOL_PATH, '-ell'], input=index_bin).decode('utf-8')
-            logger.debug(output)
-        # os.remove(tmp_file_name)
-        self.cloud_object.s3_client.put_object(Bucket=self.cloud_object._bucket, Key=self._index_key, Body=index_bin)
+        output = subprocess.check_output([GZTOOL_PATH, '-ell'], input=index_bin).decode('utf-8')
+        logger.debug(output)
+        self.cloud_object.s3_client.put_object(Bucket=self.cloud_object._meta_bucket, Key=self._index_key,
+                                               Body=index_bin)
 
         total_lines = RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop()
 
@@ -82,7 +84,9 @@ class GZippedText(CloudObjectBase):
 
     def get_line_range(self, line0, line1):
         meta_obj = self.cloud_object.get_meta_obj()
-        df = pd.read_parquet(meta_obj)
+        meta_buff = io.BytesIO(meta_obj.read())
+        meta_buff.seek(0)
+        df = pd.read_parquet(meta_buff)
         res = df.loc[(df['line_number'] >= line0) & (df['line_number'] <= line1)]
         window0 = res.head(1)['compressed_byte'].values[0].item()
         window1 = df.loc[res.tail(1).index + 1]['compressed_byte'].values[0].item()
@@ -104,23 +108,25 @@ class GZipLineIterator(CloudObjectChunk):
 
     def setup(self):
         tmp_index_file = tempfile.mktemp()
-        res = self.cloud_object.s3_client.get_object(Bucket=self.cloud_object._bucket, Key=self.child._index_key)
+
+        # Get index and store it to temp file
+        res = self.cloud_object.s3_client.get_object(Bucket=self.cloud_object._meta_bucket, Key=self.child._index_key)
         with open(tmp_index_file, 'wb') as index_tmp:
             index_tmp.write(res['Body'].read())
 
-        res = self.cloud_object.s3_client.get_object(Bucket=self.cloud_object._bucket, Key=self.cloud_object._key,
-                                                     Range=f'{self.range0 - 1}-{self.range1}')
+        res = self.cloud_object.s3_client.get_object(Bucket=self.cloud_object._obj_bucket, Key=self.cloud_object._key,
+                                                     Range=f'bytes={self.range0 - 1}-{self.range1 - 1}')
         self._body = res['Body']
 
         tmp_chunk_file = tempfile.mktemp()
         with open(tmp_chunk_file, 'wb') as chunk_tmp:
             chunk_tmp.write(self._body.read())
 
-        index_proc = subprocess.Popen([GZTOOL_PATH, '-I', tmp_index_file, '-n', str(self.range0), tmp_chunk_file])
+        cmd = [GZTOOL_PATH, '-I', tmp_index_file, '-n', str(self.range0), '-L', str(self.line0), tmp_chunk_file]
+        index_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         stdout, stderr = index_proc.communicate()
         # logger.debug(stdout.decode('utf-8'))
         logger.debug(stderr.decode('utf-8'))
-        assert index_proc.returncode == 0
 
         return stdout
