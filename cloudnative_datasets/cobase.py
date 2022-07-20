@@ -1,16 +1,11 @@
 import inspect
-import os.path
-import re
 import logging
-import shutil
+from typing import Tuple, Dict, BinaryIO
 
 import boto3
 import botocore
-import s3fs
 
-from typing import Tuple, Dict, BinaryIO
-
-key_regex = re.compile(r'^\w+://.+/.+$')
+from .util import split_s3_path
 
 logger = logging.getLogger(__name__)
 
@@ -25,41 +20,31 @@ class CloudObjectBase:
 
 class CloudObject:
     def __init__(self, cloud_object_class, s3_path, s3_config=None):
-        if not key_regex.match(s3_path):
-            raise Exception(f'CloudObject path must satisfy regex {key_regex.pattern}')
         self._obj_meta = None
         self._meta_meta = None
         self._s3_path = s3_path
         self._cls = cloud_object_class
+        self._obj_attrs = {}
 
         if s3_config is None:
             s3_config = {}
 
-        self.s3 = s3fs.S3FileSystem(
-            key=s3_config.get('aws_access_key_id'),
-            secret=s3_config.get('aws_secret_access_key'),
-            client_kwargs=s3_config.get('s3_client_kwargs', None),
-            config_kwargs=s3_config.get('s3_config_kwargs', None)
-        )
-
         self.s3_client = boto3.client('s3', aws_access_key_id=s3_config.get('aws_access_key_id'),
                                       aws_secret_access_key=s3_config.get('aws_secret_access_key'),
-                                      region_name=s3_config.get('s3_client_kwargs', {}).get('region_name'),
-                                      endpoint_url=s3_config.get('s3_client_kwargs', {}).get('endpoint_url'),
+                                      region_name=s3_config.get('region_name'),
+                                      endpoint_url=s3_config.get('endpoint_url'),
                                       config=botocore.client.Config(**s3_config.get('s3_config_kwargs', {})))
 
-        self._bucket, self._key, self._version = self.s3.split_path(s3_path)
-        self._meta_key = self._key + '.meta'
-        self._full_key = os.path.join(self._bucket, self._key)
-        self._full_meta_key = self._full_key + '.meta'
+        self._obj_bucket, self._key = split_s3_path(s3_path)
+        self._meta_bucket = self._obj_bucket + '.meta'
 
-        logger.debug(f'{self._bucket=},{self._key=},{self._version=}')
+        logger.debug(f'{self._obj_bucket=},{self._meta_bucket=},{self._key=}')
 
         self._child = cloud_object_class(self)
 
     @property
     def path(self):
-        return self._full_key
+        return self._s3_path
 
     @classmethod
     def new_from_s3(cls, cloud_object_class, s3_path, s3_config=None):
@@ -67,28 +52,18 @@ class CloudObject:
         return co_instance
 
     @classmethod
-    def new_from_file(cls, cloud_object_class, file, cloud_path=None, s3_config=None):
-        if cloud_path is None and isinstance(file, str):
-            cloud_path = 's3://' + file
-        elif cloud_path is None:
-            raise Exception('Cloud path is required')
-
+    def new_from_file(cls, cloud_object_class, file_path, cloud_path, s3_config=None):
         co_instance = cls(cloud_object_class, cloud_path, s3_config)
 
         if co_instance.exists():
             raise Exception('Object already exists')
 
-        if isinstance(file, str):
-            stream = open(file, 'rb')
-        else:
-            stream = file
+        bucket, key = split_s3_path(cloud_path)
 
-        with co_instance.s3.open(co_instance._full_key, 'wb') as f:
-            shutil.copyfileobj(stream, f)
+        co_instance.s3_client.upload_file(Filename=file_path, Bucket=bucket, Key=key)
 
     def _update_attrs(self):
         print(self._meta_meta)
-
         self._attributes = {key: value for key, value in self._meta_meta['Metadata'].items()}
 
     def exists(self):
@@ -97,47 +72,62 @@ class CloudObject:
         return bool(self._obj_meta)
 
     def is_staged(self):
-        return self.s3.exists(self._full_meta_key)
+        try:
+            self.s3_client.head_object(Bucket=self._meta_bucket, Key=self._key)
+            return True
+        except botocore.exceptions.ClientError as e:
+            logger.debug(e.response)
+            if e.response['Error']['Code'] == '404':
+                return False
+            else:
+                raise e
 
     def get_attribute(self, key):
-        if not self.is_staged():
-            raise Exception('Object is not staged')
-
-        if 'Metadata' not in self._meta_meta:
-            self.fetch()
-            if 'Metadata' not in self._meta_meta:
-                raise KeyError(key)
-
-        if key not in self._meta_meta['Metadata']:
-            self.fetch()
-            if key not in self._meta_meta['Metadata']:
-                raise KeyError(key)
-
-        return self._meta_meta['Metadata'][key]
+        return self._obj_attrs[key]
 
     def fetch(self):
         if not self._obj_meta:
-            logger.debug('fetching object')
-            self._obj_meta = self.s3.info(self._full_key)
-            res = self.s3_client.head_object(Bucket=self._bucket, Key=self._meta_key)
-            del res['ResponseMetadata']
-            self._meta_meta = res
-            logger.debug(self._obj_meta)
-            logger.debug(self._meta_meta)
-        return self._obj_meta
+            logger.debug('fetching object head')
+            try:
+                head_res = self.s3_client.head_object(Bucket=self._obj_bucket, Key=self._key)
+                del head_res['ResponseMetadata']
+                self._obj_meta = head_res
+            except botocore.exceptions.ClientError as e:
+                if e.response['Error']['Code'] == '404':
+                    self._obj_meta = None
+                else:
+                    raise e
+        if not self._meta_meta:
+            logger.debug('fetching meta head')
+            try:
+                head_res = self.s3_client.head_object(Bucket=self._meta_bucket, Key=self._key)
+                del head_res['ResponseMetadata']
+                self._meta_meta = head_res
+                if 'Metadata' in head_res:
+                    self._obj_attrs.update(head_res['Metadata'])
+            except botocore.exceptions.ClientError as e:
+                if e.response['Error']['Code'] == '404':
+                    self._meta_meta = None
+                else:
+                    raise e
+        return self._obj_meta, self._meta_meta
 
     def preprocess(self):
-        with self.s3.open(self._full_key) as input_stream:
-            body, meta = self._child.preprocess(input_stream)
-        self.s3_client.put_object(
+        get_res = self.s3_client.get_object(Bucket=self._obj_bucket, Key=self._key)
+        logger.debug(get_res)
+        body, meta = self._child.preprocess(object_stream=get_res['Body'])
+        put_res = self.s3_client.put_object(
             Body=body,
-            Bucket=self._bucket,
-            Key=self._meta_key,
+            Bucket=self._meta_bucket,
+            Key=self._key,
             Metadata=meta
         )
+        logger.debug(put_res)
+        self._obj_attrs.update(meta)
 
     def get_meta_obj(self):
-        return self.s3.open(self._full_meta_key)
+        get_res = self.s3_client.get_object(Bucket=self._meta_bucket, Key=self._key)
+        return get_res['Body']
 
     def call(self, f, *args, **kwargs):
         if isinstance(f, str):
