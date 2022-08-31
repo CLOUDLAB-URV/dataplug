@@ -126,7 +126,17 @@ class CloudObject:
     def preprocess(self):
         get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._key)
         logger.debug(get_res)
-        body, meta = self._child.preprocess(object_stream=get_res['Body'])
+
+        result = self._child.preprocess(object_stream=get_res['Body'])
+
+        try:
+            body, meta = result
+        except TypeError:
+            raise Exception(f'Preprocessing result is {result}')
+
+        if body is None or meta is None:
+            raise Exception('Preprocessing result is {}'.format((body, meta)))
+
         put_res = self._s3.put_object(
             Body=body,
             Bucket=self._meta_bucket,
