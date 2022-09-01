@@ -1,21 +1,33 @@
 import inspect
 import logging
+import functools
+import math
 from typing import Tuple, Dict, BinaryIO
 
 import boto3
 import botocore
 
 from .util import split_s3_path
+from .preprocessers import AsyncPreprocesser, MapReducePreprocesser
 
 logger = logging.getLogger(__name__)
 
 
-class CloudObjectBase:
-    def __init__(self, cloud_object):
-        self.cloud_object: CloudObject = cloud_object
+class CloudObjectWrapper:
+    def __init__(self, preprocesser):
+        self.co_class = None
+        self.preprocesser = preprocesser
 
-    def preprocess(self, object_stream: BinaryIO) -> Tuple[bytes, Dict[str, str]]:
-        raise NotImplementedError()
+    def __call__(self, cls):
+        if not inspect.isclass(cls):
+            raise TypeError(f'CloudObject expected to use with class type, not {type(cls)}')
+
+        if self.co_class is None:
+            self.co_class = cls
+        else:
+            raise Exception(f"Can't overwrite decorator, now is {self.co_class}")
+
+        return self
 
 
 class CloudObject:
@@ -38,8 +50,6 @@ class CloudObject:
         self._meta_bucket = self._obj_bucket + '.meta'
 
         logger.debug(f'{self._obj_bucket=},{self._meta_bucket=},{self._key=}')
-
-        self._child = cloud_object_class(self)
 
     @property
     def path(self):
@@ -123,28 +133,64 @@ class CloudObject:
                     raise e
         return self._obj_meta, self._meta_meta
 
-    def preprocess(self):
-        get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._key)
-        logger.debug(get_res)
+    def force_preprocess(self, local: bool = False, chunk_size: int = None, num_workers: int = None):
+        if local:
+            if issubclass(self._cls.preprocesser, AsyncPreprocesser):
+                get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._key)
+                logger.debug(get_res)
 
-        result = self._child.preprocess(object_stream=get_res['Body'])
+                result = self._cls.preprocesser.preprocess(data_stream=get_res['Body'], s3=self._s3)
 
-        try:
-            body, meta = result
-        except TypeError:
-            raise Exception(f'Preprocessing result is {result}')
+                try:
+                    body, meta = result
+                except TypeError:
+                    raise Exception(f'Preprocessing result is {result}')
 
-        if body is None or meta is None:
-            raise Exception('Preprocessing result is {}'.format((body, meta)))
+                if body is None or meta is None:
+                    raise Exception('Preprocessing result is {}'.format((body, meta)))
 
-        put_res = self._s3.put_object(
-            Body=body,
-            Bucket=self._meta_bucket,
-            Key=self._key,
-            Metadata=meta
-        )
-        logger.debug(put_res)
-        self._obj_attrs.update(meta)
+                put_res = self._s3.put_object(
+                    Body=body,
+                    Bucket=self._meta_bucket,
+                    Key=self._key,
+                    Metadata=meta
+                )
+                logger.debug(put_res)
+                self._obj_attrs.update(meta)
+            elif issubclass(self._cls.preprocesser, MapReducePreprocesser):
+                head_res = self._s3.head_object(Bucket=self._obj_bucket, Key=self._key)
+                print(head_res)
+                obj_size = head_res['ContentLength']
+
+                if chunk_size is not None and num_workers is not None:
+                    raise Exception('Both chunk_size and num_workers is not allowed')
+                elif chunk_size is not None and num_workers is None:
+                    iterations = math.ceil(obj_size / chunk_size)
+                elif chunk_size is None and num_workers is not None:
+                    iterations = num_workers
+                    chunk_size = round(obj_size / num_workers)
+                else:
+                    raise Exception('At least chunk_size or num_workers parameter is required')
+
+                map_results = []
+                for i in range(iterations):
+                    r0 = i * chunk_size
+                    r1 = ((i * chunk_size) + chunk_size)
+                    r1 = r1 if r1 <= obj_size else obj_size
+                    get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._key, Range=f'bytes={r0}-{r1}')
+
+                    result = self._cls.preprocesser.map(data_stream=get_res['Body'], worker_id=i,
+                                                        key=self._key, chunk_size=chunk_size,
+                                                        obj_size=obj_size, partitions=iterations, s3=self._s3)
+                    map_results.append(result)
+
+                reduce_result, meta = self._cls.preprocesser.reduce(map_results, self._s3)
+                pass
+
+            else:
+                raise Exception()
+        else:
+            raise NotImplementedError()
 
     def get_meta_obj(self):
         get_res = self._s3.get_object(Bucket=self._meta_bucket, Key=self._key)
@@ -163,4 +209,3 @@ class CloudObject:
 
     def partition(self, strategy, *args, **kwargs):
         return self.call(strategy, *args, **kwargs)
-

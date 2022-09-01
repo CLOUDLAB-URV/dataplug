@@ -27,7 +27,7 @@ class GZippedText(CloudObjectBase):
         super().__init__(*args, **kwargs)
         self._index_key = self.cloud_object._key + 'i'
 
-    def preprocess(self, object_stream: BinaryIO):
+    def force_preprocess(self, object_stream: BinaryIO):
         tmp_index_file_name = tempfile.mktemp()
         try:
             os.remove(tmp_index_file_name)

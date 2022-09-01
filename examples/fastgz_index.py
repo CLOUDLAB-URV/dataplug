@@ -23,8 +23,8 @@ def main():
     is_staged = co.is_staged()
     print(is_staged)
     if not is_staged:
-        co.preprocess()
-    co.preprocess()
+        co.force_preprocess()
+    co.force_preprocess()
 
     total_lines = co.get_attribute('total_lines')
     print(total_lines)
