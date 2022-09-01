@@ -22,15 +22,15 @@ def main():
 
     is_staged = co.is_staged()
     print(is_staged)
-    if not is_staged:
-        co.preprocess()
-    co.preprocess()
+    # if not is_staged:
+    #     co.force_preprocess()<
+    co.force_preprocess(local=True, num_workers=4)
 
-    total_lines = co.get_attribute('total_lines')
-    print(total_lines)
-
-    it = co.partition(FASTA.partition_chunk_lines, 100_000, strategy='merge')
-    it.setup()
+    # total_lines = co.get_attribute('total_lines')
+    # print(total_lines)
+    #
+    # it = co.partition(FASTA.partition_chunk_lines, 100_000, strategy='merge')
+    # it.setup()
 
 
 if __name__ == '__main__':

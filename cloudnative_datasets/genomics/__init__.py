@@ -1,1 +1,1 @@
-from .sequence import *
+from .fasta import *
