@@ -1,6 +1,8 @@
 import io
 import json
 import re
+import diskcache
+import tempfile
 from typing import BinaryIO, Tuple, Dict
 
 from ..cobase import CloudObjectWrapper
@@ -95,61 +97,60 @@ class FASTAPreprocesser(MapReducePreprocesser):
 
     @staticmethod
     def reduce(results, s3):
-        result = ""
+        if len(results) == 1:
+            sequences = json.loads(results.pop())
+            output = "\n".join(sequences)
+            return None, sequences
 
-        prev_chunk = None
-        for i, curr_chunk in enumerate(results):
-            if '>>' in curr_chunk[0]:
-                first_curr = curr_chunk[0]
-                last_prev = prev_chunk[-1]
-                param_curr = first_curr.split(' ')
-                param_prev = last_prev.split(' ')
-                if '<->' in last_prev or '<_>' in last_prev:
-                    if '<->' in last_prev:
-                        # If the split was after a space, then there is all id
-                        name_id = param_prev[0].replace('<->', '')
+        cache = diskcache.Cache(tempfile.mktemp())
+        for i, result in enumerate(results):
+            sequences = json.loads(result)
+            # dict_prev = results[i - 1]
+            # seq_range_prev = dict_prev['sequences']
+            if i > 0 and '>>' in sequences[0]:
+                param_seq = sequences[0].split(' ')
+                prev_sequences = cache[i - 1]
+                last_prev_seq = prev_sequences[-1]
+                param_seq_prev = last_prev_seq.split(' ')
+                if '<->' in last_prev_seq or '<_>' in last_prev_seq:
+                    if '<->' in last_prev_seq[-1]:  # If the split was after a space, then there is all id
+                        name_id = param_seq_prev[0].replace('<->', '')
                     else:
-                        name_id = param_prev[0].replace('<_>', '') + param_curr[5].replace('^', '')
-                    length = param_curr[4].split('-')[1]
-                    offset_head = param_prev[1]
-                    offset_base = param_curr[3].split('-')[1]
-                    prev_chunk.pop()  # Remove previous sequence
+                        name_id = param_seq_prev[0].replace('<_>', '') + param_seq[5].replace('^', '')
+                    length = param_seq[4].split('-')[1]
+                    offset_head = param_seq_prev[1]
+                    offset_base = param_seq[3].split('-')[1]
+                    prev_sequences.pop()  # Remove previous sequence
+                    cache[i - 1] = prev_sequences
                     split = 0
                 else:
-                    length = param_curr[4].split('-')[0]
-                    name_id = param_prev[0]
-                    offset_head = param_prev[2]
-                    offset_base = param_curr[3].split('-')[0]
-                    split = int(param_prev[1])
+                    length = param_seq[4].split('-')[0]
+                    name_id = param_seq_prev[0]
+                    offset_head = param_seq_prev[2]
+                    offset_base = param_seq[3].split('-')[0]
+                    split = int(param_seq_prev[1])
                     # Update number of partitions of the sequence
                     for x in range(i - split, i):  # Update previous sequences
                         # num_chunks_has_divided + 1 (i+1: total of current partitions of sequence)
-                        results[x]['sequences'][-1] = results[x]['sequences'][-1].replace(f' {split} ',
-                                                                                          f' {split + 1} ')
-                # Remove 4rt param
-                corrected_seq = first_curr.replace(f' {param_curr[5]}', '')
-                # [offset_base_0-offset_base_1|offset_base] -> offset_base
-                corrected_seq = corrected_seq.replace(f' {param_curr[3]} ', f' {offset_base} ')
-                # [length_0-length_1|length] -> length
-                corrected_seq = corrected_seq.replace(f' {param_curr[4]}', f' {length}')
-                # X --> num_chunks_has_divided
-                corrected_seq = corrected_seq.replace(' <X> ', f' {str(split + 1)} ')
-                # Y --> offset_head
-                corrected_seq = corrected_seq.replace(' <Y> ', f' {offset_head} ')
-                # '>>' -> name_id
-                corrected_seq = corrected_seq.replace('>> ', f'{name_id} ')
+                        s = cache[x]
+                        s[-1] = s[-1].replace(f' {split} ', f' {split + 1} ')
+                        cache[x] = s
+                sequences[0] = sequences[0].replace(f' {param_seq[5]}', '')  # Remove 4rt param
+                sequences[0] = sequences[0].replace(f' {param_seq[3]} ',
+                                                    f' {offset_base} ')  # [offset_base_0-offset_base_1|offset_base] -> offset_base
+                sequences[0] = sequences[0].replace(f' {param_seq[4]}',
+                                                    f' {length}')  # [length_0-length_1|length] -> length
+                sequences[0] = sequences[0].replace(' <X> ', f' {str(split + 1)} ')  # X --> num_chunks_has_divided
+                sequences[0] = sequences[0].replace(' <Y> ', f' {offset_head} ')  # Y --> offset_head
+                sequences[0] = sequences[0].replace('>> ', f'{name_id} ')  # '>>' -> name_id
+            cache[i] = sequences
 
-            # push previous chunk
-            res = "\n".join(prev_chunk)
-            result = result + "\n" + res
+        output = ""
+        for i in range(len(results)):
+            output += "\n".join(cache[i])
+            output += "\n"
 
-            prev_chunk = curr_chunk
-
-        # push last chunk
-        res = "\n".join(prev_chunk)
-        result = result + "\n" + res
-
-        return None, result
+        return None, output
 
 
 @CloudObjectWrapper(preprocesser=FASTAPreprocesser)
