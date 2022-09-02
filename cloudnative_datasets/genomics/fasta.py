@@ -24,9 +24,11 @@ class FASTAPreprocesser(MapReducePreprocesser):
         content[-1] = f'{content[-1]} {len_base}'
 
     @staticmethod
-    def map(data_stream, worker_id, key, chunk_size, obj_size, partitions, s3):
-        min_range = worker_id * chunk_size
-        max_range = int(obj_size) if worker_id == partitions - 1 else (worker_id + 1) * chunk_size
+    def map(data_stream, meta):
+        min_range = meta.worker_id * meta.chunk_size
+        max_range = int(meta.obj_size) \
+            if meta.worker_id == meta.partitions - 1 \
+            else (meta.worker_id + 1) * meta.chunk_size
         # data = self.storage.get_object(bucket=self.bucket, key=key,
         #                                extra_get_args={'Range': f'bytes={min_range}-{max_range - 1}'}).decode('utf-8')
         data = data_stream.read().decode('utf-8')
@@ -45,7 +47,7 @@ class FASTAPreprocesser(MapReducePreprocesser):
                 end = min_range + m.end()
                 if first_sequence:
                     first_sequence = False
-                    if worker_id > 0 and start - 1 > min_range:
+                    if meta.worker_id > 0 and start - 1 > min_range:
                         # If it is not the worker of the first part of the file and in addition it
                         # turns out that the partition begins in the middle of the base of a sequence.
                         # (start-1): avoid having a split sequence in the index that only has '\n'
@@ -96,7 +98,7 @@ class FASTAPreprocesser(MapReducePreprocesser):
         return json.dumps(sequences)
 
     @staticmethod
-    def reduce(results, s3):
+    def reduce(results, meta):
         if len(results) == 1:
             sequences = json.loads(results.pop())
             output = "\n".join(sequences)

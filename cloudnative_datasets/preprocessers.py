@@ -3,7 +3,7 @@ class AsyncPreprocesser:
         pass
 
     @staticmethod
-    def preprocess(data_stream, key, s3):
+    def preprocess(data_stream, meta):
         pass
 
 
@@ -12,9 +12,9 @@ class MapReducePreprocesser:
         pass
 
     @staticmethod
-    def map(data_stream, worker_id, key, chunk_size, obj_size, partitions, s3):
+    def map(data_stream, meta):
         raise NotImplementedError()
 
     @staticmethod
-    def reduce(results, s3):
+    def reduce(results, meta):
         raise NotImplementedError()
