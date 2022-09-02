@@ -9,12 +9,14 @@ from typing import BinaryIO
 
 import pandas as pd
 
-from ..cobase import CloudObjectBase
+from ..cobase import CloudObjectWrapper
 from ..cochunkbase import CloudObjectChunk
+from ..preprocessers import AsyncPreprocesser
 
 logger = logging.getLogger(__name__)
 
-GZTOOL_PATH = '/home/lab144/.local/bin/gztool'
+# GZTOOL_PATH = '/home/lab144/.local/bin/gztool'
+GZTOOL_PATH = '/home/aitor-pc/.local/bin/gztool'
 CHUNK_SIZE = 65536
 
 RE_WINDOWS = re.compile(r'#\d+: @ \d+ / \d+ L\d+ \( \d+ @\d+ \)')
@@ -22,12 +24,12 @@ RE_NUMS = re.compile(r'\d+')
 RE_NLINES = re.compile(r'Number of lines\s+:\s+\d+')
 
 
-class GZippedText(CloudObjectBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._index_key = self.cloud_object._key + 'i'
+class GZipTextAsyncPreprocesser(AsyncPreprocesser):
+    def __init__(self):
+        super().__init__()
 
-    def force_preprocess(self, object_stream: BinaryIO):
+    @staticmethod
+    def preprocess(data_stream, meta):
         tmp_index_file_name = tempfile.mktemp()
         try:
             os.remove(tmp_index_file_name)
@@ -38,11 +40,11 @@ class GZippedText(CloudObjectBase):
         index_proc = subprocess.Popen([GZTOOL_PATH, '-i', '-x', '-s', '1', '-I', tmp_index_file_name],
                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        chunk = object_stream.read(CHUNK_SIZE)
+        chunk = data_stream.read(CHUNK_SIZE)
         while chunk != b"":
             index_proc.stdin.write(chunk)
-            chunk = object_stream.read(CHUNK_SIZE)
-        object_stream.close()
+            chunk = data_stream.read(CHUNK_SIZE)
+        # data_stream.close()
 
         stdout, stderr = index_proc.communicate()
         logger.debug(stdout.decode('utf-8'))
@@ -53,8 +55,9 @@ class GZippedText(CloudObjectBase):
             index_bin = index_f.read()
         output = subprocess.check_output([GZTOOL_PATH, '-ell'], input=index_bin).decode('utf-8')
         logger.debug(output)
-        self.cloud_object.s3.put_object(Bucket=self.cloud_object.meta_bucket, Key=self._index_key,
-                                        Body=index_bin)
+
+        gzip_index = meta.key + '.idx'
+        meta.s3.put_object(Bucket=meta.meta_bucket, Key=gzip_index, Body=index_bin)
 
         total_lines = RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop()
 
@@ -72,6 +75,9 @@ class GZippedText(CloudObjectBase):
         df.to_csv('test.csv')
         return out_stream.getvalue(), {'total_lines': total_lines}
 
+
+@CloudObjectWrapper(preprocesser=GZipTextAsyncPreprocesser)
+class GZipText:
     def partition_chunk_lines(self, lines_per_chunk, strategy='expand'):
         total_lines = int(self.cloud_object.get_attribute('total_lines'))
         parts = ceil(total_lines / lines_per_chunk)
@@ -89,8 +95,6 @@ class GZippedText(CloudObjectBase):
                 pairs[-1] = pair[0], pair[1] + extra
             else:
                 raise Exception(f'Unknown strategy {strategy}')
-
-
 
         return pairs
 

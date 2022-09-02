@@ -1,1 +1,2 @@
-from .fasta import *
+from .fasta import FASTA
+from .fastq import FASTQGZip
