@@ -16,9 +16,18 @@ logger = logging.getLogger(__name__)
 
 class CloudObjectWrapper:
     def __init__(self, preprocesser=None, inherit=None):
-        print(preprocesser, inherit)
+        # print(preprocesser, inherit)
         self.co_class = None
-        self.preprocesser = preprocesser
+        self.__preprocesser = preprocesser
+        self.__parent = inherit
+
+    def _get_preprocesser(self):
+        if self.__preprocesser is not None:
+            return self.__preprocesser
+        elif self.__parent is not None:
+            return self.__parent._get_preprocesser()
+        else:
+            raise Exception('There is not preprocesser')
 
     def __call__(self, cls):
         if not inspect.isclass(cls):
@@ -48,10 +57,11 @@ class CloudObject:
                                 endpoint_url=self._s3_config.get('endpoint_url'),
                                 config=botocore.client.Config(**self._s3_config.get('s3_config_kwargs', {})))
 
-        self._obj_bucket, self._key = split_s3_path(s3_path)
+        self._obj_bucket, self._obj_key = split_s3_path(s3_path)
+        self._meta_key = self._obj_key + '.meta'
         self._meta_bucket = self._obj_bucket + '.meta'
 
-        logger.debug(f'{self._obj_bucket=},{self._meta_bucket=},{self._key=}')
+        logger.debug(f'{self._obj_bucket=},{self._meta_bucket=},{self._obj_key=}')
 
     @property
     def path(self):
@@ -96,7 +106,7 @@ class CloudObject:
 
     def is_staged(self):
         try:
-            self._s3.head_object(Bucket=self._meta_bucket, Key=self._key)
+            self._s3.head_object(Bucket=self._meta_bucket, Key=self._obj_key)
             return True
         except botocore.exceptions.ClientError as e:
             logger.debug(e.response)
@@ -112,7 +122,7 @@ class CloudObject:
         if not self._obj_meta:
             logger.debug('fetching object head')
             try:
-                head_res = self._s3.head_object(Bucket=self._obj_bucket, Key=self._key)
+                head_res = self._s3.head_object(Bucket=self._obj_bucket, Key=self._obj_key)
                 del head_res['ResponseMetadata']
                 self._obj_meta = head_res
             except botocore.exceptions.ClientError as e:
@@ -123,7 +133,7 @@ class CloudObject:
         if not self._meta_meta:
             logger.debug('fetching meta head')
             try:
-                head_res = self._s3.head_object(Bucket=self._meta_bucket, Key=self._key)
+                head_res = self._s3.head_object(Bucket=self._meta_bucket, Key=self._obj_key)
                 del head_res['ResponseMetadata']
                 self._meta_meta = head_res
                 if 'Metadata' in head_res:
@@ -142,22 +152,25 @@ class CloudObject:
             raise NotImplementedError()
 
     def __local_preprocess(self, chunk_size: int = None, num_workers: int = None):
-        if issubclass(self._cls.preprocesser, AsyncPreprocesser):
-            get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._key)
+        preprocesser = self._cls._get_preprocesser()
+        if issubclass(preprocesser, AsyncPreprocesser):
+            get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._obj_key)
             logger.debug(get_res)
             obj_size = get_res['ContentLength']
 
             meta = types.SimpleNamespace(
                 s3=self._s3,
-                key=self._key,
+                object_bucket=self._obj_bucket,
+                object_key=self._obj_key,
                 meta_bucket=self._meta_bucket,
+                meta_key=self._meta_key,
                 worker_id=1,
                 chunk_size=obj_size,
                 obj_size=obj_size,
                 partitions=1
             )
 
-            result = self._cls.preprocesser.preprocess(data_stream=get_res['Body'], meta=meta)
+            result = preprocesser.preprocess(data_stream=get_res['Body'], meta=meta)
 
             try:
                 body, meta = result
@@ -170,13 +183,13 @@ class CloudObject:
             put_res = self._s3.put_object(
                 Body=body,
                 Bucket=self._meta_bucket,
-                Key=self._key,
+                Key=self._meta_key,
                 Metadata=meta
             )
             logger.debug(put_res)
             self._obj_attrs.update(meta)
-        elif issubclass(self._cls.preprocesser, MapReducePreprocesser):
-            head_res = self._s3.head_object(Bucket=self._obj_bucket, Key=self._key)
+        elif issubclass(preprocesser, MapReducePreprocesser):
+            head_res = self._s3.head_object(Bucket=self._obj_bucket, Key=self._obj_key)
             print(head_res)
             obj_size = head_res['ContentLength']
 
@@ -195,25 +208,30 @@ class CloudObject:
                 r0 = i * chunk_size
                 r1 = ((i * chunk_size) + chunk_size)
                 r1 = r1 if r1 <= obj_size else obj_size
-                get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._key, Range=f'bytes={r0}-{r1}')
+                get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._obj_key, Range=f'bytes={r0}-{r1}')
 
                 meta = types.SimpleNamespace(
                     s3=self._s3,
-                    key=self._key,
+                    object_bucket=self._obj_bucket,
+                    object_key=self._obj_key,
                     meta_bucket=self._meta_bucket,
+                    meta_key=self._meta_key,
+                    object_meta=self._meta_key,
                     worker_id=i,
                     chunk_size=chunk_size,
                     obj_size=obj_size,
                     partitions=iterations
                 )
 
-                result = self._cls.preprocesser.map(data_stream=get_res['Body'], meta=meta)
+                result = self._cls.__preprocesser.map(data_stream=get_res['Body'], meta=meta)
                 map_results.append(result)
 
-            reduce_result, meta = self._cls.preprocesser.reduce(map_results, self._s3)
+            reduce_result, meta = self._cls.__preprocesser.reduce(map_results, self._s3)
+        else:
+            raise Exception(f'Preprocessor is not a subclass of {AsyncPreprocesser} or {MapReducePreprocesser}')
 
     def get_meta_obj(self):
-        get_res = self._s3.get_object(Bucket=self._meta_bucket, Key=self._key)
+        get_res = self._s3.get_object(Bucket=self._meta_bucket, Key=self._obj_key)
         return get_res['Body']
 
     def call(self, f, *args, **kwargs):
