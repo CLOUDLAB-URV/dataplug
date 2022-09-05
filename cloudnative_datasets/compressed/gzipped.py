@@ -15,6 +15,8 @@ from ..preprocessers import AsyncPreprocesser
 
 logger = logging.getLogger(__name__)
 
+# GZTool version 1.4.3
+# https://github.com/circulosmeos/gztool
 # GZTOOL_PATH = '/home/lab144/.local/bin/gztool'
 GZTOOL_PATH = '/home/aitor-pc/.local/bin/gztool'
 CHUNK_SIZE = 65536
@@ -36,7 +38,8 @@ class GZipTextAsyncPreprocesser(AsyncPreprocesser):
         except FileNotFoundError:
             pass
 
-        # Create index
+        # Create index and save to tmp file
+        # (tmp file is needed, sending to stdout is not working at the moment)
         index_proc = subprocess.Popen([GZTOOL_PATH, '-i', '-x', '-s', '1', '-I', tmp_index_file_name],
                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -51,35 +54,60 @@ class GZipTextAsyncPreprocesser(AsyncPreprocesser):
         logger.debug(stderr.decode('utf-8'))
         assert index_proc.returncode == 0
 
-        with open(tmp_index_file_name, 'rb') as index_f:
-            index_bin = index_f.read()
-        output = subprocess.check_output([GZTOOL_PATH, '-ell'], input=index_bin).decode('utf-8')
+        # Generate list of access windows from index
+        output = subprocess.check_output([GZTOOL_PATH, '-ell', '-I', tmp_index_file_name]).decode('utf-8')
         logger.debug(output)
 
-        gzip_index = meta.key + '.idx'
-        meta.s3.put_object(Bucket=meta.meta_bucket, Key=gzip_index, Body=index_bin)
+        # Store index binary file
+        gzip_index_key = meta.meta_key + '.idx'
+        meta.s3.upload_file(Filename=tmp_index_file_name, Bucket=meta.meta_bucket, Key=gzip_index_key)
 
+        # Get the total number of lines
         total_lines = RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop()
 
-        lines = []
-        for f in RE_WINDOWS.finditer(output):
-            nums = [int(n) for n in RE_NUMS.findall(f.group())]
-            lines.append(nums)
+        # Generator that parses output to avoid copying all window data as lists
+        def _lines_generator():
+            for f in RE_WINDOWS.finditer(output):
+                nums = [int(n) for n in RE_NUMS.findall(f.group())]
+                yield nums
 
-        df = pd.DataFrame(lines, columns=['window', 'compressed_byte', 'uncompressed_byte',
-                                          'line_number', 'window_size', 'window_offset'])
+        # Generate data frame that stores window data
+        df = pd.DataFrame(_lines_generator(),
+                          columns=['window', 'compressed_byte', 'uncompressed_byte',
+                                   'line_number', 'window_size', 'window_offset'])
         df.set_index(['window'], inplace=True)
 
+        # Store data frame as parquet
         out_stream = io.BytesIO()
         df.to_parquet(out_stream, engine='pyarrow')
-        df.to_csv('test.csv')
-        return out_stream.getvalue(), {'total_lines': total_lines}
+        # df.to_csv('test.csv')  # debug
+
+        os.remove(tmp_index_file_name)
+
+        return out_stream.getvalue(), {'total_lines': total_lines, 'index_key': gzip_index_key}
 
 
 @CloudObjectWrapper(preprocesser=GZipTextAsyncPreprocesser)
 class GZipText:
-    def partition_chunk_lines(self, lines_per_chunk, strategy='expand'):
-        total_lines = int(self.cloud_object.get_attribute('total_lines'))
+    @staticmethod
+    def _get_ranges_from_line_pairs(cloud_object, pairs):
+        meta_obj = cloud_object.s3.get_object(Bucket=cloud_object._meta_bucket, Key=cloud_object._meta_key)
+        meta_buff = io.BytesIO(meta_obj.read())
+        meta_buff.seek(0)
+        df = pd.read_parquet(meta_buff)
+
+        byte_ranges = [None] * len(pairs)
+        for i, (line_0, line_1) in enumerate(pairs):
+            window = df.loc[(df['line_number'] >= line_0) & (df['line_number'] <= line_1)]
+            window0 = window.head(1)['compressed_byte'].values[0].item()
+            window1 = df.loc[window.tail(1).index + 1]['compressed_byte'].values[0].item()
+            byte_ranges[i] = (window0, window1)
+
+        return byte_ranges
+
+    @staticmethod
+    def partition_chunk_lines(cloud_object, lines_per_chunk, strategy='expand'):
+        total_lines = int(cloud_object.get_attribute('total_lines'))
         parts = ceil(total_lines / lines_per_chunk)
         pairs = [(lines_per_chunk * i, (lines_per_chunk * i) + lines_per_chunk - 1) for i in range(parts)]
 
@@ -96,56 +124,43 @@ class GZipText:
             else:
                 raise Exception(f'Unknown strategy {strategy}')
 
-        return pairs
+        byte_ranges = GZipText._get_ranges_from_line_pairs(cloud_object, pairs)
+        chunks = [GZipChunk(cloud_object, range_0, range_1, line_0, line_1)
+                  for (range_0, range_1), (line_0, line_1) in zip(byte_ranges, pairs)]
+
+        return chunks
 
     def partition_num_chunks(self, n_chunks):
-        x = self.cloud_object.get_attribute('total_lines')
-        pass
-
-    def __get_line_range(self, line0, line1):
-        meta_obj = self.cloud_object.get_meta_obj()
-        meta_buff = io.BytesIO(meta_obj.read())
-        meta_buff.seek(0)
-        df = pd.read_parquet(meta_buff)
-        res = df.loc[(df['line_number'] >= line0) & (df['line_number'] <= line1)]
-        window0 = res.head(1)['compressed_byte'].values[0].item()
-        window1 = df.loc[res.tail(1).index + 1]['compressed_byte'].values[0].item()
-
-        return GZipLineIterator(range0=window0, range1=window1, line0=line0, line1=line1,
-                                cloud_object=self.cloud_object, child=self)
+        # TODO
+        raise NotImplementedError()
 
 
-class GZipLineIterator(CloudObjectChunk):
-    def __init__(self, range0, range1, line0, line1, *args, **kwargs):
+class GZipChunk(CloudObjectChunk):
+    def __init__(self, line_0, line_1, *args, **kwargs):
+        self.line_0 = line_0
+        self.line_1 = line_1
         super().__init__(*args, **kwargs)
 
-        self.range0 = range0
-        self.range1 = range1
-        self.line0 = line0
-        self.line1 = line1
-
-        self._body = None
-
-    def setup(self):
+    def get(self, stream=False):
         tmp_index_file = tempfile.mktemp()
 
         # Get index and store it to temp file
-        res = self.cloud_object._s3.get_object(Bucket=self.cloud_object._meta_bucket, Key=self.child._index_key)
-        with open(tmp_index_file, 'wb') as index_tmp:
-            index_tmp.write(res['Body'].read())
+        self.s3.download_file(Bucket=self.meta_bucket, Key=self.attributes['index_key'], Filename=tmp_index_file)
 
-        res = self.cloud_object._s3.get_object(Bucket=self.cloud_object._obj_bucket, Key=self.cloud_object._key,
-                                               Range=f'bytes={self.range0 - 1}-{self.range1 - 1}')
-        self._body = res['Body']
+        # Get compressed byte range
+        res = self.s3.get_object(Bucket=self.object_bucket, Key=self.object_key,
+                                 Range=f'bytes={self.range_0 - 1}-{self.range_1 - 1}')
+        body = res['Body']
 
-        tmp_chunk_file = tempfile.mktemp()
-        with open(tmp_chunk_file, 'wb') as chunk_tmp:
-            chunk_tmp.write(self._body.read())
+        cmd = [GZTOOL_PATH, '-I', tmp_index_file, '-n', str(self.range_0), '-L', str(self.line_0)]
+        proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        cmd = [GZTOOL_PATH, '-I', tmp_index_file, '-n', str(self.range0), '-L', str(self.line0), tmp_chunk_file]
-        index_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        chunk = body.read(CHUNK_SIZE)
+        while chunk != b"":
+            proc.stdin.write(chunk)
+            chunk = body.read(CHUNK_SIZE)
 
-        stdout, stderr = index_proc.communicate()
+        stdout, stderr = proc.communicate()
         # logger.debug(stdout.decode('utf-8'))
         logger.debug(stderr.decode('utf-8'))
 
