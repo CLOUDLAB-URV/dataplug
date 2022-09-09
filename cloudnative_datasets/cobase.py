@@ -9,7 +9,7 @@ import boto3
 import botocore
 
 from .util import split_s3_path
-from .preprocessers import AsyncPreprocesser, MapReducePreprocesser
+from .preprocessers import BatchPreprocesser, MapReducePreprocesser
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +153,7 @@ class CloudObject:
 
     def __local_preprocess(self, chunk_size: int = None, num_workers: int = None):
         preprocesser = self._cls._get_preprocesser()
-        if issubclass(preprocesser, AsyncPreprocesser):
+        if issubclass(preprocesser, BatchPreprocesser):
             get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._obj_key)
             logger.debug(get_res)
             obj_size = get_res['ContentLength']
@@ -228,7 +228,7 @@ class CloudObject:
 
             reduce_result, meta = self._cls.__preprocesser.reduce(map_results, self._s3)
         else:
-            raise Exception(f'Preprocessor is not a subclass of {AsyncPreprocesser} or {MapReducePreprocesser}')
+            raise Exception(f'Preprocessor is not a subclass of {BatchPreprocesser} or {MapReducePreprocesser}')
 
     def get_meta_obj(self):
         get_res = self._s3.get_object(Bucket=self._meta_bucket, Key=self._obj_key)

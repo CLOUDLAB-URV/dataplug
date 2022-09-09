@@ -1,4 +1,4 @@
-class AsyncPreprocesser:
+class BatchPreprocesser:
     def __init__(self):
         pass
 
