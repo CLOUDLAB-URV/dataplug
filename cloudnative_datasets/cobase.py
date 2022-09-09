@@ -180,12 +180,16 @@ class CloudObject:
             if body is None or meta is None:
                 raise Exception('Preprocessing result is {}'.format((body, meta)))
 
-            put_res = self._s3.put_object(
-                Body=body,
+            put_res = self._s3.upload_fileobj(
+                Fileobj=body,
                 Bucket=self._meta_bucket,
                 Key=self._meta_key,
-                Metadata=meta
+                ExtraArgs={'Metadata': meta}
             )
+
+            if hasattr(body, 'close'):
+                body.close()
+
             logger.debug(put_res)
             self._obj_attrs.update(meta)
         elif issubclass(preprocesser, MapReducePreprocesser):
