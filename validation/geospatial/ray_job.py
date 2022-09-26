@@ -9,7 +9,7 @@ from ray.data.block import Block, BlockMetadata
 from ray.data.datasource import WriteResult
 from ray.types import ObjectRef
 
-from workflow import partition_las, create_dem, merge_dem_partitions
+from lpc_workflow import partition_las, create_dem, merge_dem_partitions
 
 
 def partition_las_ray_wrapper(args):

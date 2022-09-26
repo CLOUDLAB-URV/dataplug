@@ -3,7 +3,7 @@ import json
 import tempfile
 
 import rasterio
-from rasterio.plot import show
+from laspy import CopcReader, Bounds
 from rasterio.merge import merge
 import rasterio as rio
 
@@ -11,6 +11,48 @@ import numpy as np
 import os
 import pdal
 import laspy
+
+from cloudnative_datasets.util import force_delete_path
+
+MAX_X_SIZE = 550.0
+MAX_Y_SIZE = 550.0
+
+SQUARE_SPLIT = 2
+
+
+def convert_to_copc(lidar_data):
+    input_file_path = tempfile.mktemp()
+    output_file_path = tempfile.mktemp()
+
+    try:
+        force_delete_path(input_file_path)
+        force_delete_path(output_file_path)
+
+        with open(input_file_path, 'wb') as input_file:
+            input_file.write(lidar_data)
+
+        pipeline_json = [
+            {
+                "type": "readers.las",
+                "filename": input_file_path
+            },
+            {
+                "type": "writers.copc",
+                "filename": output_file_path
+            }
+        ]
+
+        pipeline = pdal.Pipeline(json.dumps(pipeline_json))
+        pipeline.execute()
+
+        with open(output_file_path, 'rb') as result_file:
+            result = result_file.read()
+
+        return result
+
+    finally:
+        force_delete_path(input_file_path)
+        force_delete_path(output_file_path)
 
 
 def square_split(x_min, y_min, x_max, y_max, square_splits):
@@ -28,6 +70,22 @@ def square_split(x_min, y_min, x_max, y_max, square_splits):
     return bounds
 
 
+def recursive_split(x_min, y_min, x_max, y_max, max_x_size, max_y_size):
+    x_size = x_max - x_min
+    y_size = y_max - y_min
+
+    if x_size > max_x_size:
+        left = recursive_split(x_min, y_min, x_min + (x_size // 2), y_max, max_x_size, max_y_size)
+        right = recursive_split(x_min + (x_size // 2), y_min, x_max, y_max, max_x_size, max_y_size)
+        return left + right
+    elif y_size > max_y_size:
+        up = recursive_split(x_min, y_min, x_max, y_min + (y_size // 2), max_x_size, max_y_size)
+        down = recursive_split(x_min, y_min + (y_size // 2), x_max, y_max, max_x_size, max_y_size)
+        return up + down
+    else:
+        return [(x_min, y_min, x_max, y_max)]
+
+
 def partition_las(file_path, lidar_data):
     with laspy.open(lidar_data) as file:
         sub_bounds = square_split(
@@ -35,8 +93,16 @@ def partition_las(file_path, lidar_data):
             file.header.y_min,
             file.header.x_max,
             file.header.y_max,
-            2
+            SQUARE_SPLIT
         )
+        # sub_bounds = recursive_split(
+        #     file.header.mins[0],
+        #     file.header.mins[1],
+        #     file.header.maxs[0],
+        #     file.header.maxs[1],
+        #     MAX_X_SIZE,
+        #     MAX_Y_SIZE
+        # )
 
         buffers = [io.BytesIO() for _ in range(len(sub_bounds))]
         writers = [laspy.open(buff, mode='w', header=file.header, closefd=False, do_compress=True) for buff in buffers]
@@ -73,8 +139,37 @@ def partition_las(file_path, lidar_data):
         return [(file_path, i, buf.getvalue()) for i, buf in enumerate(buffers)]
 
 
-def partition_copc():
-    pass
+def partition_copc(file_url, partition_num):
+    with CopcReader.open(file_url) as copc_file:
+        sub_bounds = square_split(
+            copc_file.header.mins[0],
+            copc_file.header.mins[1],
+            copc_file.header.maxs[0],
+            copc_file.header.maxs[1],
+            SQUARE_SPLIT
+        )
+
+        query_bounds = Bounds(
+            mins=np.asarray((sub_bounds[partition_num][0], sub_bounds[partition_num][1])),
+            maxs=np.asarray((sub_bounds[partition_num][2], sub_bounds[partition_num][3]))
+        )
+
+        points = copc_file.query(query_bounds)
+        new_header = laspy.LasHeader(
+            version=copc_file.header.version,
+            point_format=copc_file.header.point_format,
+        )
+        new_header.offsets = copc_file.header.offsets
+        new_header.scales = copc_file.header.scales
+
+        crs = copc_file.header.parse_crs()
+        new_header.add_crs(crs, keep_compatibility=True)
+
+        out_buff = io.BytesIO()
+        with laspy.open(out_buff, mode='w', header=new_header, closefd=False) as output:
+            output.write_points(points)
+
+        return out_buff.getvalue()
 
 
 def create_dem(file_path, partition, las_data):
@@ -91,13 +186,13 @@ def create_dem(file_path, partition, las_data):
                 {
                     'type': 'readers.las',
                     'filename': laz_filename,
-                    'spatialreference': 'EPSG:25830'
+                    # 'spatialreference': 'EPSG:25830'
                 },
-                {
-                    'type': 'filters.reprojection',
-                    'in_srs': 'EPSG:25830',
-                    'out_srs': 'EPSG:25830'
-                },
+                # {
+                #     'type': 'filters.reprojection',
+                #     'in_srs': 'EPSG:25830',
+                #     'out_srs': 'EPSG:25830'
+                # },
                 {
                     'type': 'filters.assign',
                     'assignment': 'Classification[:]=0'

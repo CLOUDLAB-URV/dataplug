@@ -5,7 +5,7 @@ from pprint import pprint
 import dask.bytes
 import dask.bag
 
-from workflow import partition_las, create_dem, merge_dem_partitions
+from lpc_workflow import partition_las, create_dem, merge_dem_partitions
 
 
 def partition_las_dask_wrapper(args):
@@ -27,7 +27,7 @@ def merge_partitions_dask_wrapper(args):
     return result[1]
 
 
-if __name__ == '__main__':
+def run_naive_workflow():
     storage_options = {
         'key': 'minioadmin',
         'secret': 'minioadmin',
@@ -51,3 +51,7 @@ if __name__ == '__main__':
               .groupby(lambda args: args[0])
               .map(merge_partitions_dask_wrapper)
               .to_textfiles('s3://geospatial-result/*.gtiff', storage_options=storage_options, encoding=None))
+
+
+if __name__ == '__main__':
+    run_naive_workflow()
