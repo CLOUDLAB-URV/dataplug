@@ -1,7 +1,7 @@
 import json
 
 import pdal
-import laspy.copc as lasp
+import laspy.copc
 import json
 import tempfile
 import shutil
@@ -42,7 +42,7 @@ class LiDARPreprocesser(BatchPreprocesser):
             pipeline.execute()
 
             with open(output_file_path, 'rb') as copc_file:
-                copc_reader = lasp.CopcReader(copc_file)
+                copc_reader = laspy.copc.CopcReader(copc_file)
                 copc_meta = {
                     'points': str(copc_reader.header.point_count),
                     'x_scale': str(copc_reader.header.x_scale),
@@ -65,7 +65,6 @@ class LiDARPreprocesser(BatchPreprocesser):
         finally:
             force_delete_path(input_file_path)
             force_delete_path(output_file_path)
-
 
 
 @CloudObjectWrapper(preprocesser=LiDARPreprocesser)
