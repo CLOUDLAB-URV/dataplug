@@ -11,13 +11,20 @@ import numpy as np
 import os
 import pdal
 import laspy
-
-from cloudnative_datasets.util import force_delete_path
+import shutil
 
 MAX_X_SIZE = 550.0
 MAX_Y_SIZE = 550.0
 
 SQUARE_SPLIT = 2
+
+
+def force_delete_path(path):
+    if os.path.exists(path):
+        if os.path.isfile(path):
+            os.remove(path)
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
 
 
 def convert_to_copc(lidar_data):
