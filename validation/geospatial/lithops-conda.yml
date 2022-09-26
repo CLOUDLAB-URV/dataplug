@@ -1,0 +1,11 @@
+name: lithops-conda
+channels:
+  - conda-forge
+  - anaconda
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - boto3
+  - pdal
+  - python-pdal
