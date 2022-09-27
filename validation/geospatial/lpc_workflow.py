@@ -16,7 +16,7 @@ import shutil
 MAX_X_SIZE = 550.0
 MAX_Y_SIZE = 550.0
 
-SQUARE_SPLIT = 2
+SQUARE_SPLIT = 3
 
 
 def force_delete_path(path):
@@ -240,7 +240,7 @@ def create_dem(file_path, partition, las_data):
         pipeline = pdal.Pipeline(json.dumps(dem_pipeline_json))
         # pipeline.validate()
         # pipeline.loglevel = 8
-        print('Executing DEM pipeline...')
+        print(f'Executing DEM pipeline for {file_path}...')
         result = pipeline.execute()
         print(f'DEM result wrote {result} bytes')
 
