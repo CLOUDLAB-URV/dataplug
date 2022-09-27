@@ -48,5 +48,9 @@ if __name__ == '__main__':
             print(f'Skip {filename}, size is {head_res.headers["Content-Length"]}')
 
 
+    futures = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        res = pool.map(download_and_upload, links)
+        for link in links:
+            f = pool.submit(download_and_upload, link)
+            futures.append(f)
+        [f.result() for f in futures]
