@@ -116,8 +116,6 @@ def run_naive_workflow():
     storage = lithops.storage.Storage()
 
     keys = storage.list_keys(bucket=BUCKET, prefix='laz/CA_YosemiteNP_2019/')
-    keys = keys[:1]
-    print(keys)
 
     try:
         t0 = time.time()
@@ -173,7 +171,7 @@ def run_cloudnative_workflow():
 
     keys = storage.list_keys(bucket=BUCKET, prefix='copc/CA_YosemiteNP_2019/')
 
-    part_keys = [(key, part) for key in keys for part in range(SQUARE_SPLIT * 2)]
+    part_keys = [(key, part) for key in keys for part in range(SQUARE_SPLIT * SQUARE_SPLIT)]
 
     try:
         t0 = time.time()
@@ -225,5 +223,5 @@ def preprocess_dataset():
 
 if __name__ == '__main__':
     # preprocess_dataset()
-    run_naive_workflow()
-    # run_cloudnative_workflow()
+    # run_naive_workflow()
+    run_cloudnative_workflow()

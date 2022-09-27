@@ -33,13 +33,19 @@ if __name__ == '__main__':
             else:
                 raise error
 
-        if not exists:
-            print(f'Download {filename}')
+        if exists:
+            print(f'Key {key} exists')
+            return
+
+        head_res = requests.head(link)
+        print(head_res.headers)
+        if 130_000_000 < int(head_res.headers['Content-Length']) <= 170_000_000:
+            print(f'Download {filename} (size {head_res.headers["Content-Length"]})')
             response = requests.get(link)
             s3.put_object(Bucket=BUCKET, Key=key, Body=response.content)
             print(f'Put {key} OK')
         else:
-            print(f'Key {key} exists')
+            print(f'Skip {filename}, size is {head_res.headers["Content-Length"]}')
 
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as pool:
