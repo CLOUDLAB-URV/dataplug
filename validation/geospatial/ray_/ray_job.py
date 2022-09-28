@@ -1,3 +1,10 @@
+import time
+
+import boto3
+import ray
+import s3fs
+from pyarrow import fs
+
 import io
 import json
 import tempfile
@@ -25,41 +32,6 @@ def force_delete_path(path):
             os.remove(path)
         elif os.path.isdir(path):
             shutil.rmtree(path)
-
-
-def convert_to_copc(lidar_data):
-    input_file_path = tempfile.mktemp()
-    output_file_path = tempfile.mktemp()
-
-    try:
-        force_delete_path(input_file_path)
-        force_delete_path(output_file_path)
-
-        with open(input_file_path, 'wb') as input_file:
-            input_file.write(lidar_data)
-
-        pipeline_json = [
-            {
-                "type": "readers.las",
-                "filename": input_file_path
-            },
-            {
-                "type": "writers.copc",
-                "filename": output_file_path
-            }
-        ]
-
-        pipeline = pdal.Pipeline(json.dumps(pipeline_json))
-        pipeline.execute()
-
-        with open(output_file_path, 'rb') as result_file:
-            result = result_file.read()
-
-        return result
-
-    finally:
-        force_delete_path(input_file_path)
-        force_delete_path(output_file_path)
 
 
 def square_split(x_min, y_min, x_max, y_max, square_splits):
@@ -94,6 +66,8 @@ def recursive_split(x_min, y_min, x_max, y_max, max_x_size, max_y_size):
 
 
 def partition_las(file_path, lidar_data):
+    print(f'>>> partition_las - start - {time.time()} - {file_path}')
+
     with laspy.open(lidar_data) as file:
         sub_bounds = square_split(
             file.header.x_min,
@@ -114,11 +88,11 @@ def partition_las(file_path, lidar_data):
         buffers = [io.BytesIO() for _ in range(len(sub_bounds))]
         writers = [laspy.open(buff, mode='w', header=file.header, closefd=False, do_compress=True) for buff in buffers]
 
+        print(f'Going to partition file {file_path} into {len(sub_bounds)} chunks')
+
         try:
             count = 0
             for points in file.chunk_iterator(1_000_000):
-                print(f'{count / file.header.point_count * 100}%')
-
                 # For performance we need to use copy
                 # so that the underlying arrays are contiguous
                 x, y = points.x.copy(), points.y.copy()
@@ -137,16 +111,19 @@ def partition_las(file_path, lidar_data):
                     if point_piped == len(points):
                         break
                 count += len(points)
-            print(f'{count / file.header.point_count * 100}%')
         finally:
             for writer in writers:
                 if writer is not None:
                     writer.close()
 
-        return [(file_path, i, buf.getvalue()) for i, buf in enumerate(buffers)]
+        return_value = [(file_path, i, buf.getvalue()) for i, buf in enumerate(buffers)]
+        print(f'>>> partition_las - end - {time.time()} - {file_path}')
+        return return_value
 
 
 def partition_copc(file_url, partition_num):
+    print(f'>>> partition_copc - start - {time.time()} - {file_url}')
+
     with CopcReader.open(file_url) as copc_file:
         sub_bounds = square_split(
             copc_file.header.mins[0],
@@ -176,10 +153,15 @@ def partition_copc(file_url, partition_num):
         with laspy.open(out_buff, mode='w', header=new_header, closefd=False) as output:
             output.write_points(points)
 
-        return out_buff.getvalue()
+        return_value = out_buff.getvalue()
+
+        print(f'>>> partition_copc - end - {time.time()} - {file_url}')
+        return return_value
 
 
 def create_dem(file_path, partition, las_data):
+    print(f'>>> create_dem - start - {time.time()} - {file_path} - {partition}')
+
     tmp_prefix = tempfile.mktemp()
     laz_filename = tmp_prefix + '.laz'
     dem_filename = tmp_prefix + '_dem.gtiff'
@@ -247,145 +229,11 @@ def create_dem(file_path, partition, las_data):
         with open(dem_filename, 'rb') as dem_file:
             dem = dem_file.read()
 
+        print(f'>>> create_dem - end - {time.time()} - {file_path} - {partition}')
         return file_path, partition, dem
-
     finally:
         try:
             os.remove(laz_filename)
-        except FileNotFoundError:
-            pass
-        try:
-            os.remove(dem_filename)
-        except FileNotFoundError:
-            pass
-
-
-def create_models(file_path, partition, las_data):
-    tmp_prefix = tempfile.mktemp()
-    laz_filename = tmp_prefix + '.laz'
-    dsm_filename = tmp_prefix + '_dsm.gtiff'
-    dem_filename = tmp_prefix + '_dem.gtiff'
-
-    try:
-        with open(laz_filename, 'wb') as laz_file:
-            laz_file.write(las_data)
-
-        dsm_pipeline_json = {
-            'pipeline': [
-                {
-                    'type': 'readers.las',
-                    'filename': laz_filename,
-                    'spatialreference': 'EPSG:25830'
-                },
-                {
-                    'type': 'filters.reprojection',
-                    'in_srs': 'EPSG:25830',
-                    'out_srs': 'EPSG:25830'
-                },
-                {
-                    'type': 'filters.outlier',
-                    'method': 'radius',
-                    'radius': 1.0,
-                    'min_k': 4
-                },
-                {
-                    'type': 'filters.range',
-                    # Classification equals 2 (corresponding to noise points in LAS).
-                    'limits': 'Classification![7:7]'
-                },
-                {
-                    'type': 'filters.range',
-                    'limits': 'returnnumber[1:1]'
-                },
-                {
-                    'type': 'writers.gdal',
-                    'gdaldriver': 'GTiff',
-                    'nodata': '-9999',
-                    'output_type': 'max',
-                    'resolution': 1,
-                    'filename': dsm_filename
-                }
-            ]
-        }
-
-        pipeline = pdal.Pipeline(json.dumps(dsm_pipeline_json))
-        # pipeline.validate()
-        # pipeline.loglevel = 8
-        print('Executing DSM pipeline...')
-        result = pipeline.execute()
-        print(f'DSM result wrote {result} bytes')
-
-        dem_pipeline_json = {
-            'pipeline': [
-                {
-                    'type': 'readers.las',
-                    'filename': laz_filename,
-                    'spatialreference': 'EPSG:25830'
-                },
-                {
-                    'type': 'filters.reprojection',
-                    'in_srs': 'EPSG:25830',
-                    'out_srs': 'EPSG:25830'
-                },
-                {
-                    'type': 'filters.assign',
-                    'assignment': 'Classification[:]=0'
-                },
-                {
-                    'type': 'filters.elm'
-                },
-                {
-                    'type': 'filters.outlier',
-                    'method': 'radius',
-                    'radius': 1.0,
-                    'min_k': 4
-                },
-                {
-                    'type': 'filters.smrf',
-                    'ignore': 'Classification[7:7]',
-                    'slope': 0.2,
-                    'window': 16,
-                    'threshold': 0.45,
-                    'scalar': 1.2
-                },
-                {
-                    'type': 'filters.range',
-                    # Classification equals 2 (corresponding to ground in LAS).
-                    'limits': 'Classification[2:2]',
-                },
-                {
-                    'type': 'writers.gdal',
-                    'gdaldriver': 'GTiff',
-                    'nodata': '-9999',
-                    'output_type': 'max',
-                    'resolution': 1,
-                    'filename': dem_filename
-                }
-            ]
-        }
-
-        pipeline = pdal.Pipeline(json.dumps(dem_pipeline_json))
-        # pipeline.validate()
-        # pipeline.loglevel = 8
-        print('Executing DEM pipeline...')
-        result = pipeline.execute()
-        print(f'DEM result wrote {result} bytes')
-
-        with open(dsm_filename, 'rb') as dsm_file:
-            dsm = dsm_file.read()
-
-        with open(dem_filename, 'rb') as dem_file:
-            dem = dem_file.read()
-
-        return file_path, partition, dsm, dem
-
-    finally:
-        try:
-            os.remove(laz_filename)
-        except FileNotFoundError:
-            pass
-        try:
-            os.remove(dsm_filename)
         except FileNotFoundError:
             pass
         try:
@@ -395,6 +243,8 @@ def create_models(file_path, partition, las_data):
 
 
 def merge_dem_partitions(key, partitions):
+    print(f'>>> merge_dem_partitions - start - {time.time()} - {key}')
+
     file_path = key
 
     tmp_file_prefix = tempfile.mktemp()
@@ -446,80 +296,142 @@ def merge_dem_partitions(key, partitions):
         except FileNotFoundError:
             pass
 
+    print(f'>>> merge_dem_partitions - start - {time.time()} - {key}')
     return file_path, dem_merged
 
 
-def merge_partitions(key, partitions):
-    file_path = key
+def create_dem_copc_ray_wrapper(args):
+    path, partition_num = args
 
-    tmp_file_prefix = tempfile.mktemp()
+    # s3 = boto3.client('s3',
+    #                   endpoint_url='http://192.168.1.110:9000',
+    #                   aws_access_key_id='minioadmin', aws_secret_access_key='minioadmin',
+    #                   aws_session_token=None, config=boto3.session.Config(signature_version='s3v4'), verify=False)
+    s3 = boto3.client('s3')
 
-    dsm_files = []
-    dem_files = []
+    # print(path)
+    bucket, key = path.split('/', 1)
 
-    for partition in partitions:
-        _, i, dsm, dem = partition
+    obj_url = s3.generate_presigned_url('get_object', Params={'Bucket': bucket, 'Key': key}, ExpiresIn=300)
 
-        tmp_dsm_file = tmp_file_prefix + f'_dsm-part{i}.gtiff'
-        with open(tmp_dsm_file, 'wb') as file:
-            file.write(dsm)
-        dsm_files.append(tmp_dsm_file)
+    las_partition = partition_copc(obj_url, partition_num)
+    file_path, partition, dem = create_dem(key, partition_num, las_partition)
+    dem_ref = ray.put(dem)
 
-        tmp_dem_file = tmp_file_prefix + f'_dem-part{i}.gtiff'
-        with open(tmp_dem_file, 'wb') as file:
-            file.write(dem)
-        dem_files.append(tmp_dem_file)
+    return file_path, partition, dem_ref
 
-    print(f'Merging {file_path}...')
 
-    dsms = [rasterio.open(f) for f in dsm_files]
-    dems = [rasterio.open(f) for f in dem_files]
+def partition_las_ray_wrapper(args):
+    file_path, lidar_data = args
+    result = partition_las(file_path, lidar_data)
+    result_ref = [(path, i, ray.put(res)) for path, i, res in result]
+    return result_ref
 
-    mosaic_dsm, output_dsm = merge(dsms)
-    mosaic_dem, output_dem = merge(dems)
 
-    dsm_output_meta = dsms[0].meta.copy()
-    dsm_output_meta.update(
-        {
-            'driver': 'GTiff',
-            'height': mosaic_dsm.shape[1],
-            'width': mosaic_dsm.shape[2],
-            'transform': output_dsm
-        }
-    )
+def create_dem_ray_wrapper(args):
+    file_path, partition, data_ref = args
+    las_data = ray.get(data_ref)
+    result_path, result_partition, result_dem = create_dem(file_path, partition, las_data)
+    result_ref = ray.put(result_dem)
+    return result_path, result_partition, result_ref
 
-    file_dsm_merged = tmp_file_prefix + '_dsm-merged.gtiff'
-    with rio.open(file_dsm_merged, 'w', **dsm_output_meta) as m:
-        m.write(mosaic_dsm)
 
-    dem_output_meta = dems[0].meta.copy()
-    dem_output_meta.update(
-        {
-            'driver': 'GTiff',
-            'height': mosaic_dem.shape[1],
-            'width': mosaic_dem.shape[2],
-            'transform': output_dem
-        }
-    )
+def merge_dem_partitions_ray_wrapper(args):
+    key = args[0][0]
+    partitions = [(key, part, ray.get(part_ref)) for key, part, part_ref in args]
+    result = merge_dem_partitions(key, partitions)
+    result_ref = ray.put(result)
+    return [result_ref]
 
-    file_dem_merged = tmp_file_prefix + '_dem-merged.gtiff'
-    with rio.open(file_dem_merged, 'w', **dem_output_meta) as m:
-        m.write(mosaic_dem)
 
-    print(f'Done merging {file_path}')
+ray.init(address='ray://3.238.92.177:10001')
 
-    with open(file_dsm_merged, 'rb') as f:
-        dsm_merged = f.read()
-    os.remove(file_dsm_merged)
 
-    with open(file_dem_merged, 'rb') as f:
-        dem_merged = f.read()
-    os.remove(file_dem_merged)
+# ray.init()
 
-    for f in dsm_files:
-        os.remove(f)
 
-    for f in dem_files:
-        os.remove(f)
+def run_naive_workflow():
+    # file_system = fs.S3FileSystem(
+    #     access_key='minioadmin',
+    #     secret_key='minioadmin',
+    #     region='us-east-1',
+    #     endpoint_override='http://192.168.1.110:9000'
+    # )
+    #
+    # s3 = s3fs.S3FileSystem(
+    #     key='minioadmin',
+    #     secret='minioadmin',
+    #     client_kwargs={
+    #         'endpoint_url': 'http://192.168.1.110:9000'
+    #     }
+    # )
 
-    return file_path, dsm_merged, dem_merged
+    file_system = fs.S3FileSystem()
+    s3 = s3fs.S3FileSystem()
+
+    paths = s3.glob('s3://point-cloud-datasets/laz/CA_YosemiteNP_2019/*.laz')
+    # paths = s3.glob('s3://geospatial/laz/*.laz')
+    paths = paths[:len(paths) // 4]
+    print(paths)
+
+    print(f'>>> pipeline - start - {time.time()}')
+
+    print('Reading files...')
+    ds = ray.data.read_binary_files(paths, filesystem=file_system, include_paths=True)
+    print('Done')
+
+    print('Executing pipeline...')
+    (ds
+     .flat_map(partition_las_ray_wrapper)
+     .repartition(num_blocks=len(paths) * (SQUARE_SPLIT * SQUARE_SPLIT))
+     .map(create_dem_ray_wrapper)
+     .groupby(lambda args: args[0])
+     .map_groups(merge_dem_partitions_ray_wrapper)
+     )
+    print('Done')
+
+    print(f'>>> pipeline - end - {time.time()}')
+
+
+def run_cloudnative_workflow():
+    # file_system = fs.S3FileSystem(
+    #     access_key='minioadmin',
+    #     secret_key='minioadmin',
+    #     region='us-east-1',
+    #     endpoint_override='http://192.168.1.110:9000'
+    # )
+    #
+    # s3 = s3fs.S3FileSystem(
+    #     key='minioadmin',
+    #     secret='minioadmin',
+    #     client_kwargs={
+    #         'endpoint_url': 'http://192.168.1.110:9000'
+    #     }
+    # )
+
+    file_system = fs.S3FileSystem()
+    s3 = s3fs.S3FileSystem()
+
+    paths = s3.glob('s3://point-cloud-datasets/copc/CA_YosemiteNP_2019/*.laz')
+    # paths = s3.glob('s3://geospatial/copc/*.laz')
+    # print(paths)
+    paths = paths[:len(paths) // 4]
+    print(paths)
+
+    print(f'>>> pipeline - start - {time.time()}')
+
+    print('Executing pipeline...')
+    part_keys = [(path, part) for path in paths for part in range(SQUARE_SPLIT * SQUARE_SPLIT)]
+    ds = ray.data.from_items(part_keys)
+    models_ds = (ds
+                 .map(create_dem_copc_ray_wrapper)
+                 .groupby(lambda args: args[0])
+                 .map_groups(merge_dem_partitions_ray_wrapper))
+    print('Done')
+
+    print(f'>>> pipeline - end - {time.time()}')
+
+
+if __name__ == '__main__':
+    # run_naive_workflow()
+    run_cloudnative_workflow()

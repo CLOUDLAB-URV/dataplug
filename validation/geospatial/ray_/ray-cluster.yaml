@@ -1,0 +1,85 @@
+cluster_name: geospatial
+
+max_workers: 16
+
+upscaling_speed: 1.0
+
+docker:
+  image: public.ecr.aws/h7g1q8x0/ray-copc:0.5
+  container_name: "ray_container"
+  pull_before_run: True
+  run_options: # Extra options to pass into "docker run"
+    - --ulimit nofile=65536:65536
+
+idle_timeout_minutes: 5
+
+provider:
+  type: aws
+  region: us-east-1
+  availability_zone: us-east-1a
+  cache_stopped_nodes: False
+
+auth:
+  ssh_user: ubuntu
+
+available_node_types:
+  ray.head.default:
+    resources: { }
+    node_config:
+      InstanceType: m5.xlarge
+      ImageId: ami-08c40ec9ead489470
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 128
+      SecurityGroupIds:
+        - sg-08d5a89ec4010d214
+  ray.worker.default:
+    min_workers: 2
+    max_workers: 16
+    resources: { }
+    node_config:
+      InstanceType: c5.4xlarge
+      ImageId: ami-08c40ec9ead489470
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 128
+      IamInstanceProfile:
+        Arn: arn:aws:iam::786929956471:instance-profile/aitor-ec2-role
+      SecurityGroupIds:
+        - sg-08d5a89ec4010d214
+
+
+head_node_type: ray.head.default
+
+file_mounts: { }
+
+cluster_synced_files: [ ]
+
+rsync_exclude:
+  - "**/.git"
+  - "**/.git/**"
+
+rsync_filter:
+  - ".gitignore"
+
+initialization_commands:
+  - curl -fsSL https://get.docker.com -o get-docker.sh
+  - sudo sh get-docker.sh
+  - sudo usermod -aG docker $USER
+  - sudo systemctl restart docker -f
+
+setup_commands: [ ]
+
+head_setup_commands: [ ]
+
+worker_setup_commands: [ ]
+
+head_start_ray_commands:
+  - ray stop
+  - ray start --head --port=6379 --object-manager-port=8076 --autoscaling-config=~/ray_bootstrap_config.yaml
+
+worker_start_ray_commands:
+  - ray stop
+  - ray start --address=$RAY_HEAD_IP:6379 --object-manager-port=8076

@@ -1,4 +1,4 @@
-name: lithops-conda
+name: lithops_-conda
 channels:
   - conda-forge
   - anaconda
