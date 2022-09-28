@@ -1,6 +1,7 @@
 import io
 import json
 import tempfile
+import time
 
 import rasterio
 from laspy import CopcReader, Bounds
@@ -94,6 +95,8 @@ def recursive_split(x_min, y_min, x_max, y_max, max_x_size, max_y_size):
 
 
 def partition_las(file_path, lidar_data):
+    print(f'>>> partition_las - start - {time.time()} - {file_path}')
+
     with laspy.open(lidar_data) as file:
         sub_bounds = square_split(
             file.header.x_min,
@@ -143,10 +146,14 @@ def partition_las(file_path, lidar_data):
                 if writer is not None:
                     writer.close()
 
-        return [(file_path, i, buf.getvalue()) for i, buf in enumerate(buffers)]
+        ret_value = [(file_path, i, buf.getvalue()) for i, buf in enumerate(buffers)]
+        print(f'>>> partition_las - end - {time.time()} - {file_path}')
+        return ret_value
 
 
 def partition_copc(file_url, partition_num):
+    print(f'>>> partition_copc - start - {time.time()}')
+
     with CopcReader.open(file_url) as copc_file:
         sub_bounds = square_split(
             copc_file.header.mins[0],
@@ -176,10 +183,15 @@ def partition_copc(file_url, partition_num):
         with laspy.open(out_buff, mode='w', header=new_header, closefd=False) as output:
             output.write_points(points)
 
-        return out_buff.getvalue()
+        return_value = out_buff.getvalue()
+
+        print(f'>>> partition_copc - end - {time.time()}')
+        return return_value
 
 
 def create_dem(file_path, partition, las_data):
+    print(f'>>> create_dem - start - {time.time()} - {file_path}')
+
     tmp_prefix = tempfile.mktemp()
     laz_filename = tmp_prefix + '.laz'
     dem_filename = tmp_prefix + '_dem.gtiff'
@@ -247,8 +259,8 @@ def create_dem(file_path, partition, las_data):
         with open(dem_filename, 'rb') as dem_file:
             dem = dem_file.read()
 
+        print(f'>>> create_dem - end - {time.time()} - {file_path}')
         return file_path, partition, dem
-
     finally:
         try:
             os.remove(laz_filename)
@@ -261,6 +273,8 @@ def create_dem(file_path, partition, las_data):
 
 
 def merge_dem_partitions(key, partitions):
+    print(f'>>> merge_dem_partitions - start - {time.time()} - {key}')
+
     file_path = key
 
     tmp_file_prefix = tempfile.mktemp()
@@ -312,4 +326,5 @@ def merge_dem_partitions(key, partitions):
         except FileNotFoundError:
             pass
 
+    print(f'>>> merge_dem_partitions - end - {time.time()} - {key}')
     return file_path, dem_merged
