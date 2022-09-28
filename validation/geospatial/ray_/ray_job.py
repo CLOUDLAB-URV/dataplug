@@ -1,3 +1,4 @@
+import itertools
 import time
 
 import boto3
@@ -296,11 +297,33 @@ def merge_dem_partitions(key, partitions):
         except FileNotFoundError:
             pass
 
-    print(f'>>> merge_dem_partitions - start - {time.time()} - {key}')
+    print(f'>>> merge_dem_partitions - end - {time.time()} - {key}')
     return file_path, dem_merged
 
 
 def create_dem_copc_ray_wrapper(args):
+    path, partition_num = args
+
+    # s3 = boto3.client('s3',
+    #                   endpoint_url='http://192.168.1.110:9000',
+    #                   aws_access_key_id='minioadmin', aws_secret_access_key='minioadmin',
+    #                   aws_session_token=None, config=boto3.session.Config(signature_version='s3v4'), verify=False)
+    s3 = boto3.client('s3')
+
+    # print(path)
+    bucket, key = path.split('/', 1)
+
+    obj_url = s3.generate_presigned_url('get_object', Params={'Bucket': bucket, 'Key': key}, ExpiresIn=300)
+
+    las_partition = partition_copc(obj_url, partition_num)
+    file_path, partition, dem = create_dem(key, partition_num, las_partition)
+    dem_ref = ray.put(dem)
+
+    return file_path, partition, dem_ref
+
+
+@ray.remote(memory=1769)
+def create_dem_copc_ray_task_wrapper(args):
     path, partition_num = args
 
     # s3 = boto3.client('s3',
@@ -328,7 +351,35 @@ def partition_las_ray_wrapper(args):
     return result_ref
 
 
+@ray.remote(memory=1769)
+def partition_las_ray_task_wrapper(args):
+    file_path = args
+
+    # s3 = boto3.client('s3',
+    #                   endpoint_url='http://192.168.1.110:9000',
+    #                   aws_access_key_id='minioadmin', aws_secret_access_key='minioadmin',
+    #                   aws_session_token=None, config=boto3.session.Config(signature_version='s3v4'), verify=False)
+    s3 = boto3.client('s3')
+
+    bucket, key = file_path.split('/', 1)
+    res = s3.get_object(Bucket=bucket, Key=key)
+    lidar_data = res['Body'].read()
+
+    result = partition_las(file_path, lidar_data)
+    result_ref = [(path, i, ray.put(res)) for path, i, res in result]
+    return result_ref
+
+
 def create_dem_ray_wrapper(args):
+    file_path, partition, data_ref = args
+    las_data = ray.get(data_ref)
+    result_path, result_partition, result_dem = create_dem(file_path, partition, las_data)
+    result_ref = ray.put(result_dem)
+    return result_path, result_partition, result_ref
+
+
+@ray.remote(memory=1769)
+def create_dem_ray_task_wrapper(args):
     file_path, partition, data_ref = args
     las_data = ray.get(data_ref)
     result_path, result_partition, result_dem = create_dem(file_path, partition, las_data)
@@ -344,7 +395,16 @@ def merge_dem_partitions_ray_wrapper(args):
     return [result_ref]
 
 
-ray.init(address='ray://3.238.92.177:10001')
+@ray.remote(memory=1769)
+def merge_dem_partitions_ray_task_wrapper(args):
+    key = args[0][0]
+    partitions = [(key, part, ray.get(part_ref)) for key, part, part_ref in args]
+    result = merge_dem_partitions(key, partitions)
+    result_ref = ray.put(result)
+    return [result_ref]
+
+
+ray.init(address='ray://44.203.240.233:10001')
 
 
 # ray.init()
@@ -432,6 +492,92 @@ def run_cloudnative_workflow():
     print(f'>>> pipeline - end - {time.time()}')
 
 
+def run_naive_tasks():
+    # s3 = s3fs.S3FileSystem(
+    #     key='minioadmin',
+    #     secret='minioadmin',
+    #     client_kwargs={
+    #         'endpoint_url': 'http://192.168.1.110:9000'
+    #     }
+    # )
+    s3 = s3fs.S3FileSystem()
+
+    paths = s3.glob('s3://point-cloud-datasets/laz/CA_YosemiteNP_2019/*.laz')
+    # paths = s3.glob('s3://geospatial/laz/*')
+    paths = paths[:len(paths) // 4]
+    print(paths)
+
+    print(f'>>> pipeline - start - {time.time()}')
+
+    partition_tasks = []
+    for path in paths:
+        task = partition_las_ray_task_wrapper.remote(path)
+        partition_tasks.append(task)
+
+    partitions = ray.get(partition_tasks)
+    partitions_flat = list(itertools.chain.from_iterable(partitions))
+
+    dem_tasks = []
+    for partition in partitions_flat:
+        task = create_dem_ray_task_wrapper.remote(partition)
+        dem_tasks.append(task)
+    dems = ray.get(dem_tasks)
+
+    grouped_dems = []
+    for key, group in itertools.groupby(dems, lambda part: part[0]):
+        grouped_dems.append(list(group))
+
+    merge_tasks = []
+    for grouped_dem in grouped_dems:
+        task = merge_dem_partitions_ray_task_wrapper.remote(grouped_dem)
+        merge_tasks.append(task)
+
+    ray.get(merge_tasks)
+
+    print(f'>>> pipeline - end - {time.time()}')
+
+
+def run_cloudnative_tasks():
+    # s3 = s3fs.S3FileSystem(
+    #     key='minioadmin',
+    #     secret='minioadmin',
+    #     client_kwargs={
+    #         'endpoint_url': 'http://192.168.1.110:9000'
+    #     }
+    # )
+    s3 = s3fs.S3FileSystem()
+
+    paths = s3.glob('s3://point-cloud-datasets/copc/CA_YosemiteNP_2019/*.laz')
+    # paths = s3.glob('s3://geospatial/copc/*')
+    paths = paths[:len(paths) // 4]
+    print(paths)
+
+    print(f'>>> pipeline - start - {time.time()}')
+
+    part_keys = [(key, part) for key in paths for part in range(SQUARE_SPLIT * SQUARE_SPLIT)]
+
+    dem_tasks = []
+    for partition in part_keys:
+        task = create_dem_copc_ray_task_wrapper.remote(partition)
+        dem_tasks.append(task)
+    dems = ray.get(dem_tasks)
+
+    grouped_dems = []
+    for key, group in itertools.groupby(dems, lambda part: part[0]):
+        grouped_dems.append(list(group))
+
+    merge_tasks = []
+    for grouped_dem in grouped_dems:
+        task = merge_dem_partitions_ray_task_wrapper.remote(grouped_dem)
+        merge_tasks.append(task)
+
+    ray.get(merge_tasks)
+
+    print(f'>>> pipeline - end - {time.time()}')
+
+
 if __name__ == '__main__':
     # run_naive_workflow()
-    run_cloudnative_workflow()
+    # run_cloudnative_workflow()
+    # run_naive_tasks()
+    run_cloudnative_tasks()

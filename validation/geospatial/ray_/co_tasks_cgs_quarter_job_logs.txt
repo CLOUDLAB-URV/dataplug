@@ -1,0 +1,766 @@
+['point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz', 'point-cloud-datasets/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz']
+>>> pipeline - start - 1664404868.2877285
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> partition_copc - start - 1664404869.7264886
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m >>> partition_copc - start - 1664404869.951146
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m >>> partition_copc - start - 1664404870.2767227
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> partition_copc - start - 1664404870.3754265
+[2m[1m[36m(scheduler +7s)[0m Tip: use `ray status` to view detailed cluster status. To disable these messages, set RAY_SCHEDULER_EVENTS=0.
+[2m[1m[36m(scheduler +7s)[0m Adding 3 nodes of type ray.worker.default.
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> partition_copc - end - 1664404877.8494103
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> create_dem - start - 1664404877.8534675 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m >>> partition_copc - end - 1664404878.0886362
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m >>> create_dem - start - 1664404878.0928075 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m >>> partition_copc - end - 1664404878.2135758
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m >>> create_dem - start - 1664404878.2173913 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> partition_copc - end - 1664404878.1635299
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> create_dem - start - 1664404878.1683319 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m DEM result wrote 783985 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> create_dem - end - 1664404931.2263956 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> partition_copc - start - 1664404931.2719328
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> partition_copc - end - 1664404936.14028
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> create_dem - start - 1664404936.1441839 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m DEM result wrote 1367316 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> create_dem - end - 1664404940.5306814 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> partition_copc - start - 1664404940.575762
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> partition_copc - end - 1664404944.439708
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> create_dem - start - 1664404944.4437284 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m DEM result wrote 1047487 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m >>> create_dem - end - 1664404947.6884625 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m >>> partition_copc - start - 1664404947.730702
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404951.698682
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404951.6953533
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404951.6806498
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404951.7690327
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404951.8299153
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404951.8401623
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404951.8364887
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404951.779146
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404952.253813
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404952.3942745
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404952.4283218
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404952.4737163
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m >>> partition_copc - end - 1664404952.5408835
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m >>> create_dem - start - 1664404952.5450187 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404952.6340983
+[2m[36m(create_dem_copc_ray_task_wrapper pid=361, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404952.607802
+[2m[36m(create_dem_copc_ray_task_wrapper pid=348, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404952.718061
+[2m[36m(create_dem_copc_ray_task_wrapper pid=360, ip=172.31.5.93)[0m >>> partition_copc - start - 1664404952.7089984
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.3009415
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.2991877
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.2967694
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.2968266
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.337201
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.3394687
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.3617415
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.3888373
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.3616018
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.3821163
+[2m[36m(create_dem_copc_ray_task_wrapper pid=321, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.8935719
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.8588588
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.8598778
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.9777968
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404954.9661639
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m >>> partition_copc - start - 1664404955.022142
+[2m[1m[36m(scheduler +1m29s)[0m Resized to 36 CPUs.
+[2m[1m[36m(scheduler +1m29s)[0m Adding 2 nodes of type ray.worker.default.
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m DEM result wrote 1194113 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m >>> create_dem - end - 1664404956.1518228 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m >>> partition_copc - start - 1664404956.194888
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404959.4310248
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m >>> create_dem - start - 1664404959.4345257 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404959.5665982
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m >>> create_dem - start - 1664404959.5841062 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404959.5538704
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m >>> create_dem - start - 1664404959.5686336 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404959.7235088
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m >>> create_dem - start - 1664404959.7269428 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404959.7360427
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m >>> create_dem - start - 1664404959.7403862 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404959.830483
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m >>> create_dem - start - 1664404959.8342347 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404959.8779428
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m >>> create_dem - start - 1664404959.8816533 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404959.933876
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m >>> create_dem - start - 1664404959.937731 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=360, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404959.941005
+[2m[36m(create_dem_copc_ray_task_wrapper pid=360, ip=172.31.5.93)[0m >>> create_dem - start - 1664404959.944647 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404959.995317
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m >>> create_dem - start - 1664404959.9989655 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=360, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404960.106178
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m >>> create_dem - start - 1664404960.1108572 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404960.1719213
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m >>> create_dem - start - 1664404960.1754165 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404960.091936
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m >>> create_dem - start - 1664404960.0958686 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404960.161889
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m >>> create_dem - start - 1664404960.1655169 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=348, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404960.3030162
+[2m[36m(create_dem_copc_ray_task_wrapper pid=348, ip=172.31.5.93)[0m >>> create_dem - start - 1664404960.3066163 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=348, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m >>> partition_copc - end - 1664404961.41124
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m >>> create_dem - start - 1664404961.4156594 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=361, ip=172.31.5.93)[0m >>> partition_copc - end - 1664404961.7656064
+[2m[36m(create_dem_copc_ray_task_wrapper pid=361, ip=172.31.5.93)[0m >>> create_dem - start - 1664404961.769153 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=361, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404961.9528341
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m >>> create_dem - start - 1664404961.9563527 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.2171733
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.2209492 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.3118637
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.4157124
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.3160505 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.4193103 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.578761
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.5830905 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.5335975
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.5379434 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.5701318
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.5745442 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.6054363
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.6092708 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.712363
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.716818 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.65084
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.6553028 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.66747
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.6713345 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.7600555
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.7640038 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.7519412
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.7557378 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.9168775
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.920612 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404962.9798684
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m >>> create_dem - start - 1664404962.9836047 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=321, ip=172.31.11.71)[0m >>> partition_copc - end - 1664404963.355499
+[2m[36m(create_dem_copc_ray_task_wrapper pid=321, ip=172.31.11.71)[0m >>> create_dem - start - 1664404963.3593104 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=321, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2310743
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.230966
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2309928
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2315643
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2306328
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2266893
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2293563
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2249131
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2308042
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2310927
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2313025
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2417073
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2307715
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.2713354
+[2m[36m(create_dem_copc_ray_task_wrapper pid=386, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404979.837725
+[2m[36m(create_dem_copc_ray_task_wrapper pid=403, ip=172.31.9.119)[0m >>> partition_copc - start - 1664404980.169791
+[2m[1m[36m(scheduler +1m55s)[0m Resized to 68 CPUs.
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404981.5422297
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404981.524925
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404981.6134796
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404981.6836708
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404981.6804943
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404981.6361654
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404981.67388
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404981.6771967
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404981.7179453
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404981.7735243
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404982.325897
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404982.3166804
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404982.3302948
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404982.34277
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404982.3503926
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404982.403634
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404982.4033346
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404982.447637
+[2m[36m(create_dem_copc_ray_task_wrapper pid=341, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404982.9544182
+[2m[36m(create_dem_copc_ray_task_wrapper pid=317, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404982.9053588
+[2m[36m(create_dem_copc_ray_task_wrapper pid=295, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404983.1029618
+[2m[36m(create_dem_copc_ray_task_wrapper pid=306, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404983.1797862
+[2m[36m(create_dem_copc_ray_task_wrapper pid=339, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404983.2049723
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404983.2365353
+[2m[36m(create_dem_copc_ray_task_wrapper pid=334, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404983.283154
+[2m[36m(create_dem_copc_ray_task_wrapper pid=393, ip=172.31.5.219)[0m >>> partition_copc - start - 1664404983.288098
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404983.5001347
+[2m[36m(create_dem_copc_ray_task_wrapper pid=590, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404983.7546883
+[2m[36m(create_dem_copc_ray_task_wrapper pid=573, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404983.757901
+[2m[36m(create_dem_copc_ray_task_wrapper pid=560, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404983.712099
+[2m[36m(create_dem_copc_ray_task_wrapper pid=564, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404983.833419
+[2m[36m(create_dem_copc_ray_task_wrapper pid=557, ip=172.31.9.233)[0m >>> partition_copc - start - 1664404983.7732275
+[2m[1m[36m(scheduler +2m0s)[0m Resized to 84 CPUs.
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404986.247515
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.119)[0m >>> create_dem - start - 1664404986.2509341 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404987.596172
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.119)[0m >>> create_dem - start - 1664404987.5996723 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404987.5189958
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.119)[0m >>> create_dem - start - 1664404987.5227785 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404987.6563387
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.119)[0m >>> create_dem - start - 1664404987.660271 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404987.725659
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.119)[0m >>> create_dem - start - 1664404987.7302575 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404987.9645936
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.9.119)[0m >>> create_dem - start - 1664404987.9687269 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404988.03058
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.119)[0m >>> create_dem - start - 1664404988.0345852 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404988.205062
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.119)[0m >>> create_dem - start - 1664404988.2093942 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404988.2080472
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.9.119)[0m >>> create_dem - start - 1664404988.2122748 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=386, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404988.1645174
+[2m[36m(create_dem_copc_ray_task_wrapper pid=386, ip=172.31.9.119)[0m >>> create_dem - start - 1664404988.1688933 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404988.2791598
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.119)[0m >>> create_dem - start - 1664404988.2833025 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=386, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404988.3219059
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m >>> create_dem - start - 1664404988.325916 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404988.354739
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.119)[0m >>> create_dem - start - 1664404988.3589487 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=403, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404988.3854113
+[2m[36m(create_dem_copc_ray_task_wrapper pid=403, ip=172.31.9.119)[0m >>> create_dem - start - 1664404988.3890872 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=403, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404988.5714078
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.119)[0m >>> create_dem - start - 1664404988.5764582 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404988.7068162
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.233)[0m >>> create_dem - start - 1664404988.7105484 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404988.8451076
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.9.119)[0m >>> create_dem - start - 1664404988.8491023 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404988.817263
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m >>> create_dem - start - 1664404988.8211284 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404988.899313
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.233)[0m >>> create_dem - start - 1664404988.9027195 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.9.119)[0m >>> partition_copc - end - 1664404988.9792936
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.9.119)[0m >>> create_dem - start - 1664404988.9832811 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.9.119)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404989.2624
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.233)[0m >>> create_dem - start - 1664404989.2664936 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404989.325244
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.233)[0m >>> create_dem - start - 1664404989.3285043 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404989.3139174
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.233)[0m >>> create_dem - start - 1664404989.3177664 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404989.456609
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.233)[0m >>> create_dem - start - 1664404989.4601421 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404989.8193371
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.233)[0m >>> create_dem - start - 1664404989.8225965 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m DEM result wrote 880686 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> create_dem - end - 1664404989.8691459 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> partition_copc - start - 1664404989.9058347
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404989.9434862
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.5.219)[0m >>> create_dem - start - 1664404989.94742 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404990.3552594
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.233)[0m >>> create_dem - start - 1664404990.3587124 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404990.7115495
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.5.219)[0m >>> create_dem - start - 1664404990.7189002 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404990.9105735
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> create_dem - start - 1664404990.9145997 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404991.0257194
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.219)[0m >>> create_dem - start - 1664404991.0304825 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=557, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404991.025553
+[2m[36m(create_dem_copc_ray_task_wrapper pid=557, ip=172.31.9.233)[0m >>> create_dem - start - 1664404991.0299854 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=557, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404991.2518382
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.219)[0m >>> create_dem - start - 1664404991.2559114 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404991.2246656
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.219)[0m >>> create_dem - start - 1664404991.2290287 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404991.1780534
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.5.219)[0m >>> create_dem - start - 1664404991.1821747 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404991.2911835
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.219)[0m >>> create_dem - start - 1664404991.2955184 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=339, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404991.422741
+[2m[36m(create_dem_copc_ray_task_wrapper pid=339, ip=172.31.5.219)[0m >>> create_dem - start - 1664404991.4267764 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404991.418138
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.5.219)[0m >>> create_dem - start - 1664404991.4220498 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=339, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=306, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404991.6096947
+[2m[36m(create_dem_copc_ray_task_wrapper pid=306, ip=172.31.5.219)[0m >>> create_dem - start - 1664404991.613818 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=306, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=590, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404991.7963758
+[2m[36m(create_dem_copc_ray_task_wrapper pid=590, ip=172.31.9.233)[0m >>> create_dem - start - 1664404991.8005717 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=564, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404991.7358313
+[2m[36m(create_dem_copc_ray_task_wrapper pid=564, ip=172.31.9.233)[0m >>> create_dem - start - 1664404991.7400594 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=590, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=564, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404991.913981
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.219)[0m >>> create_dem - start - 1664404991.918098 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=295, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404991.9051948
+[2m[36m(create_dem_copc_ray_task_wrapper pid=295, ip=172.31.5.219)[0m >>> create_dem - start - 1664404991.9095504 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=573, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404991.9439127
+[2m[36m(create_dem_copc_ray_task_wrapper pid=573, ip=172.31.9.233)[0m >>> create_dem - start - 1664404991.948012 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=295, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=334, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404992.010437
+[2m[36m(create_dem_copc_ray_task_wrapper pid=334, ip=172.31.5.219)[0m >>> create_dem - start - 1664404992.014826 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=573, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=341, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404992.1289644
+[2m[36m(create_dem_copc_ray_task_wrapper pid=341, ip=172.31.5.219)[0m >>> create_dem - start - 1664404992.1333008 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=334, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=341, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=560, ip=172.31.9.233)[0m >>> partition_copc - end - 1664404992.3265972
+[2m[36m(create_dem_copc_ray_task_wrapper pid=560, ip=172.31.9.233)[0m >>> create_dem - start - 1664404992.3307438 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=560, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=317, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404992.6506553
+[2m[36m(create_dem_copc_ray_task_wrapper pid=317, ip=172.31.5.219)[0m >>> create_dem - start - 1664404992.654845 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=317, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=393, ip=172.31.5.219)[0m >>> partition_copc - end - 1664404992.748967
+[2m[36m(create_dem_copc_ray_task_wrapper pid=393, ip=172.31.5.219)[0m >>> create_dem - start - 1664404992.753206 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=393, ip=172.31.5.219)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> partition_copc - end - 1664404995.4479578
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> create_dem - start - 1664404995.4524868 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m DEM result wrote 1069752 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> create_dem - end - 1664404997.576553 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> partition_copc - start - 1664404997.6146228
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> partition_copc - end - 1664405002.5477023
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> create_dem - start - 1664405002.5521939 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m DEM result wrote 1160356 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m >>> create_dem - end - 1664405005.0347943 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m >>> partition_copc - start - 1664405005.2405353
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m DEM result wrote 1172150 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m >>> create_dem - end - 1664405005.9193773 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m >>> partition_copc - start - 1664405006.0463343
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m DEM result wrote 889935 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m >>> create_dem - end - 1664405009.6563785 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405009.8448958
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m >>> partition_copc - end - 1664405009.9438295
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m >>> create_dem - start - 1664405009.9485047 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m DEM result wrote 995382 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m >>> create_dem - end - 1664405010.2954657 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405010.4515557
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m >>> partition_copc - end - 1664405010.5835447
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m >>> create_dem - start - 1664405010.5874162 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m DEM result wrote 868439 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m >>> create_dem - end - 1664405010.8368537 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405010.9479523
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m DEM result wrote 881585 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m >>> create_dem - end - 1664405013.2860165 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m DEM result wrote 1012811 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m >>> create_dem - end - 1664405013.4871595 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405013.448479
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405013.649525
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405013.8758428
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m >>> create_dem - start - 1664405013.8797078 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m DEM result wrote 998832 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m >>> create_dem - end - 1664405014.0659719 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405014.3643196
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405015.0487924
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m >>> create_dem - start - 1664405015.05726 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405016.009054
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m >>> create_dem - start - 1664405016.0127199 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m DEM result wrote 917773 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m >>> create_dem - end - 1664405017.89796 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405018.046905
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m DEM result wrote 1112766 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m >>> create_dem - end - 1664405018.3206036 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m DEM result wrote 812217 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m >>> create_dem - end - 1664405018.2981288 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405018.46075
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405018.452046
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m DEM result wrote 922516 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m >>> create_dem - end - 1664405018.5156589 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405018.4841483
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m >>> create_dem - start - 1664405018.488371 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405018.6497624
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405018.6668596
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m >>> create_dem - start - 1664405018.670369 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405018.692726
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m >>> create_dem - start - 1664405018.6965797 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m DEM result wrote 1238130 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m >>> create_dem - end - 1664405019.9961402 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m >>> partition_copc - start - 1664405020.150464
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405021.330884
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m >>> create_dem - start - 1664405021.3350413 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m DEM result wrote 1007043 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m >>> create_dem - end - 1664405021.4919033 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m >>> partition_copc - start - 1664405021.6488829
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405023.3580577
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m >>> create_dem - start - 1664405023.362425 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m >>> partition_copc - end - 1664405023.7530284
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m >>> create_dem - start - 1664405023.7574902 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405024.1665916
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m >>> create_dem - start - 1664405024.1705787 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m DEM result wrote 1904143 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m >>> create_dem - end - 1664405024.1622264 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405024.2713656
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m >>> create_dem - start - 1664405024.2756753 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405024.2507823
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m DEM result wrote 1339008 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m >>> create_dem - end - 1664405026.0942538 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m >>> partition_copc - start - 1664405026.255152
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m >>> partition_copc - end - 1664405026.4286022
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m >>> create_dem - start - 1664405026.4331644 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m DEM result wrote 1547609 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m >>> create_dem - end - 1664405027.3467412 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m >>> partition_copc - start - 1664405027.4537582
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m DEM result wrote 1452090 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m >>> create_dem - end - 1664405028.8107963 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m >>> partition_copc - end - 1664405028.8718162
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m >>> create_dem - start - 1664405028.876036 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405028.952776
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405029.237773
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m >>> create_dem - start - 1664405029.241912 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m DEM result wrote 1468654 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m >>> create_dem - end - 1664405029.2895558 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m >>> partition_copc - start - 1664405029.4549444
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m DEM result wrote 1100609 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m >>> create_dem - end - 1664405030.3560617 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m >>> partition_copc - start - 1664405030.5584252
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m >>> partition_copc - end - 1664405031.672914
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m >>> create_dem - start - 1664405031.6769545 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405032.9485018
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m >>> create_dem - start - 1664405032.9524195 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m DEM result wrote 1185891 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m >>> create_dem - end - 1664405033.1721911 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m DEM result wrote 768260 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m >>> create_dem - end - 1664405033.1244328 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m >>> partition_copc - start - 1664405033.2554314
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m >>> partition_copc - start - 1664405033.3590643
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m >>> partition_copc - end - 1664405034.6075191
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m >>> create_dem - start - 1664405034.6118286 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m >>> partition_copc - end - 1664405035.3138576
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m >>> create_dem - start - 1664405035.3179429 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m DEM result wrote 1639960 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m >>> create_dem - end - 1664405035.645404 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m >>> partition_copc - start - 1664405035.7560327
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m DEM result wrote 1604109 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m >>> create_dem - end - 1664405037.2242377 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m >>> partition_copc - end - 1664405037.265658
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m >>> create_dem - start - 1664405037.2695413 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m DEM result wrote 1608051 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m >>> create_dem - end - 1664405037.334707 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m >>> partition_copc - start - 1664405037.4577303
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m >>> partition_copc - start - 1664405037.5585244
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m >>> partition_copc - end - 1664405037.6843002
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m >>> create_dem - start - 1664405037.6881325 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m DEM result wrote 1148331 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m >>> create_dem - end - 1664405038.773884 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m >>> partition_copc - start - 1664405038.9620008
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.5.219)[0m DEM result wrote 903456 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.5.219)[0m >>> create_dem - end - 1664405039.4337904 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m DEM result wrote 1333287 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> create_dem - end - 1664405039.4354143 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> partition_copc - start - 1664405039.5617435
+[2m[36m(create_dem_copc_ray_task_wrapper pid=557, ip=172.31.9.233)[0m DEM result wrote 1049710 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=557, ip=172.31.9.233)[0m >>> create_dem - end - 1664405039.7360156 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m >>> partition_copc - end - 1664405041.2091506
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m >>> create_dem - start - 1664405041.2133892 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m >>> partition_copc - end - 1664405041.650003
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m >>> create_dem - start - 1664405041.654102 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.233)[0m DEM result wrote 1128749 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.233)[0m >>> create_dem - end - 1664405041.6713665 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.11.71)[0m DEM result wrote 1468230 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.11.71)[0m >>> create_dem - end - 1664405041.7562068 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m >>> partition_copc - end - 1664405042.2718282
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m >>> create_dem - start - 1664405042.276383 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.5.219)[0m DEM result wrote 1390368 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.5.219)[0m >>> create_dem - end - 1664405042.424844 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m DEM result wrote 1176355 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=502)[0m >>> create_dem - end - 1664405042.6556528 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.233)[0m DEM result wrote 910147 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.233)[0m >>> create_dem - end - 1664405042.8536422 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m >>> partition_copc - end - 1664405043.3280766
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m >>> create_dem - start - 1664405043.3324554 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=564, ip=172.31.9.233)[0m DEM result wrote 1104093 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=564, ip=172.31.9.233)[0m >>> create_dem - end - 1664405043.893157 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.11.71)[0m DEM result wrote 1318707 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.11.71)[0m >>> create_dem - end - 1664405043.8298202 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> partition_copc - end - 1664405043.9244018
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> create_dem - start - 1664405043.9274964 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m Executing DEM pipeline for copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_copc_ray_task_wrapper pid=403, ip=172.31.9.119)[0m DEM result wrote 1261978 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=403, ip=172.31.9.119)[0m >>> create_dem - end - 1664405046.6308477 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=386, ip=172.31.9.119)[0m DEM result wrote 1313665 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=386, ip=172.31.9.119)[0m >>> create_dem - end - 1664405046.5910213 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.11.71)[0m DEM result wrote 1068590 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.11.71)[0m >>> create_dem - end - 1664405047.1227887 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.119)[0m DEM result wrote 1723574 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.119)[0m >>> create_dem - end - 1664405047.7132807 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.119)[0m DEM result wrote 1495800 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.119)[0m >>> create_dem - end - 1664405048.4599686 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.233)[0m DEM result wrote 1169193 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.233)[0m >>> create_dem - end - 1664405048.516793 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=560, ip=172.31.9.233)[0m DEM result wrote 1242152 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=560, ip=172.31.9.233)[0m >>> create_dem - end - 1664405048.5809712 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.233)[0m DEM result wrote 1252041 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.233)[0m >>> create_dem - end - 1664405048.597501 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.233)[0m DEM result wrote 1016675 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.9.233)[0m >>> create_dem - end - 1664405049.0468636 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.233)[0m DEM result wrote 1042967 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.233)[0m >>> create_dem - end - 1664405049.5975897 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=339, ip=172.31.5.219)[0m DEM result wrote 1563150 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=339, ip=172.31.5.219)[0m >>> create_dem - end - 1664405050.822432 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=348, ip=172.31.5.93)[0m DEM result wrote 1565373 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=348, ip=172.31.5.93)[0m >>> create_dem - end - 1664405050.8229365 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=306, ip=172.31.5.219)[0m DEM result wrote 1324827 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=306, ip=172.31.5.219)[0m >>> create_dem - end - 1664405054.5145376 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=360, ip=172.31.5.93)[0m DEM result wrote 1192507 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=360, ip=172.31.5.93)[0m >>> create_dem - end - 1664405055.4439166 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.119)[0m DEM result wrote 1914175 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=154, ip=172.31.9.119)[0m >>> create_dem - end - 1664405055.6224086 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=321, ip=172.31.11.71)[0m DEM result wrote 1673618 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=321, ip=172.31.11.71)[0m >>> create_dem - end - 1664405056.911118 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.11.71)[0m DEM result wrote 1312277 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.11.71)[0m >>> create_dem - end - 1664405057.5376115 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.233)[0m DEM result wrote 960940 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.233)[0m >>> create_dem - end - 1664405057.5732255 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.219)[0m DEM result wrote 2085610 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.219)[0m >>> create_dem - end - 1664405058.696394 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.219)[0m DEM result wrote 1577540 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.219)[0m >>> create_dem - end - 1664405059.2139776 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=590, ip=172.31.9.233)[0m DEM result wrote 1372700 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=590, ip=172.31.9.233)[0m >>> create_dem - end - 1664405059.443166 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.119)[0m DEM result wrote 1605621 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.9.119)[0m >>> create_dem - end - 1664405059.9548838 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m DEM result wrote 1718755 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=415)[0m >>> create_dem - end - 1664405060.6763363 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.9.119)[0m DEM result wrote 2041804 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.9.119)[0m >>> create_dem - end - 1664405060.7534878 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.119)[0m DEM result wrote 1586240 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=155, ip=172.31.9.119)[0m >>> create_dem - end - 1664405061.1762874 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.119)[0m DEM result wrote 1729237 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.9.119)[0m >>> create_dem - end - 1664405061.6172836 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 8
+[2m[1m[36m(scheduler +3m17s)[0m Resized to 116 CPUs.
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.219)[0m DEM result wrote 1220446 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.219)[0m >>> create_dem - end - 1664405062.9397933 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=317, ip=172.31.5.219)[0m DEM result wrote 1704195 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=317, ip=172.31.5.219)[0m >>> create_dem - end - 1664405063.3456135 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m DEM result wrote 1277323 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.11.71)[0m >>> create_dem - end - 1664405064.307707 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m DEM result wrote 1711231 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m >>> create_dem - end - 1664405064.845645 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=573, ip=172.31.9.233)[0m DEM result wrote 1890389 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=573, ip=172.31.9.233)[0m >>> create_dem - end - 1664405066.531874 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.119)[0m DEM result wrote 1876458 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.119)[0m >>> create_dem - end - 1664405067.7088983 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m DEM result wrote 1554353 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=342, ip=172.31.11.71)[0m >>> create_dem - end - 1664405067.848004 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=361, ip=172.31.5.93)[0m DEM result wrote 1710902 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=361, ip=172.31.5.93)[0m >>> create_dem - end - 1664405067.9940875 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m DEM result wrote 1211436 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=315, ip=172.31.5.93)[0m >>> create_dem - end - 1664405068.4387715 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.233)[0m DEM result wrote 1272027 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.9.233)[0m >>> create_dem - end - 1664405070.7081409 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.9.119)[0m DEM result wrote 1918678 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.9.119)[0m >>> create_dem - end - 1664405070.736578 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.119)[0m DEM result wrote 1516566 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.9.119)[0m >>> create_dem - end - 1664405072.3628035 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.9.119)[0m DEM result wrote 1525743 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.9.119)[0m >>> create_dem - end - 1664405072.8332827 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m DEM result wrote 1662405 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m >>> create_dem - end - 1664405073.3363857 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m DEM result wrote 1183638 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.93)[0m >>> create_dem - end - 1664405073.609625 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.5.219)[0m DEM result wrote 1332586 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.5.219)[0m >>> create_dem - end - 1664405073.8461852 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m DEM result wrote 1329808 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=162, ip=172.31.5.93)[0m >>> create_dem - end - 1664405073.9853885 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=295, ip=172.31.5.219)[0m DEM result wrote 1594750 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=295, ip=172.31.5.219)[0m >>> create_dem - end - 1664405074.1234355 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m DEM result wrote 1286381 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.5.93)[0m >>> create_dem - end - 1664405074.3797069 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=393, ip=172.31.5.219)[0m DEM result wrote 2049004 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=393, ip=172.31.5.219)[0m >>> create_dem - end - 1664405076.53169 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m DEM result wrote 1258337 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.93)[0m >>> create_dem - end - 1664405076.8183475 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=334, ip=172.31.5.219)[0m DEM result wrote 1861125 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=334, ip=172.31.5.219)[0m >>> create_dem - end - 1664405077.2324493 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=341, ip=172.31.5.219)[0m DEM result wrote 1552187 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=341, ip=172.31.5.219)[0m >>> create_dem - end - 1664405077.853684 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m DEM result wrote 1149481 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=355, ip=172.31.11.71)[0m >>> create_dem - end - 1664405078.9178066 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.219)[0m DEM result wrote 1287768 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.5.219)[0m >>> create_dem - end - 1664405079.437686 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.5.219)[0m DEM result wrote 1696423 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=163, ip=172.31.5.219)[0m >>> create_dem - end - 1664405079.629101 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.219)[0m DEM result wrote 1623608 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.5.219)[0m >>> create_dem - end - 1664405079.7199645 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m DEM result wrote 997019 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=153, ip=172.31.9.233)[0m >>> create_dem - end - 1664405079.9866107 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m DEM result wrote 1175430 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.11.71)[0m >>> create_dem - end - 1664405080.4683633 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m DEM result wrote 1223936 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=359, ip=172.31.5.93)[0m >>> create_dem - end - 1664405081.7016823 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m DEM result wrote 1308639 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=150, ip=172.31.11.71)[0m >>> create_dem - end - 1664405081.7229617 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.119)[0m DEM result wrote 2142727 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.119)[0m >>> create_dem - end - 1664405081.9577332 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m DEM result wrote 1178101 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=157, ip=172.31.9.233)[0m >>> create_dem - end - 1664405082.4709148 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m DEM result wrote 1233553 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=384, ip=172.31.11.71)[0m >>> create_dem - end - 1664405084.3103034 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m DEM result wrote 1220194 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=152, ip=172.31.5.93)[0m >>> create_dem - end - 1664405084.432337 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.119)[0m DEM result wrote 2588589 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.9.119)[0m >>> create_dem - end - 1664405084.6763294 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m DEM result wrote 1021783 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.11.71)[0m >>> create_dem - end - 1664405084.7108421 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 6
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m DEM result wrote 1156959 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=392, ip=172.31.11.71)[0m >>> create_dem - end - 1664405084.9856446 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 7
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m DEM result wrote 1052880 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> create_dem - end - 1664405085.6470501 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m DEM result wrote 1078133 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=324, ip=172.31.5.93)[0m >>> create_dem - end - 1664405087.031503 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m DEM result wrote 1455912 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=159, ip=172.31.5.93)[0m >>> create_dem - end - 1664405090.4469068 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m DEM result wrote 1231800 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=151, ip=172.31.11.71)[0m >>> create_dem - end - 1664405091.0498004 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 1
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.9.119)[0m DEM result wrote 2368402 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=160, ip=172.31.9.119)[0m >>> create_dem - end - 1664405091.4196053 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 0
+[2m[36m(create_dem_copc_ray_task_wrapper pid=416)[0m E0928 15:45:05.465563944     470 chttp2_transport.cc:1103]   Received a GOAWAY with error code ENHANCE_YOUR_CALM and debug data equal to "too_many_pings"
+[2m[36m(create_dem_copc_ray_task_wrapper pid=501)[0m E0928 15:45:05.470727918     576 chttp2_transport.cc:1103]   Received a GOAWAY with error code ENHANCE_YOUR_CALM and debug data equal to "too_many_pings"
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m DEM result wrote 1300303 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=156, ip=172.31.5.93)[0m >>> create_dem - end - 1664405092.6632657 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 2
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m DEM result wrote 1229738 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=158, ip=172.31.5.93)[0m >>> create_dem - end - 1664405095.1579175 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 8
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m DEM result wrote 1612517 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=340, ip=172.31.11.71)[0m >>> create_dem - end - 1664405096.2878075 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 3
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m DEM result wrote 1216168 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=358, ip=172.31.5.93)[0m >>> create_dem - end - 1664405096.3957307 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 5
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m DEM result wrote 1648148 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=161, ip=172.31.11.71)[0m >>> create_dem - end - 1664405096.7472408 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 4
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m DEM result wrote 1409274 bytes
+[2m[36m(create_dem_copc_ray_task_wrapper pid=353, ip=172.31.5.93)[0m >>> create_dem - end - 1664405105.054851 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 5
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> merge_dem_partitions - start - 1664405105.9372113 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> merge_dem_partitions - end - 1664405106.0154457 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> merge_dem_partitions - start - 1664405106.0542898 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=164, ip=172.31.11.13)[0m >>> merge_dem_partitions - start - 1664405106.0567832 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=164, ip=172.31.11.13)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> merge_dem_partitions - end - 1664405106.1132116 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> merge_dem_partitions - start - 1664405106.174974 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=164, ip=172.31.11.13)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=164, ip=172.31.11.13)[0m >>> merge_dem_partitions - end - 1664405106.1593506 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=163, ip=172.31.11.13)[0m >>> merge_dem_partitions - start - 1664405106.140159 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=163, ip=172.31.11.13)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=165, ip=172.31.11.13)[0m >>> merge_dem_partitions - start - 1664405106.180541 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=165, ip=172.31.11.13)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=169, ip=172.31.11.13)[0m >>> merge_dem_partitions - start - 1664405106.181709 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=169, ip=172.31.11.13)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=452, ip=172.31.9.233)[0m >>> merge_dem_partitions - end - 1664405106.2384796 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=163, ip=172.31.11.13)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=163, ip=172.31.11.13)[0m >>> merge_dem_partitions - end - 1664405106.2440243 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=165, ip=172.31.11.13)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=165, ip=172.31.11.13)[0m >>> merge_dem_partitions - end - 1664405106.2844827 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=169, ip=172.31.11.13)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=169, ip=172.31.11.13)[0m >>> merge_dem_partitions - end - 1664405106.2836077 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=167, ip=172.31.11.13)[0m >>> merge_dem_partitions - start - 1664405106.2812848 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=167, ip=172.31.11.13)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=170, ip=172.31.11.13)[0m >>> merge_dem_partitions - start - 1664405106.3021495 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=170, ip=172.31.11.13)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=168, ip=172.31.11.13)[0m >>> merge_dem_partitions - start - 1664405106.2915545 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=168, ip=172.31.11.13)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=171, ip=172.31.11.13)[0m >>> merge_dem_partitions - start - 1664405106.2969065 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=171, ip=172.31.11.13)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=167, ip=172.31.11.13)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=167, ip=172.31.11.13)[0m >>> merge_dem_partitions - end - 1664405106.3795316 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=170, ip=172.31.11.13)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=170, ip=172.31.11.13)[0m >>> merge_dem_partitions - end - 1664405106.3987656 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=168, ip=172.31.11.13)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=168, ip=172.31.11.13)[0m >>> merge_dem_partitions - end - 1664405106.3869853 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=171, ip=172.31.11.13)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=171, ip=172.31.11.13)[0m >>> merge_dem_partitions - end - 1664405106.3942735 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=416)[0m >>> merge_dem_partitions - start - 1664405106.5251243 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=416)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=416)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=416)[0m >>> merge_dem_partitions - end - 1664405106.650436 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=501)[0m >>> merge_dem_partitions - start - 1664405106.567862 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=501)[0m Merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+>>> pipeline - end - 1664405106.76048
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=501)[0m Done merging copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=501)[0m >>> merge_dem_partitions - end - 1664405106.6929433 - copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz
