@@ -122,7 +122,7 @@ def partition_las(file_path, lidar_data):
 
 
 def partition_copc(file_url, partition_num):
-    print(f'>>> partition_copc - start - {time.time()} - {file_url}')
+    print(f'>>> partition_copc - start - {time.time()}')
 
     with CopcReader.open(file_url) as copc_file:
         sub_bounds = square_split(
@@ -155,7 +155,7 @@ def partition_copc(file_url, partition_num):
 
         return_value = out_buff.getvalue()
 
-        print(f'>>> partition_copc - end - {time.time()} - {file_url}')
+        print(f'>>> partition_copc - end - {time.time()}')
         return return_value
 
 

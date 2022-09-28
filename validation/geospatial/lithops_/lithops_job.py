@@ -118,37 +118,22 @@ def run_naive_workflow():
     keys = storage.list_keys(bucket=BUCKET, prefix='laz/CA_YosemiteNP_2019/')
 
     try:
-        t0 = time.time()
-        t0_part = time.time()
+        print(f'>>> pipeline - start - {time.time()}')
         fut1 = fexec.map(partition_las_lithops_wrapper, keys)
         partitions = fexec.get_result(fs=fut1)
-        t1_part = time.time()
-
-        print(f'Partitioning wallclock time: {t1_part - t0_part} s')
 
         partitions_flat = list(itertools.chain.from_iterable(partitions))
 
-        t0_proc = time.time()
         fut2 = fexec.map(create_dem_lithops_wrapper, partitions_flat)
         dems = fexec.get_result(fs=fut2)
-        t1_proc = time.time()
-
-        print(f'Processing wallclock time: {t1_proc - t0_proc} s')
 
         grouped_dems = []
         for key, group in itertools.groupby(dems, lambda part: part[0]):
             grouped_dems.append(list(group))
 
-        t0_merge = time.time()
         fut3 = fexec.map(merge_dem_partitions_lithops_wrapper, grouped_dems)
         fexec.wait(fs=fut3)
-        t1_merge = time.time()
-
-        print(f'Merging wallclock time: {t1_merge - t0_merge} s')
-
-        t1 = time.time()
-
-        print(f'Workflow wallclock time: {t1 - t0} s')
+        print(f'>>> pipeline - end - {time.time()}')
 
         fut1_stats = [f.stats for f in fut1]
         with open('naive_partition_stats.json', 'w') as file:
