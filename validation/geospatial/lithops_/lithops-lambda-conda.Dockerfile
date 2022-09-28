@@ -12,7 +12,7 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
 COPY lithops-conda.yml /tmp/lithops-conda.yml
 
 RUN /opt/miniconda/bin/conda update -n base -c defaults conda &&  \
-    /opt/miniconda/bin/conda env create --file /tmp/lithops-conda.yml --prefix /opt/conda-env
+    /opt/miniconda/bin/conda env create --file /tmp/lithops_-conda.yml --prefix /opt/conda-env
 
 RUN /opt/conda-env/bin/pip install --upgrade --no-cache-dir --ignore-installed \
         awslambdaric \

@@ -2,7 +2,7 @@ import concurrent.futures
 import json
 
 import time
-import lithops
+import lithops_
 import itertools
 
 from lpc_workflow import convert_to_copc, partition_las, create_dem, merge_dem_partitions, partition_copc, SQUARE_SPLIT
@@ -10,14 +10,14 @@ from lpc_workflow import convert_to_copc, partition_las, create_dem, merge_dem_p
 BUCKET = 'point-cloud-datasets'
 
 LITHOPS_LOCAL_CFG = {
-    'lithops':
+    'lithops_':
         {
             'backend': 'localhost',
             'storage': 'minio'
         },
     'minio':
         {
-            'storage_bucket': 'lithops-meta',
+            'storage_bucket': 'lithops_-meta',
             'endpoint': 'http://192.168.1.110:9000',
             'access_key_id': 'minioadmin',
             'secret_access_key': 'minioadmin'
@@ -97,7 +97,7 @@ def convert_to_copc_lithops_wrapper(key, storage):
     try:
         storage.head_object(bucket=BUCKET, key=new_key)
         exists = True
-    except lithops.storage.utils.StorageNoSuchKeyError:
+    except lithops_.storage.utils.StorageNoSuchKeyError:
         pass
 
     if exists:
@@ -112,8 +112,8 @@ def convert_to_copc_lithops_wrapper(key, storage):
 
 
 def run_naive_workflow():
-    fexec = lithops.FunctionExecutor(log_level='DEBUG')
-    storage = lithops.storage.Storage()
+    fexec = lithops_.FunctionExecutor(log_level='DEBUG')
+    storage = lithops_.storage.Storage()
 
     keys = storage.list_keys(bucket=BUCKET, prefix='laz/CA_YosemiteNP_2019/')
 
@@ -166,8 +166,8 @@ def run_naive_workflow():
 
 
 def run_cloudnative_workflow():
-    fexec = lithops.FunctionExecutor(log_level='DEBUG')
-    storage = lithops.storage.Storage()
+    fexec = lithops_.FunctionExecutor(log_level='DEBUG')
+    storage = lithops_.storage.Storage()
 
     keys = storage.list_keys(bucket=BUCKET, prefix='copc/CA_YosemiteNP_2019/')
 
@@ -209,9 +209,9 @@ def run_cloudnative_workflow():
 
 
 def preprocess_dataset():
-    fexec = lithops.FunctionExecutor(log_level='DEBUG')
+    fexec = lithops_.FunctionExecutor(log_level='DEBUG')
 
-    storage = lithops.storage.Storage()
+    storage = lithops_.storage.Storage()
 
     keys = storage.list_keys(bucket='point-cloud-datasets', prefix='laz/CA_YosemiteNP_2019/')
 
@@ -222,6 +222,6 @@ def preprocess_dataset():
 
 
 if __name__ == '__main__':
-    # preprocess_dataset()
+    preprocess_dataset()
     # run_naive_workflow()
-    run_cloudnative_workflow()
+    # run_cloudnative_workflow()
