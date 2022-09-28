@@ -1,0 +1,20 @@
+ray tasks
+=========
+naive: 238.47 s
+co: 222.19 s
+
+7% better
+
+ray datasets
+============
+naive: 376.99 s
+co: 337.8477497
+
+11 % better
+
+lithops
+=======
+naive: 154.7185026
+co: 111.6816561
+
+38 % better
