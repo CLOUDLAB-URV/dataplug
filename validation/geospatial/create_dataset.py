@@ -7,7 +7,8 @@ import os
 import concurrent.futures
 
 LIST_URL = 'https://rockyweb.usgs.gov/vdelivery/Datasets/Staged/Elevation/LPC/Projects/CA_YosemiteNP_2019_D19/CA_YosemiteNP_2019/0_file_download_links.txt'
-TAKE = 25
+SKIP = 150
+TAKE = 100
 BUCKET = 'point-cloud-datasets'
 PREFIX = 'laz/CA_YosemiteNP_2019'
 WORKERS = 4
@@ -15,6 +16,7 @@ WORKERS = 4
 if __name__ == '__main__':
     links = requests.get(LIST_URL).text
     links = links.splitlines()
+    links = links[SKIP:]
     links = links[:TAKE]
     print(len(links))
 

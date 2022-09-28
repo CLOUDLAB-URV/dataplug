@@ -1,0 +1,566 @@
+['point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz', 'point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz']
+>>> pipeline - start - 1664403977.3458705
+[2m[36m(partition_las_ray_task_wrapper pid=570, ip=172.31.9.25)[0m >>> partition_las - start - 1664403979.9587348 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz
+[2m[36m(partition_las_ray_task_wrapper pid=570, ip=172.31.9.25)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=574, ip=172.31.9.25)[0m >>> partition_las - start - 1664403979.9949675 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz
+[2m[36m(partition_las_ray_task_wrapper pid=574, ip=172.31.9.25)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=576, ip=172.31.9.25)[0m >>> partition_las - start - 1664403980.020474 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz
+[2m[36m(partition_las_ray_task_wrapper pid=576, ip=172.31.9.25)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=572, ip=172.31.9.25)[0m >>> partition_las - start - 1664403980.0381038 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz
+[2m[36m(partition_las_ray_task_wrapper pid=572, ip=172.31.9.25)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=775)[0m >>> partition_las - start - 1664403980.0886233 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz
+[2m[36m(partition_las_ray_task_wrapper pid=775)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> partition_las - start - 1664403980.1361566 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz
+[2m[36m(partition_las_ray_task_wrapper pid=573, ip=172.31.9.25)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=776)[0m >>> partition_las - start - 1664403980.1188443 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz
+[2m[36m(partition_las_ray_task_wrapper pid=776)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> partition_las - start - 1664403980.286065 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz
+[2m[36m(partition_las_ray_task_wrapper pid=569, ip=172.31.9.25)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=575, ip=172.31.9.25)[0m >>> partition_las - start - 1664403980.215705 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz
+[2m[36m(partition_las_ray_task_wrapper pid=575, ip=172.31.9.25)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=571, ip=172.31.9.25)[0m >>> partition_las - start - 1664403980.3315413 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz
+[2m[36m(partition_las_ray_task_wrapper pid=571, ip=172.31.9.25)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=577, ip=172.31.9.25)[0m >>> partition_las - start - 1664403980.5797164 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz
+[2m[36m(partition_las_ray_task_wrapper pid=577, ip=172.31.9.25)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=447, ip=172.31.5.8)[0m >>> partition_las - start - 1664403980.6563222 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz
+[2m[36m(partition_las_ray_task_wrapper pid=447, ip=172.31.5.8)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> partition_las - start - 1664403980.7775402 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz
+[2m[36m(partition_las_ray_task_wrapper pid=612, ip=172.31.9.25)[0m Going to partition file point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz into 9 chunks
+[2m[36m(partition_las_ray_task_wrapper pid=447, ip=172.31.5.8)[0m >>> partition_las - end - 1664403989.7728417 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz
+[2m[36m(partition_las_ray_task_wrapper pid=776)[0m >>> partition_las - end - 1664404002.0329373 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz
+[2m[36m(partition_las_ray_task_wrapper pid=775)[0m >>> partition_las - end - 1664404002.675635 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz
+[2m[36m(partition_las_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> partition_las - end - 1664404004.1771233 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz
+[2m[36m(partition_las_ray_task_wrapper pid=576, ip=172.31.9.25)[0m >>> partition_las - end - 1664404004.3181717 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz
+[2m[36m(partition_las_ray_task_wrapper pid=577, ip=172.31.9.25)[0m >>> partition_las - end - 1664404004.9174669 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz
+[2m[36m(partition_las_ray_task_wrapper pid=574, ip=172.31.9.25)[0m >>> partition_las - end - 1664404005.4077854 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz
+[2m[36m(partition_las_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> partition_las - end - 1664404005.7876277 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz
+[2m[36m(partition_las_ray_task_wrapper pid=575, ip=172.31.9.25)[0m >>> partition_las - end - 1664404005.8429282 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz
+[2m[36m(partition_las_ray_task_wrapper pid=570, ip=172.31.9.25)[0m >>> partition_las - end - 1664404005.9086583 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz
+[2m[36m(partition_las_ray_task_wrapper pid=572, ip=172.31.9.25)[0m >>> partition_las - end - 1664404006.016541 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz
+[2m[36m(partition_las_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> partition_las - end - 1664404006.8042202 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz
+[2m[36m(partition_las_ray_task_wrapper pid=571, ip=172.31.9.25)[0m >>> partition_las - end - 1664404008.1755962 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz
+[2m[36m(create_dem_ray_task_wrapper pid=575, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.0943425 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=575, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=571, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.1156325 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.1243358 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=571, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=776)[0m >>> create_dem - start - 1664404009.2150269 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=775)[0m >>> create_dem - start - 1664404009.2233093 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.1613793 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=574, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.2048066 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=574, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=576, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.159932 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=576, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.1544313 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.1670902 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=572, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.2008116 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=572, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=577, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.182064 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=577, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=566, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.1884894 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=566, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=563, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.1790173 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=563, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.1631157 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=564, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.2119293 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=564, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=568, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.184899 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=568, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=562, ip=172.31.9.25)[0m >>> create_dem - start - 1664404009.1893263 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=562, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=443, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.2022407 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=443, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=440, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.2333615 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=440, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=445, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.2413895 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=445, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=437, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.2363884 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=437, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=776)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=775)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=447, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.3164496 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=447, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=438, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.3093696 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=438, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=439, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.3501751 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=442, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.2807946 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=442, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=441, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.2703474 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=441, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=439, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=444, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.3755937 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=444, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.381802 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=828)[0m >>> create_dem - start - 1664404009.4641497 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=828)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=827)[0m >>> create_dem - start - 1664404009.467121 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=827)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.793479 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=785, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.8693779 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.8967395 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=785, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=786, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.89385 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=786, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=783, ip=172.31.5.8)[0m >>> create_dem - start - 1664404009.910703 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=783, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[1m[36m(scheduler +38s)[0m Tip: use `ray status` to view detailed cluster status. To disable these messages, set RAY_SCHEDULER_EVENTS=0.
+[2m[1m[36m(scheduler +38s)[0m Adding 5 nodes of type ray.worker.default.
+[2m[36m(create_dem_ray_task_wrapper pid=572, ip=172.31.9.25)[0m DEM result wrote 880658 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=572, ip=172.31.9.25)[0m >>> create_dem - end - 1664404047.4298315 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=572, ip=172.31.9.25)[0m >>> create_dem - start - 1664404047.5090787 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=572, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m DEM result wrote 1069702 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m >>> create_dem - end - 1664404048.131588 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m >>> create_dem - start - 1664404048.2083595 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m DEM result wrote 783947 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> create_dem - end - 1664404049.1664028 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> create_dem - start - 1664404049.3114972 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=783, ip=172.31.5.8)[0m DEM result wrote 1160338 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=783, ip=172.31.5.8)[0m >>> create_dem - end - 1664404051.5491536 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=783, ip=172.31.5.8)[0m >>> create_dem - start - 1664404051.745063 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=783, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m DEM result wrote 1172184 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m >>> create_dem - end - 1664404054.3828592 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m >>> create_dem - start - 1664404054.539456 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=445, ip=172.31.5.8)[0m DEM result wrote 889935 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=445, ip=172.31.5.8)[0m >>> create_dem - end - 1664404056.061228 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=445, ip=172.31.5.8)[0m >>> create_dem - start - 1664404056.2430084 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=445, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=437, ip=172.31.5.8)[0m DEM result wrote 995362 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=437, ip=172.31.5.8)[0m >>> create_dem - end - 1664404057.1575408 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=437, ip=172.31.5.8)[0m >>> create_dem - start - 1664404057.3459322 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=437, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m DEM result wrote 1012791 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m >>> create_dem - end - 1664404057.7017562 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m >>> create_dem - start - 1664404057.8419917 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=443, ip=172.31.5.8)[0m DEM result wrote 998832 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=443, ip=172.31.5.8)[0m >>> create_dem - end - 1664404058.1480997 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=443, ip=172.31.5.8)[0m >>> create_dem - start - 1664404058.339475 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=443, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=440, ip=172.31.5.8)[0m DEM result wrote 868439 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=440, ip=172.31.5.8)[0m >>> create_dem - end - 1664404058.4655607 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=440, ip=172.31.5.8)[0m >>> create_dem - start - 1664404058.6567214 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=574, ip=172.31.9.25)[0m DEM result wrote 1112766 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=574, ip=172.31.9.25)[0m >>> create_dem - end - 1664404058.7310786 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=440, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=574, ip=172.31.9.25)[0m >>> create_dem - start - 1664404058.8128572 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=574, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=441, ip=172.31.5.8)[0m DEM result wrote 881585 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=441, ip=172.31.5.8)[0m >>> create_dem - end - 1664404058.9754767 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=441, ip=172.31.5.8)[0m >>> create_dem - start - 1664404059.1466522 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=441, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=447, ip=172.31.5.8)[0m DEM result wrote 922489 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=447, ip=172.31.5.8)[0m >>> create_dem - end - 1664404059.2290692 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=571, ip=172.31.9.25)[0m DEM result wrote 1047483 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=571, ip=172.31.9.25)[0m >>> create_dem - end - 1664404059.3560424 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=447, ip=172.31.5.8)[0m >>> create_dem - start - 1664404059.3436565 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=447, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=571, ip=172.31.9.25)[0m >>> create_dem - start - 1664404059.4125917 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=571, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=577, ip=172.31.9.25)[0m DEM result wrote 812198 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=577, ip=172.31.9.25)[0m >>> create_dem - end - 1664404060.3121288 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=577, ip=172.31.9.25)[0m >>> create_dem - start - 1664404060.5153997 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=577, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=442, ip=172.31.5.8)[0m DEM result wrote 917752 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=442, ip=172.31.5.8)[0m >>> create_dem - end - 1664404061.5659666 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=442, ip=172.31.5.8)[0m >>> create_dem - start - 1664404061.753289 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=442, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=566, ip=172.31.9.25)[0m DEM result wrote 1007028 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=566, ip=172.31.9.25)[0m >>> create_dem - end - 1664404062.4864523 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=785, ip=172.31.5.8)[0m DEM result wrote 1238105 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=785, ip=172.31.5.8)[0m >>> create_dem - end - 1664404062.47516 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=566, ip=172.31.9.25)[0m >>> create_dem - start - 1664404062.6261673 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=566, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=785, ip=172.31.5.8)[0m >>> create_dem - start - 1664404062.6520796 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=785, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=776)[0m DEM result wrote 1367271 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=776)[0m >>> create_dem - end - 1664404066.0772605 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=776)[0m >>> create_dem - start - 1664404066.135533 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=776)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=786, ip=172.31.5.8)[0m DEM result wrote 1339001 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=786, ip=172.31.5.8)[0m >>> create_dem - end - 1664404066.4481437 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=786, ip=172.31.5.8)[0m >>> create_dem - start - 1664404067.1453292 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=786, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m DEM result wrote 1452090 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> create_dem - end - 1664404067.3346412 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> create_dem - start - 1664404067.4158368 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m DEM result wrote 1903980 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> create_dem - end - 1664404067.8298295 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> create_dem - start - 1664404067.9159362 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m DEM result wrote 1468632 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m >>> create_dem - end - 1664404070.4517107 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m >>> create_dem - start - 1664404070.6420615 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=564, ip=172.31.9.25)[0m DEM result wrote 1100604 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=564, ip=172.31.9.25)[0m >>> create_dem - end - 1664404070.9460971 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=564, ip=172.31.9.25)[0m >>> create_dem - start - 1664404071.1200619 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=564, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=568, ip=172.31.9.25)[0m DEM result wrote 1185889 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=568, ip=172.31.9.25)[0m >>> create_dem - end - 1664404072.762681 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=568, ip=172.31.9.25)[0m >>> create_dem - start - 1664404072.8206139 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=568, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=575, ip=172.31.9.25)[0m DEM result wrote 1176355 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=575, ip=172.31.9.25)[0m >>> create_dem - end - 1664404074.3740067 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=575, ip=172.31.9.25)[0m >>> create_dem - start - 1664404074.5194664 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=575, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=775)[0m DEM result wrote 1194086 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=775)[0m >>> create_dem - end - 1664404075.983364 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=775)[0m >>> create_dem - start - 1664404076.0471592 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=775)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m DEM result wrote 1608051 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m >>> create_dem - end - 1664404077.7096522 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m >>> create_dem - start - 1664404077.9239342 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=563, ip=172.31.9.25)[0m DEM result wrote 1068590 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=563, ip=172.31.9.25)[0m >>> create_dem - end - 1664404081.7990222 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=563, ip=172.31.9.25)[0m >>> create_dem - start - 1664404081.9277775 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=563, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=439, ip=172.31.5.8)[0m DEM result wrote 1468296 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=439, ip=172.31.5.8)[0m >>> create_dem - end - 1664404082.0169797 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=439, ip=172.31.5.8)[0m >>> create_dem - start - 1664404082.1632702 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=439, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=576, ip=172.31.9.25)[0m DEM result wrote 1565250 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=576, ip=172.31.9.25)[0m >>> create_dem - end - 1664404088.6181657 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=576, ip=172.31.9.25)[0m >>> create_dem - start - 1664404088.7257638 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=576, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=827)[0m DEM result wrote 1604109 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=827)[0m >>> create_dem - end - 1664404090.5910394 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=827)[0m >>> create_dem - start - 1664404090.6657224 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=827)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=562, ip=172.31.9.25)[0m DEM result wrote 1312873 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=562, ip=172.31.9.25)[0m >>> create_dem - end - 1664404092.9962852 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=438, ip=172.31.5.8)[0m DEM result wrote 1192507 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=438, ip=172.31.5.8)[0m >>> create_dem - end - 1664404092.985155 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=562, ip=172.31.9.25)[0m >>> create_dem - start - 1664404093.1293437 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=562, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=438, ip=172.31.5.8)[0m >>> create_dem - start - 1664404093.1641746 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=438, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=828)[0m DEM result wrote 1318740 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=828)[0m >>> create_dem - end - 1664404093.9849756 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=828)[0m >>> create_dem - start - 1664404094.0445404 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=828)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=444, ip=172.31.5.8)[0m DEM result wrote 1710479 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=444, ip=172.31.5.8)[0m >>> create_dem - end - 1664404107.2478774 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m DEM result wrote 1547729 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m >>> create_dem - end - 1664404107.2419474 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m >>> create_dem - start - 1664404107.4359083 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=444, ip=172.31.5.8)[0m >>> create_dem - start - 1664404107.472224 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=444, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m DEM result wrote 1723532 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m >>> create_dem - end - 1664404112.6966255 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m >>> create_dem - start - 1664404112.8612993 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m DEM result wrote 1640133 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> create_dem - end - 1664404113.1268122 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> create_dem - start - 1664404113.2407236 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m DEM result wrote 910147 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> create_dem - end - 1664404115.0335724 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> create_dem - start - 1664404115.138155 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m DEM result wrote 1128750 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> create_dem - end - 1664404116.690556 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> create_dem - start - 1664404116.839759 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m DEM result wrote 768301 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m >>> create_dem - end - 1664404117.4171484 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m >>> create_dem - start - 1664404117.5399668 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m DEM result wrote 1148331 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m >>> create_dem - end - 1664404118.5058124 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m >>> create_dem - start - 1664404118.6812649 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.9.98)[0m >>> create_dem - start - 1664404118.7889278 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.9.98)[0m >>> create_dem - start - 1664404118.8189945 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=158, ip=172.31.9.98)[0m >>> create_dem - start - 1664404118.868882 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=158, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.9.98)[0m >>> create_dem - start - 1664404118.9876711 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=155, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.0970724 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=156, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.0795376 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=156, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.0637567 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.0534353 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=155, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=159, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.1095667 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=159, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=157, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.1279855 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=157, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=208, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.4249785 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=208, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=232, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.4199643 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=232, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=211, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.473917 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=211, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=260, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.5037107 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=260, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=366, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.6191955 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=309, ip=172.31.9.98)[0m >>> create_dem - start - 1664404119.624732 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=309, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=366, ip=172.31.9.98)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m DEM result wrote 1495903 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m >>> create_dem - end - 1664404119.7194383 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m >>> create_dem - start - 1664404119.9676476 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.1542547 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.1656961 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.2091186 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=158, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.2230043 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=158, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.31967 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=157, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.352751 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=157, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=159, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.3869693 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=159, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.3911116 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=156, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.4039242 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=156, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=155, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.4140615 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=155, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=204, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.70646 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=204, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=206, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.720117 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=206, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[1m[36m(scheduler +2m26s)[0m Resized to 84 CPUs.
+[2m[36m(create_dem_ray_task_wrapper pid=229, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.827908 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=229, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=269, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.9241724 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=269, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=379, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.9520319 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=379, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=350, ip=172.31.4.246)[0m >>> create_dem - start - 1664404120.919559 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=350, ip=172.31.4.246)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.6.111)[0m >>> create_dem - start - 1664404121.1614444 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.6.111)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.6.111)[0m >>> create_dem - start - 1664404121.1776557 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.6.111)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.6.111)[0m >>> create_dem - start - 1664404121.1237657 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.6.111)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.6.111)[0m >>> create_dem - start - 1664404121.1786149 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.6.111)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.6.111)[0m >>> create_dem - start - 1664404121.1686137 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.6.111)[0m Executing DEM pipeline for point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(create_dem_ray_task_wrapper pid=786, ip=172.31.5.8)[0m DEM result wrote 1261978 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=786, ip=172.31.5.8)[0m >>> create_dem - end - 1664404123.5624576 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 1
+[2m[1m[36m(scheduler +2m31s)[0m Resized to 116 CPUs.
+[2m[36m(create_dem_ray_task_wrapper pid=572, ip=172.31.9.25)[0m DEM result wrote 1673620 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=572, ip=172.31.9.25)[0m >>> create_dem - end - 1664404127.9396522 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=575, ip=172.31.9.25)[0m DEM result wrote 1252041 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=575, ip=172.31.9.25)[0m >>> create_dem - end - 1664404128.0979958 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=445, ip=172.31.5.8)[0m DEM result wrote 1914174 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=445, ip=172.31.5.8)[0m >>> create_dem - end - 1664404128.1485603 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=437, ip=172.31.5.8)[0m DEM result wrote 1605632 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=437, ip=172.31.5.8)[0m >>> create_dem - end - 1664404128.792291 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=564, ip=172.31.9.25)[0m DEM result wrote 1042967 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=564, ip=172.31.9.25)[0m >>> create_dem - end - 1664404129.2148411 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=441, ip=172.31.5.8)[0m DEM result wrote 1586240 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=441, ip=172.31.5.8)[0m >>> create_dem - end - 1664404129.6876755 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=568, ip=172.31.9.25)[0m DEM result wrote 1169193 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=568, ip=172.31.9.25)[0m >>> create_dem - end - 1664404130.3594208 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=783, ip=172.31.5.8)[0m DEM result wrote 1718738 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=783, ip=172.31.5.8)[0m >>> create_dem - end - 1664404130.8237698 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=776)[0m DEM result wrote 1313665 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=776)[0m >>> create_dem - end - 1664404130.8096678 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=443, ip=172.31.5.8)[0m DEM result wrote 1729236 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=443, ip=172.31.5.8)[0m >>> create_dem - end - 1664404131.838342 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=574, ip=172.31.9.25)[0m DEM result wrote 2041804 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=574, ip=172.31.9.25)[0m >>> create_dem - end - 1664404133.6912184 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=775)[0m DEM result wrote 1016675 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=775)[0m >>> create_dem - end - 1664404134.8957138 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=562, ip=172.31.9.25)[0m DEM result wrote 903456 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=562, ip=172.31.9.25)[0m >>> create_dem - end - 1664404138.8197806 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=577, ip=172.31.9.25)[0m DEM result wrote 1525743 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=577, ip=172.31.9.25)[0m >>> create_dem - end - 1664404139.319199 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=563, ip=172.31.9.25)[0m DEM result wrote 960961 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=563, ip=172.31.9.25)[0m >>> create_dem - end - 1664404142.6089365 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=785, ip=172.31.5.8)[0m DEM result wrote 1876458 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=785, ip=172.31.5.8)[0m >>> create_dem - end - 1664404142.9361155 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=571, ip=172.31.9.25)[0m DEM result wrote 1918678 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=571, ip=172.31.9.25)[0m >>> create_dem - end - 1664404143.105025 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=576, ip=172.31.9.25)[0m DEM result wrote 1220379 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=576, ip=172.31.9.25)[0m >>> create_dem - end - 1664404149.1731472 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=566, ip=172.31.9.25)[0m DEM result wrote 1516566 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=566, ip=172.31.9.25)[0m >>> create_dem - end - 1664404149.1483083 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m DEM result wrote 1049658 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=787, ip=172.31.5.8)[0m >>> create_dem - end - 1664404149.5642638 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=442, ip=172.31.5.8)[0m DEM result wrote 2142727 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=442, ip=172.31.5.8)[0m >>> create_dem - end - 1664404149.62775 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=447, ip=172.31.5.8)[0m DEM result wrote 2588589 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=447, ip=172.31.5.8)[0m >>> create_dem - end - 1664404149.881875 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.6.111)[0m DEM result wrote 1233554 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.6.111)[0m >>> create_dem - end - 1664404151.4869711 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.6.111)[0m DEM result wrote 997009 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.6.111)[0m >>> create_dem - end - 1664404153.414656 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.6.111)[0m DEM result wrote 1021797 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.6.111)[0m >>> create_dem - end - 1664404153.6674478 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=438, ip=172.31.5.8)[0m DEM result wrote 1332417 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=438, ip=172.31.5.8)[0m >>> create_dem - end - 1664404154.8186307 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m DEM result wrote 1563068 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=565, ip=172.31.9.25)[0m >>> create_dem - end - 1664404156.5913494 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.6.111)[0m DEM result wrote 1216134 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.6.111)[0m >>> create_dem - end - 1664404158.1549308 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.6.111)[0m DEM result wrote 1052883 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.6.111)[0m >>> create_dem - end - 1664404159.6340716 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=439, ip=172.31.5.8)[0m DEM result wrote 1272027 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=439, ip=172.31.5.8)[0m >>> create_dem - end - 1664404160.2232227 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m DEM result wrote 1577439 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=570, ip=172.31.9.25)[0m >>> create_dem - end - 1664404161.2741213 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.9.98)[0m DEM result wrote 1333286 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.9.98)[0m >>> create_dem - end - 1664404162.601693 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=440, ip=172.31.5.8)[0m DEM result wrote 2368402 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=440, ip=172.31.5.8)[0m >>> create_dem - end - 1664404163.3022265 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m DEM result wrote 1704150 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> create_dem - end - 1664404165.7015243 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m DEM result wrote 2085608 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=784, ip=172.31.5.8)[0m >>> create_dem - end - 1664404166.0818675 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=158, ip=172.31.4.246)[0m DEM result wrote 1329751 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=158, ip=172.31.4.246)[0m >>> create_dem - end - 1664404168.4640632 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=159, ip=172.31.9.98)[0m DEM result wrote 1104080 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=159, ip=172.31.9.98)[0m >>> create_dem - end - 1664404168.418027 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.9.98)[0m DEM result wrote 1390381 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.9.98)[0m >>> create_dem - end - 1664404168.6063917 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=155, ip=172.31.4.246)[0m DEM result wrote 1554346 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=155, ip=172.31.4.246)[0m >>> create_dem - end - 1664404170.0261521 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=260, ip=172.31.9.98)[0m DEM result wrote 1211407 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=260, ip=172.31.9.98)[0m >>> create_dem - end - 1664404170.6919298 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=444, ip=172.31.5.8)[0m DEM result wrote 1623608 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=444, ip=172.31.5.8)[0m >>> create_dem - end - 1664404171.4264512 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=827)[0m DEM result wrote 1288487 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=827)[0m >>> create_dem - end - 1664404171.9891207 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m DEM result wrote 1552174 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> create_dem - end - 1664404173.341888 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.9.98)[0m DEM result wrote 1242119 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.9.98)[0m >>> create_dem - end - 1664404173.8612626 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m DEM result wrote 1594781 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> create_dem - end - 1664404173.9991798 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=828)[0m DEM result wrote 1697151 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=828)[0m >>> create_dem - end - 1664404174.589656 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=366, ip=172.31.9.98)[0m DEM result wrote 1183573 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=366, ip=172.31.9.98)[0m >>> create_dem - end - 1664404176.8505554 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=158, ip=172.31.9.98)[0m DEM result wrote 1324826 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=158, ip=172.31.9.98)[0m >>> create_dem - end - 1664404176.9974444 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.4.246)[0m DEM result wrote 1286288 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.4.246)[0m >>> create_dem - end - 1664404177.5956345 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m DEM result wrote 1612446 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=446, ip=172.31.5.8)[0m >>> create_dem - end - 1664404177.9035108 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=309, ip=172.31.9.98)[0m DEM result wrote 1223848 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=309, ip=172.31.9.98)[0m >>> create_dem - end - 1664404177.9997447 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=211, ip=172.31.9.98)[0m DEM result wrote 1277313 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=211, ip=172.31.9.98)[0m >>> create_dem - end - 1664404178.0618613 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=208, ip=172.31.9.98)[0m DEM result wrote 1662407 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=208, ip=172.31.9.98)[0m >>> create_dem - end - 1664404178.4131262 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=157, ip=172.31.9.98)[0m DEM result wrote 1711230 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=157, ip=172.31.9.98)[0m >>> create_dem - end - 1664404179.6589077 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=269, ip=172.31.4.246)[0m DEM result wrote 1231747 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=269, ip=172.31.4.246)[0m >>> create_dem - end - 1664404179.6916726 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=379, ip=172.31.4.246)[0m DEM result wrote 1308606 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=379, ip=172.31.4.246)[0m >>> create_dem - end - 1664404179.9015207 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 3
+[2m[36m(create_dem_ray_task_wrapper pid=206, ip=172.31.4.246)[0m DEM result wrote 1156946 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=206, ip=172.31.4.246)[0m >>> create_dem - end - 1664404180.8247313 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 7
+[2m[36m(create_dem_ray_task_wrapper pid=229, ip=172.31.4.246)[0m DEM result wrote 1149468 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=229, ip=172.31.4.246)[0m >>> create_dem - end - 1664404181.0880008 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=232, ip=172.31.9.98)[0m DEM result wrote 1175433 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=232, ip=172.31.9.98)[0m >>> create_dem - end - 1664404182.0566573 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.4.246)[0m DEM result wrote 1078080 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=152, ip=172.31.4.246)[0m >>> create_dem - end - 1664404182.6463795 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 5
+[2m[36m(create_dem_ray_task_wrapper pid=155, ip=172.31.9.98)[0m DEM result wrote 1372719 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=155, ip=172.31.9.98)[0m >>> create_dem - end - 1664404183.0640347 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.4.246)[0m DEM result wrote 1258300 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.4.246)[0m >>> create_dem - end - 1664404183.6552706 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz - 6
+[2m[36m(create_dem_ray_task_wrapper pid=350, ip=172.31.4.246)[0m DEM result wrote 1178088 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=350, ip=172.31.4.246)[0m >>> create_dem - end - 1664404185.5616136 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=204, ip=172.31.4.246)[0m DEM result wrote 1229738 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=204, ip=172.31.4.246)[0m >>> create_dem - end - 1664404187.8857093 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 8
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.4.246)[0m DEM result wrote 1220195 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=153, ip=172.31.4.246)[0m >>> create_dem - end - 1664404188.5426915 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=157, ip=172.31.4.246)[0m DEM result wrote 1300265 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=157, ip=172.31.4.246)[0m >>> create_dem - end - 1664404189.2219863 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=156, ip=172.31.4.246)[0m DEM result wrote 1455876 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=156, ip=172.31.4.246)[0m >>> create_dem - end - 1664404189.3879113 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.4.246)[0m DEM result wrote 1648101 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=151, ip=172.31.4.246)[0m >>> create_dem - end - 1664404190.1296554 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 4
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.9.98)[0m DEM result wrote 1890371 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=150, ip=172.31.9.98)[0m >>> create_dem - end - 1664404190.349191 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 2
+[2m[36m(create_dem_ray_task_wrapper pid=156, ip=172.31.9.98)[0m DEM result wrote 2048989 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=156, ip=172.31.9.98)[0m >>> create_dem - end - 1664404192.0892599 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 1
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.9.98)[0m DEM result wrote 1861147 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=154, ip=172.31.9.98)[0m >>> create_dem - end - 1664404194.5370588 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz - 0
+[2m[36m(create_dem_ray_task_wrapper pid=159, ip=172.31.4.246)[0m DEM result wrote 1409196 bytes
+[2m[36m(create_dem_ray_task_wrapper pid=159, ip=172.31.4.246)[0m >>> create_dem - end - 1664404198.6743639 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz - 5
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> merge_dem_partitions - start - 1664404199.1904595 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=569, ip=172.31.9.25)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> merge_dem_partitions - start - 1664404199.1865108 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=573, ip=172.31.9.25)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> merge_dem_partitions - start - 1664404199.1881316 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=612, ip=172.31.9.25)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=828)[0m >>> merge_dem_partitions - start - 1664404199.2270575 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=828)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=827)[0m >>> merge_dem_partitions - start - 1664404199.2387648 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=827)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=569, ip=172.31.9.25)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> merge_dem_partitions - end - 1664404199.2779853 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5573.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=576, ip=172.31.9.25)[0m >>> merge_dem_partitions - start - 1664404199.299181 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=576, ip=172.31.9.25)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=573, ip=172.31.9.25)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> merge_dem_partitions - end - 1664404199.2749166 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5483.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=570, ip=172.31.9.25)[0m >>> merge_dem_partitions - start - 1664404199.3342638 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=571, ip=172.31.9.25)[0m >>> merge_dem_partitions - start - 1664404199.3262687 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=571, ip=172.31.9.25)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=612, ip=172.31.9.25)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> merge_dem_partitions - end - 1664404199.2733514 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5274.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=565, ip=172.31.9.25)[0m >>> merge_dem_partitions - start - 1664404199.3202014 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=565, ip=172.31.9.25)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=828)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=828)[0m >>> merge_dem_partitions - end - 1664404199.3412888 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4884.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=827)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=827)[0m >>> merge_dem_partitions - end - 1664404199.3355947 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB4986.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> merge_dem_partitions - start - 1664404199.3526468 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=569, ip=172.31.9.25)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=569, ip=172.31.9.25)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=569, ip=172.31.9.25)[0m >>> merge_dem_partitions - end - 1664404199.4211214 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6974.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=576, ip=172.31.9.25)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=576, ip=172.31.9.25)[0m >>> merge_dem_partitions - end - 1664404199.3868015 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5967.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> merge_dem_partitions - start - 1664404199.3459454 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=573, ip=172.31.9.25)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=573, ip=172.31.9.25)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=573, ip=172.31.9.25)[0m >>> merge_dem_partitions - end - 1664404199.4155164 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=570, ip=172.31.9.25)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=571, ip=172.31.9.25)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=571, ip=172.31.9.25)[0m >>> merge_dem_partitions - end - 1664404199.4141986 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6687.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> merge_dem_partitions - start - 1664404199.3402882 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=612, ip=172.31.9.25)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=612, ip=172.31.9.25)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=612, ip=172.31.9.25)[0m >>> merge_dem_partitions - end - 1664404199.4104588 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6790.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=566, ip=172.31.9.25)[0m >>> merge_dem_partitions - start - 1664404199.3474734 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=566, ip=172.31.9.25)[0m Merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz...
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=565, ip=172.31.9.25)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=565, ip=172.31.9.25)[0m >>> merge_dem_partitions - end - 1664404199.407977 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5681.laz
+>>> pipeline - end - 1664404199.537027
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=570, ip=172.31.9.25)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=570, ip=172.31.9.25)[0m >>> merge_dem_partitions - end - 1664404199.45394 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB5579.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=566, ip=172.31.9.25)[0m Done merging point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz
+[2m[36m(merge_dem_partitions_ray_task_wrapper pid=566, ip=172.31.9.25)[0m >>> merge_dem_partitions - end - 1664404199.471458 - point-cloud-datasets/laz/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6686.laz
