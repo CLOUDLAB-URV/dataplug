@@ -2,22 +2,22 @@ import concurrent.futures
 import json
 
 import time
-import lithops_
+import lithops
 import itertools
 
 from lpc_workflow import convert_to_copc, partition_las, create_dem, merge_dem_partitions, partition_copc, SQUARE_SPLIT
 
 BUCKET = 'point-cloud-datasets'
 
-LITHOPS_LOCAL_CFG = {
-    'lithops_':
+lithopsLOCAL_CFG = {
+    'lithops':
         {
             'backend': 'localhost',
             'storage': 'minio'
         },
     'minio':
         {
-            'storage_bucket': 'lithops_-meta',
+            'storage_bucket': 'lithops-meta',
             'endpoint': 'http://192.168.1.110:9000',
             'access_key_id': 'minioadmin',
             'secret_access_key': 'minioadmin'
@@ -97,7 +97,7 @@ def convert_to_copc_lithops_wrapper(key, storage):
     try:
         storage.head_object(bucket=BUCKET, key=new_key)
         exists = True
-    except lithops_.storage.utils.StorageNoSuchKeyError:
+    except lithops.storage.utils.StorageNoSuchKeyError:
         pass
 
     if exists:
@@ -112,8 +112,8 @@ def convert_to_copc_lithops_wrapper(key, storage):
 
 
 def run_naive_workflow():
-    fexec = lithops_.FunctionExecutor(log_level='DEBUG')
-    storage = lithops_.storage.Storage()
+    fexec = lithops.FunctionExecutor(log_level='DEBUG')
+    storage = lithops.storage.Storage()
 
     keys = storage.list_keys(bucket=BUCKET, prefix='laz/CA_YosemiteNP_2019/')
 
@@ -166,8 +166,8 @@ def run_naive_workflow():
 
 
 def run_cloudnative_workflow():
-    fexec = lithops_.FunctionExecutor(log_level='DEBUG')
-    storage = lithops_.storage.Storage()
+    fexec = lithops.FunctionExecutor(log_level='DEBUG')
+    storage = lithops.storage.Storage()
 
     keys = storage.list_keys(bucket=BUCKET, prefix='copc/CA_YosemiteNP_2019/')
 
@@ -209,9 +209,9 @@ def run_cloudnative_workflow():
 
 
 def preprocess_dataset():
-    fexec = lithops_.FunctionExecutor(log_level='DEBUG')
+    fexec = lithops.FunctionExecutor(log_level='DEBUG')
 
-    storage = lithops_.storage.Storage()
+    storage = lithops.storage.Storage()
 
     keys = storage.list_keys(bucket='point-cloud-datasets', prefix='laz/CA_YosemiteNP_2019/')
 
