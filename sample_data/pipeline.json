@@ -1,0 +1,10 @@
+[
+  {
+    "type": "readers.las",
+    "filename": "USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz"
+  },
+  {
+    "type": "writers.copc",
+    "filename": "copcUSGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz"
+  }
+]
