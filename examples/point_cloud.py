@@ -18,10 +18,10 @@ def main():
         }
     }
 
-    co = CloudObject.new_from_s3(LiDARPointCloud, 's3://geospatial/lidar_sample.las', s3_config=config)
+    co = CloudObject.new_from_s3(LiDARPointCloud, 's3://geospatial/laz/cnig/PNOA_2016_CAT_324-4570_ORT-CLA-COL.laz', s3_config=config)
     co.fetch()
 
-    is_staged = co.is_staged()
+    is_staged = co.is_preprocessed()
     print(is_staged)
     # if not is_staged:
     #     co.force_preprocess()

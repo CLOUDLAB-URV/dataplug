@@ -1,4 +1,4 @@
-import json
+from io import BytesIO
 
 import pdal
 import laspy.copc
@@ -6,7 +6,7 @@ import json
 import tempfile
 import shutil
 
-from ..cobase import CloudObjectWrapper
+from ..cobase import CloudObjectWrapper, PreprocesserMetadata
 from ..preprocessers import BatchPreprocesser
 from ..util import force_delete_path
 
@@ -16,7 +16,7 @@ class LiDARPreprocesser(BatchPreprocesser):
         super().__init__()
 
     @staticmethod
-    def preprocess(data_stream, meta):
+    def preprocess(data_stream: BytesIO, meta: PreprocesserMetadata):
         input_file_path = tempfile.mktemp()
         output_file_path = tempfile.mktemp()
 
@@ -61,7 +61,7 @@ class LiDARPreprocesser(BatchPreprocesser):
                     'root_size': str(copc_reader.copc_info.hierarchy_root_size)
                 }
 
-                return open(output_file_path, 'rb'), copc_meta
+            return open(output_file_path, 'rb'), copc_meta
         finally:
             force_delete_path(input_file_path)
             force_delete_path(output_file_path)

@@ -1,4 +1,7 @@
 
 
 class DatasetBase:
-    pass
+    @classmethod
+    def glob(cls, cloud_object_class, s3_path):
+
+        pass
