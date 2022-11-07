@@ -10,7 +10,7 @@ from typing import BinaryIO
 import pandas as pd
 
 from ..cobase import CloudObjectWrapper
-from ..cochunkbase import CloudObjectChunk
+from ..cochunkbase import CloudObjectSlice
 from ..preprocessers import BatchPreprocesser
 
 logger = logging.getLogger(__name__)
@@ -135,7 +135,7 @@ class GZipText:
         raise NotImplementedError()
 
 
-class GZipChunk(CloudObjectChunk):
+class GZipChunk(CloudObjectSlice):
     def __init__(self, line_0, line_1, *args, **kwargs):
         self.line_0 = line_0
         self.line_1 = line_1

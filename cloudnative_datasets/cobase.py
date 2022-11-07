@@ -63,19 +63,27 @@ class CloudObject:
                                 endpoint_url=self._s3_config.get('endpoint_url'),
                                 config=botocore.client.Config(**self._s3_config.get('s3_config_kwargs', {})))
 
-        logger.debug(f'{self._obj_bucket=},{self._meta_bucket=},{self._obj_key=}')
+        logger.debug(f'{self._obj_path=},{self._meta_path=}')
 
     @property
     def path(self) -> PureS3Path:
         return self._obj_path
 
     @property
+    def size(self) -> int:
+        if not self._obj_meta:
+            self.fetch()
+        return self._obj_meta['ContentLength']
+
+    @property
     def s3client(self):
         return self._s3
 
     @classmethod
-    def new_from_s3(cls, cloud_object_class, s3_path, s3_config=None):
+    def new_from_s3(cls, cloud_object_class, s3_path, s3_config=None, fetch=True):
         co_instance = cls(cloud_object_class, s3_path, s3_config)
+        if fetch:
+            co_instance.fetch(enforce_obj=True)
         return co_instance
 
     @classmethod
@@ -105,20 +113,30 @@ class CloudObject:
             else:
                 raise e
 
-    def fetch(self) -> Tuple[Dict[str, str], Dict[str, str]]:
+    def fetch(self, enforce_obj: bool = False, enforce_meta: bool = False) -> Tuple[Dict[str, str], Dict[str, str]]:
+        """
+        Get object metadata from storage with HEAD object request
+        :param enforce_obj: True to raise KeyError exception if object key is not found in storage
+        :param enforce_meta: True to raise KeyError exception if metadata key is not found in storage
+        :return: Tuple for object metadata and objectmeta metadata
+        """
         if not self._obj_meta:
             try:
                 res, _ = head_object(self._s3, self._obj_path.bucket, self._obj_path.key)
                 self._obj_meta = res
-            except KeyError:
+            except KeyError as e:
                 self._obj_meta = None
+                if enforce_obj:
+                    raise e
         if not self._meta_meta:
             try:
                 res, _ = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
                 self._meta_meta = res
-            except KeyError:
+            except KeyError as e:
                 self._meta_meta = None
-        return self._obj_meta, self._meta_meta
+                if enforce_meta:
+                    raise e
+            return self._obj_meta, self._meta_meta
 
     def force_preprocess(self, local: bool = False, chunk_size: int = None, num_workers: int = None):
         if local:
@@ -206,23 +224,25 @@ class CloudObject:
         else:
             raise Exception(f'Preprocessor is not a subclass of {BatchPreprocesser} or {MapReducePreprocesser}')
 
-    def get_meta_obj(self):
-        get_res = self._s3.get_object(Bucket=self._meta_bucket, Key=self._obj_key)
-        return get_res['Body']
+        def get_meta_obj(self):
+            get_res = self._s3.get_object(Bucket=self._meta_bucket, Key=self._obj_key)
+            return get_res['Body']
 
-    def call(self, f, *args, **kwargs):
-        if isinstance(f, str):
-            func_name = f
-        elif inspect.ismethod(f) or inspect.isfunction(f):
-            func_name = f.__name__
-        else:
-            raise Exception(f)
+        def call(self, f, *args, **kwargs):
+            if isinstance(f, str):
+                func_name = f
+            elif inspect.ismethod(f) or inspect.isfunction(f):
+                func_name = f.__name__
+            else:
+                raise Exception(f)
 
-        attr = getattr(self._child, func_name)
-        return attr.__call__(*args, **kwargs)
+            attr = getattr(self._child, func_name)
+            return attr.__call__(*args, **kwargs)
 
     def partition(self, strategy, *args, **kwargs):
-        return self.call(strategy, *args, **kwargs)
+        slices = strategy(self, *args, **kwargs)
+        [slice._populate(self) for slice in slices]
+        return slices
 
 
 @dataclass
