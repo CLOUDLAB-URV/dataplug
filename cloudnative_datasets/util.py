@@ -2,6 +2,7 @@ import logging
 import re
 import os
 import shutil
+from contextlib import suppress
 from pathlib import PurePath, _PosixFlavour
 
 import botocore
