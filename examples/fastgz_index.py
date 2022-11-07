@@ -20,7 +20,7 @@ def main():
     co = CloudObject.new_from_s3(FASTQGZip, 's3://genomics/SRR21394969.fastq.gz', s3_config=config)
     co.fetch()
 
-    is_staged = co.is_staged()
+    is_staged = co.is_preprocessed()
     print(is_staged)
     # if not is_staged:
     #     co.force_preprocess()

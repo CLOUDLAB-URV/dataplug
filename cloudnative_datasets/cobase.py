@@ -2,26 +2,29 @@ import inspect
 import logging
 import functools
 import math
-import types
+from typing import Union
+from dataclasses import dataclass
 from typing import Tuple, Dict, BinaryIO
 
 import boto3
 import botocore
 
-from .util import split_s3_path
+from .util import split_s3_path, PureS3Path, head_object
 from .preprocessers import BatchPreprocesser, MapReducePreprocesser
 
 logger = logging.getLogger(__name__)
 
 
 class CloudObjectWrapper:
-    def __init__(self, preprocesser=None, inherit=None):
+    def __init__(self,
+                 preprocesser: Union[BatchPreprocesser, MapReducePreprocesser] = None,
+                 inherit_from: 'CloudObjectWrapper' = None):
         # print(preprocesser, inherit)
-        self.co_class = None
-        self.__preprocesser = preprocesser
-        self.__parent = inherit
+        self.co_class: object = None
+        self.__preprocesser: Union[BatchPreprocesser, MapReducePreprocesser] = preprocesser
+        self.__parent: 'CloudObjectWrapper' = inherit_from
 
-    def _get_preprocesser(self):
+    def _get_preprocesser(self) -> Union[BatchPreprocesser, MapReducePreprocesser]:
         if self.__preprocesser is not None:
             return self.__preprocesser
         elif self.__parent is not None:
@@ -42,12 +45,15 @@ class CloudObjectWrapper:
 
 
 class CloudObject:
-    def __init__(self, cloud_object_class, s3_path, s3_config=None):
+    def __init__(self,
+                 cloud_object_class: CloudObjectWrapper,
+                 s3_uri_path: str,
+                 s3_config: dict = None):
         self._obj_meta = None
         self._meta_meta = None
-        self._s3_path = s3_path
+        self._obj_path = PureS3Path.from_uri(s3_uri_path)
+        self._meta_path = PureS3Path.from_bucket_key(self._obj_path.bucket + '.meta', self._obj_path.key)
         self._cls = cloud_object_class
-        self._obj_attrs = {}
         self._s3_config = s3_config or {}
 
         self._s3 = boto3.client('s3',
@@ -57,26 +63,14 @@ class CloudObject:
                                 endpoint_url=self._s3_config.get('endpoint_url'),
                                 config=botocore.client.Config(**self._s3_config.get('s3_config_kwargs', {})))
 
-        self._obj_bucket, self._obj_key = split_s3_path(s3_path)
-        self._meta_key = self._obj_key + '.meta'
-        self._meta_bucket = self._obj_bucket + '.meta'
-
         logger.debug(f'{self._obj_bucket=},{self._meta_bucket=},{self._obj_key=}')
 
     @property
-    def path(self):
-        return self._s3_path
+    def path(self) -> PureS3Path:
+        return self._obj_path
 
     @property
-    def meta_bucket(self):
-        return self._meta_bucket
-
-    @property
-    def obj_bucket(self):
-        return self._obj_bucket
-
-    @property
-    def s3(self):
+    def s3client(self):
         return self._s3
 
     @classmethod
@@ -95,18 +89,14 @@ class CloudObject:
 
         co_instance._s3.upload_file(Filename=file_path, Bucket=bucket, Key=key)
 
-    def _update_attrs(self):
-        print(self._meta_meta)
-        self._attributes = {key: value for key, value in self._meta_meta['Metadata'].items()}
-
-    def exists(self):
+    def exists(self) -> bool:
         if not self._obj_meta:
             self.fetch()
         return bool(self._obj_meta)
 
-    def is_staged(self):
+    def is_preprocessed(self) -> bool:
         try:
-            self._s3.head_object(Bucket=self._meta_bucket, Key=self._obj_key)
+            self._s3.head_object(Bucket=self._meta_path.bucket, Key=self._meta_path.key)
             return True
         except botocore.exceptions.ClientError as e:
             logger.debug(e.response)
@@ -115,34 +105,19 @@ class CloudObject:
             else:
                 raise e
 
-    def get_attribute(self, key):
-        return self._obj_attrs[key]
-
-    def fetch(self):
+    def fetch(self) -> Tuple[Dict[str, str], Dict[str, str]]:
         if not self._obj_meta:
-            logger.debug('fetching object head')
             try:
-                head_res = self._s3.head_object(Bucket=self._obj_bucket, Key=self._obj_key)
-                del head_res['ResponseMetadata']
-                self._obj_meta = head_res
-            except botocore.exceptions.ClientError as e:
-                if e.response['Error']['Code'] == '404':
-                    self._obj_meta = None
-                else:
-                    raise e
+                res, _ = head_object(self._s3, self._obj_path.bucket, self._obj_path.key)
+                self._obj_meta = res
+            except KeyError:
+                self._obj_meta = None
         if not self._meta_meta:
-            logger.debug('fetching meta head')
             try:
-                head_res = self._s3.head_object(Bucket=self._meta_bucket, Key=self._obj_key)
-                del head_res['ResponseMetadata']
-                self._meta_meta = head_res
-                if 'Metadata' in head_res:
-                    self._obj_attrs.update(head_res['Metadata'])
-            except botocore.exceptions.ClientError as e:
-                if e.response['Error']['Code'] == '404':
-                    self._meta_meta = None
-                else:
-                    raise e
+                res, _ = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
+                self._meta_meta = res
+            except KeyError:
+                self._meta_meta = None
         return self._obj_meta, self._meta_meta
 
     def force_preprocess(self, local: bool = False, chunk_size: int = None, num_workers: int = None):
@@ -154,16 +129,14 @@ class CloudObject:
     def __local_preprocess(self, chunk_size: int = None, num_workers: int = None):
         preprocesser = self._cls._get_preprocesser()
         if issubclass(preprocesser, BatchPreprocesser):
-            get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._obj_key)
+            get_res = self._s3.get_object(Bucket=self._obj_path.bucket, Key=self._obj_path.key)
             logger.debug(get_res)
             obj_size = get_res['ContentLength']
 
-            meta = types.SimpleNamespace(
+            meta = PreprocesserMetadata(
                 s3=self._s3,
-                object_bucket=self._obj_bucket,
-                object_key=self._obj_key,
-                meta_bucket=self._meta_bucket,
-                meta_key=self._meta_key,
+                obj_path=self._obj_path,
+                meta_path=self._meta_path,
                 worker_id=1,
                 chunk_size=obj_size,
                 obj_size=obj_size,
@@ -214,13 +187,12 @@ class CloudObject:
                 r1 = r1 if r1 <= obj_size else obj_size
                 get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._obj_key, Range=f'bytes={r0}-{r1}')
 
-                meta = types.SimpleNamespace(
+                meta = PreprocesserMetadata(
                     s3=self._s3,
                     object_bucket=self._obj_bucket,
                     object_key=self._obj_key,
                     meta_bucket=self._meta_bucket,
                     meta_key=self._meta_key,
-                    object_meta=self._meta_key,
                     worker_id=i,
                     chunk_size=chunk_size,
                     obj_size=obj_size,
@@ -251,3 +223,17 @@ class CloudObject:
 
     def partition(self, strategy, *args, **kwargs):
         return self.call(strategy, *args, **kwargs)
+
+
+@dataclass
+class PreprocesserMetadata:
+    """
+    Data Class structure containing the metadata used by the preprocesser class
+    """
+    s3: boto3.client
+    obj_path: PureS3Path
+    meta_path: PureS3Path
+    worker_id: int
+    chunk_size: int
+    obj_size: int
+    partitions: int = 1
