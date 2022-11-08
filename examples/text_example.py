@@ -12,7 +12,7 @@ if __name__ == '__main__':
         'aws_access_key_id': 'minioadmin',
         'aws_secret_access_key': 'minioadmin',
         'region_name': 'us-east-1',
-        'endpoint_url': 'http://192.168.1.110:9000',
+        'endpoint_url': 'http://127.0.0.1:9000',
         's3_config_kwargs': {
             'signature_version': 's3v4'
         }
@@ -20,8 +20,8 @@ if __name__ == '__main__':
 
     co = CloudObject.new_from_s3(UTF8Text, 's3://testdata/lorem_ipsum.txt', s3_config=config)
 
-    data_slices = co.partition(whole_words_strategy, num_chunks=15)
-    for slice in data_slices:
-        text = slice.get()
-        print(text.strip())
+    data_slices = co.partition(whole_words_strategy, num_chunks=100)
+    for data_slice in data_slices:
+        text = data_slice.get()
+        print(text)
         print('---')
