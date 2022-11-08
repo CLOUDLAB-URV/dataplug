@@ -28,7 +28,7 @@ class UTF8TextSlice(CloudObjectSlice):
         super().__init__(*args, **kwargs)
 
     def get(self):
-        r0 = self.range_0 - self.padding if not self.first else self.range_0
+        r0 = self.range_0 - 1 if not self.first else self.range_0
         r1 = self.range_1 + self.padding if not self.last else self.range_1
 
         res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key, Range=f'bytes={r0}-{r1}')
@@ -61,7 +61,7 @@ class UTF8TextSlice(CloudObjectSlice):
         return body[s0:s1]
 
 
-def whole_words_strategy(cloud_object: UTF8Text, num_chunks: int, padding: int = 128) -> List[UTF8TextSlice]:
+def whole_words_strategy(cloud_object: UTF8Text, num_chunks: int, padding: int = 32) -> List[UTF8TextSlice]:
     """
     This partition strategy chunks raw text by number of chunks avoiding to cut words in half
     """
