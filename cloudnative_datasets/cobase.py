@@ -93,7 +93,7 @@ class CloudObject:
         return self._s3
 
     @classmethod
-    def new_from_s3(cls, cloud_object_class, s3_path, s3_config=None, fetch=True) -> 'CloudObject':
+    def from_s3(cls, cloud_object_class, s3_path, s3_config=None, fetch=True) -> 'CloudObject':
         co_instance = cls(cloud_object_class, s3_path, s3_config)
         if fetch:
             co_instance.fetch(enforce_obj=True)
