@@ -1,13 +1,11 @@
-import io
 import json
 import re
 import diskcache
 import tempfile
-from typing import BinaryIO, Tuple, Dict
 
 from ..cobase import CloudObjectWrapper
 
-from ..preprocessers import MapReducePreprocessor
+from cloudnative_datasets.preprocess.stubs import MapReducePreprocessor
 
 
 class FASTAPreprocesser(MapReducePreprocessor):
@@ -155,7 +153,7 @@ class FASTAPreprocesser(MapReducePreprocessor):
         return None, output
 
 
-@CloudObjectWrapper(preprocesser=FASTAPreprocesser)
+@CloudObjectWrapper(preprocessor=FASTAPreprocesser)
 class FASTA:
     def __init__(self, cloud_object):
         self.cloud_object = cloud_object

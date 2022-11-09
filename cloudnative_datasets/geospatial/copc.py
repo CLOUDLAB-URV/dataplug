@@ -7,7 +7,7 @@ import tempfile
 import shutil
 
 from ..cobase import CloudObjectWrapper, PreprocesserMetadata
-from ..preprocessers import BatchPreprocessor
+from cloudnative_datasets.preprocess.stubs import BatchPreprocessor
 from ..util import force_delete_path
 
 
@@ -67,7 +67,7 @@ class LiDARPreprocesser(BatchPreprocessor):
             force_delete_path(output_file_path)
 
 
-@CloudObjectWrapper(preprocesser=LiDARPreprocesser)
+@CloudObjectWrapper(preprocessor=LiDARPreprocesser)
 class LiDARPointCloud:
     def __init__(self, cloud_object):
         self.cloud_object = cloud_object

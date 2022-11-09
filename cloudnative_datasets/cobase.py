@@ -2,24 +2,20 @@ from __future__ import annotations
 
 import inspect
 import logging
-import math
 from typing import Union, Callable, List, Concatenate
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Tuple, Dict, Optional
 
-import boto3
 import botocore
-
-from .cochunkbase import CloudObjectSlice
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
+    from .cochunkbase import CloudObjectSlice
 else:
     S3Client = object
 
 from .util import split_s3_path, head_object
 from .storage import PureS3Path, PickleableS3ClientProxy
-from cloudnative_datasets.preprocess.stubs import BatchPreprocessor, MapReducePreprocessor
+from .preprocess import BatchPreprocessor, MapReducePreprocessor, PreprocessorBackendBase
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +85,7 @@ class CloudObject:
         return int(self._obj_meta['ContentLength'])
 
     @property
-    def s3client(self) -> S3Client:
+    def s3(self) -> S3Client:
         return self._s3
 
     @classmethod
@@ -153,121 +149,26 @@ class CloudObject:
                     raise e
             return self._obj_meta, self._meta_meta
 
-    def force_preprocess(self, local: bool = False, chunk_size: int = None, num_workers: int = None):
-        if local:
-            self.__local_preprocess(chunk_size, num_workers)
+    def preprocess(self, preprocessor_backend: PreprocessorBackendBase, chunk_size: int = None,
+                   num_workers: int = None):
+        preprocessor_backend.do_preprocess(self, chunk_size, num_workers)
+
+    def get_meta_obj(self):
+        get_res = self._s3.get_object(Bucket=self._meta_bucket, Key=self._obj_key)
+        return get_res['Body']
+
+    def call(self, f, *args, **kwargs):
+        if isinstance(f, str):
+            func_name = f
+        elif inspect.ismethod(f) or inspect.isfunction(f):
+            func_name = f.__name__
         else:
-            raise NotImplementedError()
+            raise Exception(f)
 
-    def __local_preprocess(self, chunk_size: int = None, num_workers: int = None):
-        preprocesser = self._cls.preprocesser
-        if issubclass(preprocesser, BatchPreprocessor):
-            get_res = self._s3.get_object(Bucket=self._obj_path.bucket, Key=self._obj_path.key)
-            logger.debug(get_res)
-            obj_size = get_res['ContentLength']
-
-            meta = PreprocesserMetadata(
-                s3=self._s3,
-                obj_path=self._obj_path,
-                meta_path=self._meta_path,
-                worker_id=1,
-                chunk_size=obj_size,
-                obj_size=obj_size,
-                partitions=1
-            )
-
-            result = preprocesser.preprocess(data_stream=get_res['Body'], meta=meta)
-
-            try:
-                body, meta = result
-            except TypeError:
-                raise Exception(f'Preprocessing result is {result}')
-
-            if body is None or meta is None:
-                raise Exception('Preprocessing result is {}'.format((body, meta)))
-
-            self._s3.upload_fileobj(
-                Fileobj=body,
-                Bucket=self._meta_bucket,
-                Key=self._meta_key,
-                ExtraArgs={'Metadata': meta}
-            )
-
-            if hasattr(body, 'close'):
-                body.close()
-
-            self._obj_attrs.update(meta)
-        elif issubclass(preprocesser, MapReducePreprocessor):
-            head_res = self._s3.head_object(Bucket=self._obj_bucket, Key=self._obj_key)
-            print(head_res)
-            obj_size = head_res['ContentLength']
-
-            if chunk_size is not None and num_workers is not None:
-                raise Exception('Both chunk_size and num_workers is not allowed')
-            elif chunk_size is not None and num_workers is None:
-                iterations = math.ceil(obj_size / chunk_size)
-            elif chunk_size is None and num_workers is not None:
-                iterations = num_workers
-                chunk_size = round(obj_size / num_workers)
-            else:
-                raise Exception('At least chunk_size or num_workers parameter is required')
-
-            map_results = []
-            for i in range(iterations):
-                r0 = i * chunk_size
-                r1 = ((i * chunk_size) + chunk_size)
-                r1 = r1 if r1 <= obj_size else obj_size
-                get_res = self._s3.get_object(Bucket=self._obj_bucket, Key=self._obj_key, Range=f'bytes={r0}-{r1}')
-
-                meta = PreprocesserMetadata(
-                    s3=self._s3,
-                    object_bucket=self._obj_bucket,
-                    object_key=self._obj_key,
-                    meta_bucket=self._meta_bucket,
-                    meta_key=self._meta_key,
-                    worker_id=i,
-                    chunk_size=chunk_size,
-                    obj_size=obj_size,
-                    partitions=iterations
-                )
-
-                result = self._cls.__preprocesser.map(data_stream=get_res['Body'], meta=meta)
-                map_results.append(result)
-
-            reduce_result, meta = self._cls.__preprocesser.reduce(map_results, self._s3)
-        else:
-            raise Exception(f'Preprocessor is not a subclass of {BatchPreprocessor} or {MapReducePreprocessor}')
-
-        def get_meta_obj(self):
-            get_res = self._s3.get_object(Bucket=self._meta_bucket, Key=self._obj_key)
-            return get_res['Body']
-
-        def call(self, f, *args, **kwargs):
-            if isinstance(f, str):
-                func_name = f
-            elif inspect.ismethod(f) or inspect.isfunction(f):
-                func_name = f.__name__
-            else:
-                raise Exception(f)
-
-            attr = getattr(self._child, func_name)
-            return attr.__call__(*args, **kwargs)
+        attr = getattr(self._child, func_name)
+        return attr.__call__(*args, **kwargs)
 
     def partition(self, strategy: Callable[Concatenate['CloudObject', ...], List[CloudObjectSlice]], *args, **kwargs):
         slices = strategy(self, *args, **kwargs)
         [slice.contextualize(self) for slice in slices]
         return slices
-
-
-@dataclass
-class PreprocesserMetadata:
-    """
-    Data Class structure containing the metadata used by the preprocesser class
-    """
-    s3: boto3.client
-    obj_path: PureS3Path
-    meta_path: PureS3Path
-    worker_id: int
-    chunk_size: int
-    obj_size: int
-    partitions: int = 1
