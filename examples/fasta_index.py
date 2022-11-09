@@ -24,7 +24,7 @@ def main():
     print(is_staged)
     # if not is_staged:
     #     co.force_preprocess()<
-    co.force_preprocess(local=True, num_workers=4)
+    co.preprocess(local=True, num_workers=4)
 
     # total_lines = co.get_attribute('total_lines')
     # print(total_lines)

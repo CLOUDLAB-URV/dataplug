@@ -18,20 +18,14 @@ def main():
         }
     }
 
-    co = CloudObject.from_s3(LiDARPointCloud, 's3://geospatial/laz/cnig/PNOA_2016_CAT_324-4570_ORT-CLA-COL.laz', s3_config=config)
+    co = CloudObject.from_s3(LiDARPointCloud, 's3://geospatial/laz/cnig/PNOA_2016_CAT_324-4570_ORT-CLA-COL.laz',
+                             s3_config=config)
     co.fetch()
 
-    is_staged = co.is_preprocessed()
-    print(is_staged)
-    # if not is_staged:
-    #     co.force_preprocess()
-    co.force_preprocess(local=True)
-
-    # total_lines = co.get_attribute('total_lines')
-    # print(total_lines)
-    #
-    # it = co.partition(FASTA.partition_chunk_lines, 100_000, strategy='merge')
-    # it.setup()
+    preprocessed = co.is_preprocessed()
+    print(preprocessed)
+    if not preprocessed:
+        co.preprocess()
 
 
 if __name__ == '__main__':

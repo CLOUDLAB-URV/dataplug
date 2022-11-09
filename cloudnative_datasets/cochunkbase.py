@@ -16,7 +16,7 @@ class CloudObjectSlice:
         self.size: Optional[int] = None
 
     def contextualize(self, cloud_object: 'CloudObject'):
-        self.s3 = cloud_object.s3client
+        self.s3 = cloud_object.s3
         self.obj_path = cloud_object.path
         self.meta_path = cloud_object.meta_path
         self.size = cloud_object.size

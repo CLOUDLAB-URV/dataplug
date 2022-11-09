@@ -14,7 +14,7 @@ from cloudnative_datasets.basic import UTF8Text, whole_words_strategy
 # logging.getLogger("botocore").setLevel(logging.WARNING)
 # logging.getLogger('cloudnative_datasets').setLevel(logging.DEBUG)
 
-def count_words(data_slice):
+def word_count(data_slice):
     t0 = time.perf_counter()
     text = data_slice.get()
     t1 = time.perf_counter()
@@ -29,14 +29,14 @@ def count_words(data_slice):
 
 def lithops_backend(data_slice):
     fexec = lithops.FunctionExecutor()
-    fexec.map(count_words, data_slices)
+    fexec.map(word_count, data_slices)
     result = fexec.get_result()
     return result
 
 
 def ray_backend(data_slice):
     ray.init()
-    ray_task = ray.remote(count_words)
+    ray_task = ray.remote(word_count)
     tasks = []
     for data_slice in data_slices:
         tasks.append(ray_task.remote(data_slice))
@@ -56,8 +56,8 @@ if __name__ == '__main__':
 
     data_slices = co.partition(whole_words_strategy, num_chunks=8)
 
-    result = lithops_backend(data_slices)
-    # result = ray_backend(data_slices)
+    # result = lithops_backend(data_slices)
+    result = ray_backend(data_slices)
 
     merged = defaultdict(lambda: 0)
     for map_result in result:

@@ -5,13 +5,12 @@ import io
 import subprocess
 import tempfile
 from math import ceil
-from typing import BinaryIO
 
 import pandas as pd
 
 from ..cobase import CloudObjectWrapper
 from ..cochunkbase import CloudObjectSlice
-from ..preprocessers import BatchPreprocessor
+from cloudnative_datasets.preprocess.stubs import BatchPreprocessor
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +59,7 @@ class GZipTextAsyncPreprocesser(BatchPreprocessor):
 
         # Store index binary file
         gzip_index_key = meta.meta_key + '.idx'
-        meta.s3client.upload_file(Filename=tmp_index_file_name, Bucket=meta.meta_bucket, Key=gzip_index_key)
+        meta.s3.upload_file(Filename=tmp_index_file_name, Bucket=meta.meta_bucket, Key=gzip_index_key)
 
         # Get the total number of lines
         total_lines = RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop()
@@ -87,11 +86,11 @@ class GZipTextAsyncPreprocesser(BatchPreprocessor):
         return out_stream.getvalue(), {'total_lines': total_lines, 'index_key': gzip_index_key}
 
 
-@CloudObjectWrapper(preprocesser=GZipTextAsyncPreprocesser)
+@CloudObjectWrapper(preprocessor=GZipTextAsyncPreprocesser)
 class GZipText:
     @staticmethod
     def _get_ranges_from_line_pairs(cloud_object, pairs):
-        meta_obj = cloud_object.s3client.get_object(Bucket=cloud_object._meta_bucket, Key=cloud_object._meta_key)
+        meta_obj = cloud_object.s3.get_object(Bucket=cloud_object._meta_bucket, Key=cloud_object._meta_key)
         meta_buff = io.BytesIO(meta_obj.read())
         meta_buff.seek(0)
         df = pd.read_parquet(meta_buff)
