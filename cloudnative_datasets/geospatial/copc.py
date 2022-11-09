@@ -7,11 +7,11 @@ import tempfile
 import shutil
 
 from ..cobase import CloudObjectWrapper, PreprocesserMetadata
-from ..preprocessers import BatchPreprocesser
+from ..preprocessers import BatchPreprocessor
 from ..util import force_delete_path
 
 
-class LiDARPreprocesser(BatchPreprocesser):
+class LiDARPreprocesser(BatchPreprocessor):
     def __init__(self):
         super().__init__()
 

@@ -11,7 +11,7 @@ import pandas as pd
 
 from ..cobase import CloudObjectWrapper
 from ..cochunkbase import CloudObjectSlice
-from ..preprocessers import BatchPreprocesser
+from ..preprocessers import BatchPreprocessor
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ RE_NUMS = re.compile(r'\d+')
 RE_NLINES = re.compile(r'Number of lines\s+:\s+\d+')
 
 
-class GZipTextAsyncPreprocesser(BatchPreprocesser):
+class GZipTextAsyncPreprocesser(BatchPreprocessor):
     def __init__(self):
         super().__init__()
 

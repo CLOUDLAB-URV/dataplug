@@ -1,4 +1,4 @@
-class BatchPreprocesser:
+class BatchPreprocessor:
     def __init__(self):
         pass
 
@@ -7,7 +7,7 @@ class BatchPreprocesser:
         pass
 
 
-class MapReducePreprocesser:
+class MapReducePreprocessor:
     def __init__(self):
         pass
 

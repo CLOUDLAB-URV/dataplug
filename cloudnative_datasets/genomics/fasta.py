@@ -7,10 +7,10 @@ from typing import BinaryIO, Tuple, Dict
 
 from ..cobase import CloudObjectWrapper
 
-from ..preprocessers import MapReducePreprocesser
+from ..preprocessers import MapReducePreprocessor
 
 
-class FASTAPreprocesser(MapReducePreprocesser):
+class FASTAPreprocesser(MapReducePreprocessor):
     def __init__(self):
         super().__init__()
 
