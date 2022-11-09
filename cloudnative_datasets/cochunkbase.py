@@ -1,13 +1,25 @@
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from .cobase import CloudObject
+    from .storage import PureS3Path
+    from mypy_boto3_s3 import S3Client
+
+
 class CloudObjectSlice:
     def __init__(self, range_0, range_1):
         self.range_0 = range_0
         self.range_1 = range_1
+        self.s3: Optional[S3Client] = None
+        self.obj_path: Optional[PureS3Path] = None
+        self.meta_path: Optional[PureS3Path] = None
+        self.size: Optional[int] = None
 
-    def _populate(self, cloud_object):
-        self.s3 = cloud_object._s3
-        self.obj_path = cloud_object._obj_path
-        self.meta_path = cloud_object._meta_path
-        self.obj_size = cloud_object.size
+    def contextualize(self, cloud_object: 'CloudObject'):
+        self.s3 = cloud_object.s3client
+        self.obj_path = cloud_object.path
+        self.meta_path = cloud_object.meta_path
+        self.size = cloud_object.size
         # self.attributes = cloud_object._obj_attrs
 
     def get(self):
