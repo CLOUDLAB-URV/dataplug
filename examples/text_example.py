@@ -52,7 +52,7 @@ if __name__ == '__main__':
         'config': botocore.config.Config(signature_version='s3v4')
     }
 
-    co = CloudObject.new_from_s3(UTF8Text, 's3://testdata/lorem_ipsum.txt', s3_config=config)
+    co = CloudObject.from_s3(UTF8Text, 's3://testdata/lorem_ipsum.txt', s3_config=config)
 
     data_slices = co.partition(whole_words_strategy, num_chunks=8)
 
