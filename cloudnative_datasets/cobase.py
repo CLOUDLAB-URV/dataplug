@@ -19,22 +19,22 @@ else:
 
 from .util import split_s3_path, head_object
 from .storage import PureS3Path, PickleableS3ClientProxy
-from .preprocessers import BatchPreprocesser, MapReducePreprocesser
+from .preprocessers import BatchPreprocessor, MapReducePreprocessor
 
 logger = logging.getLogger(__name__)
 
 
 class CloudObjectWrapper:
     def __init__(self,
-                 preprocesser: Union[BatchPreprocesser, MapReducePreprocesser] = None,
+                 preprocesser: Union[BatchPreprocessor, MapReducePreprocessor] = None,
                  inherit_from: 'CloudObjectWrapper' = None):
         # print(preprocesser, inherit)
         self.co_class: object = None
-        self.__preprocesser: Union[BatchPreprocesser, MapReducePreprocesser] = preprocesser
+        self.__preprocesser: Union[BatchPreprocessor, MapReducePreprocessor] = preprocesser
         self.__parent: 'CloudObjectWrapper' = inherit_from
 
     @property
-    def preprocesser(self) -> Union[BatchPreprocesser, MapReducePreprocesser]:
+    def preprocesser(self) -> Union[BatchPreprocessor, MapReducePreprocessor]:
         if self.__preprocesser is not None:
             return self.__preprocesser
         elif self.__parent is not None:
@@ -161,7 +161,7 @@ class CloudObject:
 
     def __local_preprocess(self, chunk_size: int = None, num_workers: int = None):
         preprocesser = self._cls.preprocesser
-        if issubclass(preprocesser, BatchPreprocesser):
+        if issubclass(preprocesser, BatchPreprocessor):
             get_res = self._s3.get_object(Bucket=self._obj_path.bucket, Key=self._obj_path.key)
             logger.debug(get_res)
             obj_size = get_res['ContentLength']
@@ -197,7 +197,7 @@ class CloudObject:
                 body.close()
 
             self._obj_attrs.update(meta)
-        elif issubclass(preprocesser, MapReducePreprocesser):
+        elif issubclass(preprocesser, MapReducePreprocessor):
             head_res = self._s3.head_object(Bucket=self._obj_bucket, Key=self._obj_key)
             print(head_res)
             obj_size = head_res['ContentLength']
@@ -236,7 +236,7 @@ class CloudObject:
 
             reduce_result, meta = self._cls.__preprocesser.reduce(map_results, self._s3)
         else:
-            raise Exception(f'Preprocessor is not a subclass of {BatchPreprocesser} or {MapReducePreprocesser}')
+            raise Exception(f'Preprocessor is not a subclass of {BatchPreprocessor} or {MapReducePreprocessor}')
 
         def get_meta_obj(self):
             get_res = self._s3.get_object(Bucket=self._meta_bucket, Key=self._obj_key)
