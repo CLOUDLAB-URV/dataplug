@@ -3,6 +3,7 @@ import time
 
 import botocore.config
 import lithops
+import ray
 from collections import defaultdict
 
 from cloudnative_datasets import CloudObject
@@ -17,13 +18,29 @@ def count_words(data_slice):
     t0 = time.perf_counter()
     text = data_slice.get()
     t1 = time.perf_counter()
-    print(f'Slice get: {t1-t0:.3f} s')
+    print(f'Slice get: {t1 - t0:.3f} s')
 
     words = defaultdict(lambda: 0)
     for word in text.split():
         word = word.strip().lower().replace('.', '').replace(',', '')
         words[word] += 1
     return dict(words)
+
+
+def lithops_backend(data_slice):
+    fexec = lithops.FunctionExecutor()
+    fexec.map(count_words, data_slices)
+    result = fexec.get_result()
+    return result
+
+
+def ray_backend(data_slice):
+    ray.init()
+    ray_task = ray.remote(count_words)
+    tasks = []
+    for data_slice in data_slices:
+        tasks.append(ray_task.remote(data_slice))
+    return ray.get(tasks)
 
 
 if __name__ == '__main__':
@@ -39,9 +56,8 @@ if __name__ == '__main__':
 
     data_slices = co.partition(whole_words_strategy, num_chunks=8)
 
-    fexec = lithops.FunctionExecutor()
-    fexec.map(count_words, data_slices)
-    result = fexec.get_result()
+    result = lithops_backend(data_slices)
+    # result = ray_backend(data_slices)
 
     merged = defaultdict(lambda: 0)
     for map_result in result:
