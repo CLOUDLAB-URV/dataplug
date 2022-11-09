@@ -19,24 +19,24 @@ else:
 
 from .util import split_s3_path, head_object
 from .storage import PureS3Path, PickleableS3ClientProxy
-from .preprocessers import BatchPreprocessor, MapReducePreprocessor
+from cloudnative_datasets.preprocess.stubs import BatchPreprocessor, MapReducePreprocessor
 
 logger = logging.getLogger(__name__)
 
 
 class CloudObjectWrapper:
     def __init__(self,
-                 preprocesser: Union[BatchPreprocessor, MapReducePreprocessor] = None,
+                 preprocessor: Union[BatchPreprocessor, MapReducePreprocessor] = None,
                  inherit_from: 'CloudObjectWrapper' = None):
         # print(preprocesser, inherit)
         self.co_class: object = None
-        self.__preprocesser: Union[BatchPreprocessor, MapReducePreprocessor] = preprocesser
+        self.__preprocessor: Union[BatchPreprocessor, MapReducePreprocessor] = preprocessor
         self.__parent: 'CloudObjectWrapper' = inherit_from
 
     @property
     def preprocesser(self) -> Union[BatchPreprocessor, MapReducePreprocessor]:
-        if self.__preprocesser is not None:
-            return self.__preprocesser
+        if self.__preprocessor is not None:
+            return self.__preprocessor
         elif self.__parent is not None:
             return self.__parent.preprocesser
         else:
