@@ -1,13 +1,6 @@
 import logging
-import os
-import re
-import io
-import subprocess
-import tempfile
 from math import ceil
 from typing import BinaryIO, List
-
-import pandas as pd
 
 from ..cobase import CloudObjectWrapper
 from ..cochunkbase import CloudObjectSlice
@@ -73,8 +66,8 @@ def whole_words_strategy(cloud_object: UTF8Text, num_chunks: int, padding: int =
         r0 = r0 + 1 if r0 > 0 else r0
         r1 = (chunk_sz * i) + chunk_sz
         r1 = cloud_object.size if r1 > cloud_object.size else r1
-        slice = UTF8TextSlice(range_0=r0, range_1=r1, padding=padding)
-        slices.append(slice)
+        data_slice = UTF8TextSlice(range_0=r0, range_1=r1, padding=padding)
+        slices.append(data_slice)
     slices[0].first = True
     slices[-1].last = True
 
