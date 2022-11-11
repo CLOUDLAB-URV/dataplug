@@ -8,9 +8,9 @@ from math import ceil
 
 import pandas as pd
 
-from ..cobase import CloudObjectWrapper
-from ..cochunkbase import CloudObjectSlice
-from cloudnative_datasets.preprocess.stubs import BatchPreprocessor
+from ..cloudobject import CloudObjectWrapper
+from ..dataslice import CloudObjectSlice
+from dataplug.preprocess.stubs import BatchPreprocessor
 
 logger = logging.getLogger(__name__)
 

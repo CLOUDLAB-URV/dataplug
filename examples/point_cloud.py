@@ -1,7 +1,7 @@
 import logging
 
-from cloudnative_datasets import CloudObject
-from cloudnative_datasets.geospatial import LiDARPointCloud
+from dataplug import CloudObject
+from dataplug.geospatial import LiDARPointCloud
 
 
 # logging.basicConfig(level=logging.DEBUG)

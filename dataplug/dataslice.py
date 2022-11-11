@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from .cobase import CloudObject
+    from .cloudobject import CloudObject
     from .storage import PureS3Path
     from mypy_boto3_s3 import S3Client
 

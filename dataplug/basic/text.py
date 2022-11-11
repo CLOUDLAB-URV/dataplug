@@ -2,8 +2,8 @@ import logging
 from math import ceil
 from typing import BinaryIO, List
 
-from ..cobase import CloudObjectWrapper
-from ..cochunkbase import CloudObjectSlice
+from ..cloudobject import CloudObjectWrapper
+from ..dataslice import CloudObjectSlice
 
 logger = logging.getLogger(__name__)
 

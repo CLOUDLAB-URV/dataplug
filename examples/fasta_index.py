@@ -1,7 +1,7 @@
 import logging
 
-from cloudnative_datasets import CloudObject
-from cloudnative_datasets.genomics import FASTA
+from dataplug import CloudObject
+from dataplug.genomics import FASTA
 
 # logging.basicConfig(level=logging.DEBUG)
 

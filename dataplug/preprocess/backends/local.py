@@ -6,7 +6,7 @@ from ..base import PreprocessorBackendBase
 from ..stubs import BatchPreprocessor, MapReducePreprocessor, PreprocesserMetadata
 
 if TYPE_CHECKING:
-    from ...cobase import CloudObject
+    from ...cloudobject import CloudObject
 else:
     CloudObject = object
 

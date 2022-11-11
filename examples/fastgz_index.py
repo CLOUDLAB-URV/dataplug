@@ -1,7 +1,7 @@
 import logging
 
-from cloudnative_datasets import CloudObject
-from cloudnative_datasets.genomics import FASTQGZip
+from dataplug import CloudObject
+from dataplug.genomics import FASTQGZip
 
 logging.basicConfig(level=logging.DEBUG)
 

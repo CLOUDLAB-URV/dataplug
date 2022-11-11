@@ -6,13 +6,13 @@ import lithops
 import ray
 from collections import defaultdict
 
-from cloudnative_datasets import CloudObject
-from cloudnative_datasets.basic import UTF8Text, whole_words_strategy
+from dataplug import CloudObject
+from dataplug.basic import UTF8Text, whole_words_strategy
 
 
 # logging.basicConfig(level=logging.DEBUG)
 # logging.getLogger("botocore").setLevel(logging.WARNING)
-# logging.getLogger('cloudnative_datasets').setLevel(logging.DEBUG)
+# logging.getLogger('dataplug').setLevel(logging.DEBUG)
 
 def word_count(data_slice):
     t0 = time.perf_counter()

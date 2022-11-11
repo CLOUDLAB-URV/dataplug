@@ -1,4 +1,4 @@
-from ..cobase import CloudObjectWrapper
+from ..cloudobject import CloudObjectWrapper
 from ..compressed.gzipped import GZipText
 
 

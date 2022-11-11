@@ -9,7 +9,7 @@ import botocore
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
-    from .cochunkbase import CloudObjectSlice
+    from .dataslice import CloudObjectSlice
 else:
     S3Client = object
 

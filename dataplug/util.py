@@ -3,13 +3,8 @@ import logging
 import re
 import os
 import shutil
-from contextlib import suppress
-from pathlib import PurePath, _PosixFlavour
-from typing import Optional
 
-import boto3
 import botocore
-from mypy_boto3_s3 import S3Client
 
 logger = logging.getLogger(__name__)
 
@@ -48,5 +43,3 @@ def head_object(s3client, bucket, key):
         else:
             raise e
     return response, metadata
-
-

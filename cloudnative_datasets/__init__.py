@@ -1,1 +1,0 @@
-from .cobase import CloudObject
