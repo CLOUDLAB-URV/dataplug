@@ -1,1 +1,1 @@
-# lithops-datasets
+# DataPlug: Pluggable data types for cloud-native analytics workloads

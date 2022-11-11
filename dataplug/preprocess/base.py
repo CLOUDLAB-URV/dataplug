@@ -4,7 +4,7 @@ from abc import ABC
 from typing import TYPE_CHECKING, Union, Optional
 
 if TYPE_CHECKING:
-    from ..cobase import CloudObject
+    from ..cloudobject import CloudObject
     from .stubs import BatchPreprocessor, MapReducePreprocessor
 
 

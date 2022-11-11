@@ -3,9 +3,9 @@ import re
 import diskcache
 import tempfile
 
-from ..cobase import CloudObjectWrapper
+from ..cloudobject import CloudObjectWrapper
 
-from cloudnative_datasets.preprocess.stubs import MapReducePreprocessor
+from dataplug.preprocess.stubs import MapReducePreprocessor
 
 
 class FASTAPreprocesser(MapReducePreprocessor):

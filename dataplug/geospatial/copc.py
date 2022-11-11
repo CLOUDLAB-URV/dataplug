@@ -6,8 +6,8 @@ import json
 import tempfile
 import shutil
 
-from ..cobase import CloudObjectWrapper, PreprocesserMetadata
-from cloudnative_datasets.preprocess.stubs import BatchPreprocessor
+from ..cloudobject import CloudObjectWrapper, PreprocesserMetadata
+from dataplug.preprocess.stubs import BatchPreprocessor
 from ..util import force_delete_path
 
 
