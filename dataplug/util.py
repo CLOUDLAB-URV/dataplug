@@ -11,6 +11,16 @@ logger = logging.getLogger(__name__)
 S3_PATH_REGEX = re.compile(r'^\w+://.+/.+$')
 
 
+def setup_logging(level=logging.INFO):
+    root_logger = logging.getLogger('dataplug')
+    root_logger.setLevel(level)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s")
+    ch.setFormatter(formatter)
+    root_logger.addHandler(ch)
+
+
 def split_s3_path(path):
     if not S3_PATH_REGEX.fullmatch(path):
         raise ValueError(f'Path must satisfy regex {S3_PATH_REGEX}')

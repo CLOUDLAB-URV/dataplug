@@ -1,27 +1,16 @@
 from __future__ import annotations
 
 import json
+import logging
+
+from typing import TYPE_CHECKING, Optional, Union, IO, Any, Literal, Dict, Callable, Mapping, List
 from contextlib import suppress
-from datetime import datetime
 from pathlib import _PosixFlavour, PurePath
 
 import boto3
+import botocore.client
 
-from typing import TYPE_CHECKING, Optional, Union, IO, Any, Literal, Dict, Callable, Mapping, List
-
-from boto3.s3.transfer import TransferConfig
-from botocore.response import StreamingBody
-
-if TYPE_CHECKING:
-    from mypy_boto3_s3 import S3Client
-    from mypy_boto3_s3.literals import ChecksumAlgorithmType, ObjectCannedACLType, ServerSideEncryptionType, \
-        StorageClassType, ObjectLockModeType, ObjectLockLegalHoldStatusType
-    from mypy_boto3_s3.type_defs import UploadPartOutputTypeDef, PutObjectOutputTypeDef, ListPartsOutputTypeDef, \
-        ListObjectsV2OutputTypeDef, ListObjectsOutputTypeDef, ListMultipartUploadsOutputTypeDef, \
-        ListBucketsOutputTypeDef, \
-        HeadObjectOutputTypeDef, EmptyResponseMetadataTypeDef, GetObjectOutputTypeDef, \
-        CreateMultipartUploadOutputTypeDef, \
-        CompletedMultipartUploadTypeDef, CompleteMultipartUploadOutputTypeDef, AbortMultipartUploadOutputTypeDef
+logger = logging.getLogger(__name__)
 
 S3_FULL_ACCESS_POLICY = json.dumps(
     {
@@ -45,49 +34,63 @@ S3_FULL_ACCESS_POLICY = json.dumps(
 
 class PickleableS3ClientProxy:
     def __init__(self, aws_access_key_id: str, aws_secret_access_key: str,
-                 region_name: str, endpoint_url: str,
-                 config: Optional[dict] = ...):
+                 region_name: str, endpoint_url: str, use_token: Optional[bool] = True,
+                 config_kwargs: Optional[dict] = None):
         self.region_name = region_name
         self.endpoint_url = endpoint_url
-        self.config = config
+        self.config_kwargs = config_kwargs or {}
 
-        sts_admin = boto3.client('sts',
-                                 aws_access_key_id=aws_access_key_id,
-                                 aws_secret_access_key=aws_secret_access_key,
-                                 region_name=region_name,
-                                 endpoint_url=endpoint_url,
-                                 config=config)
+        if use_token:
+            sts_admin = boto3.client('sts',
+                                     aws_access_key_id=aws_access_key_id,
+                                     aws_secret_access_key=aws_secret_access_key,
+                                     region_name=region_name,
+                                     endpoint_url=endpoint_url,
+                                     config=botocore.client.Config(**self.config_kwargs))
 
-        response = sts_admin.assume_role(RoleArn='arn:x:ignored:by:minio:',
-                                         RoleSessionName='ignored-by-minio',
-                                         Policy=S3_FULL_ACCESS_POLICY,
-                                         DurationSeconds=86400)
+            response = sts_admin.assume_role(RoleArn='arn:x:ignored:by:minio:',
+                                             RoleSessionName='ignored-by-minio',
+                                             Policy=S3_FULL_ACCESS_POLICY,
+                                             DurationSeconds=86400)
 
-        self.tmp_credentials = response['Credentials']
+            self.credentials = response['Credentials']
 
-        self.client = boto3.client('s3',
-                                   aws_access_key_id=self.tmp_credentials['AccessKeyId'],
-                                   aws_secret_access_key=self.tmp_credentials['SecretAccessKey'],
-                                   aws_session_token=self.tmp_credentials['SessionToken'],
-                                   endpoint_url=self.endpoint_url,
-                                   region_name=self.region_name)
+            self.client = boto3.client('s3',
+                                       aws_access_key_id=self.credentials['AccessKeyId'],
+                                       aws_secret_access_key=self.credentials['SecretAccessKey'],
+                                       aws_session_token=self.credentials['SessionToken'],
+                                       endpoint_url=self.endpoint_url,
+                                       region_name=self.region_name,
+                                       config=botocore.client.Config(**self.config_kwargs))
+        else:
+            logger.warning('Using user credentials is discouraged for security reasons -'
+                           ' consider using token-based authentication instead')
+            self.credentials = {
+                'AccessKeyId': aws_access_key_id,
+                'SecretAccessKey': aws_secret_access_key
+            }
+            self.client = boto3.client('s3',
+                                       aws_access_key_id=self.credentials['AccessKeyId'],
+                                       aws_secret_access_key=self.credentials['SecretAccessKey'],
+                                       endpoint_url=self.endpoint_url,
+                                       region_name=self.region_name)
 
     def __getstate__(self):
         return {
-            'tmp_credentials': self.tmp_credentials,
+            'credentials': self.credentials,
             'endpoint_url': self.endpoint_url,
             'region_name': self.region_name
         }
 
     def __setstate__(self, state):
-        self.tmp_credentials = state['tmp_credentials']
+        self.credentials = state['credentials']
         self.endpoint_url = state['endpoint_url']
         self.region_name = state['region_name']
 
         self.client = boto3.client('s3',
-                                   aws_access_key_id=self.tmp_credentials['AccessKeyId'],
-                                   aws_secret_access_key=self.tmp_credentials['SecretAccessKey'],
-                                   aws_session_token=self.tmp_credentials['SessionToken'],
+                                   aws_access_key_id=self.credentials['AccessKeyId'],
+                                   aws_secret_access_key=self.credentials['SecretAccessKey'],
+                                   aws_session_token=self.credentials.get('SessionToken'),
                                    endpoint_url=self.endpoint_url,
                                    region_name=self.region_name)
 
