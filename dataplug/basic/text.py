@@ -2,13 +2,13 @@ import logging
 from math import ceil
 from typing import BinaryIO, List
 
-from ..cloudobject import CloudObjectWrapper
+from ..cloudobject import CloudDataType
 from ..dataslice import CloudObjectSlice
 
 logger = logging.getLogger(__name__)
 
 
-@CloudObjectWrapper()
+@CloudDataType()
 class UTF8Text:
     pass
 

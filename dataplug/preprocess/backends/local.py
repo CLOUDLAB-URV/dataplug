@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import logging
 import math
 from typing import TYPE_CHECKING, Union, Optional
 
 from ..base import PreprocessorBackendBase
-from ..stubs import BatchPreprocessor, MapReducePreprocessor, PreprocesserMetadata
+from ..stubs import BatchPreprocessor, MapReducePreprocessor, PreprocessorMetadata
 
 if TYPE_CHECKING:
     from ...cloudobject import CloudObject
@@ -18,11 +20,14 @@ class LocalPreprocessor(PreprocessorBackendBase):
                       preprocessor: Union[BatchPreprocessor, MapReducePreprocessor],
                       cloud_object: CloudObject,
                       chunk_size: Optional[int] = None,
-                      num_workers: Optional[int] = None):
+                      num_workers: Optional[int] = None,
+                      *args, **kwargs):
         if issubclass(preprocessor, BatchPreprocessor):
-            self._do_local_batch(cloud_object, preprocessor)
+            batch_pp: BatchPreprocessor = preprocessor(*args, **kwargs)
+            self._do_local_batch(cloud_object, batch_pp)
         elif issubclass(preprocessor, MapReducePreprocessor):
-            self._do_local_mapreduce(cloud_object, preprocessor)
+            mapreduce_pp: MapReducePreprocessor = preprocessor(*args, **kwargs)
+            self._do_local_mapreduce(cloud_object, mapreduce_pp, chunk_size, num_workers)
 
     @staticmethod
     def _do_local_batch(cloud_object, preprocessor):
@@ -30,7 +35,7 @@ class LocalPreprocessor(PreprocessorBackendBase):
         logger.debug(get_res)
         obj_size = get_res['ContentLength']
 
-        meta = PreprocesserMetadata(
+        meta = PreprocessorMetadata(
             s3=cloud_object.s3,
             obj_path=cloud_object.path,
             meta_path=cloud_object.meta_path,
@@ -48,11 +53,11 @@ class LocalPreprocessor(PreprocessorBackendBase):
             raise Exception(f'Preprocessing result is {result}')
 
         if body is None or meta is None:
-            raise Exception('Preprocessing result is {}'.format((body, meta)))
+            raise Exception(f'Preprocessing result is {body, meta}')
 
         cloud_object.s3.upload_fileobj(
             Fileobj=body,
-            Bucket=cloud_object.path.bucket,
+            Bucket=cloud_object.meta_path.bucket,
             Key=cloud_object.path.key,
             ExtraArgs={'Metadata': meta}
         )
@@ -84,7 +89,7 @@ class LocalPreprocessor(PreprocessorBackendBase):
             get_res = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key,
                                                  Range=f'bytes={r0}-{r1}')
 
-            meta = PreprocesserMetadata(
+            meta = PreprocessorMetadata(
                 s3=cloud_object.s3,
                 obj_path=cloud_object.path,
                 meta_path=cloud_object.meta_path,

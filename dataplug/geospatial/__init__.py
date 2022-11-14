@@ -1,1 +1,1 @@
-from .copc import LiDARPointCloud
+from .laserpointcloud import LiDARPointCloud

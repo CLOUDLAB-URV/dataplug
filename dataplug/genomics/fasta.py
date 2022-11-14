@@ -3,7 +3,7 @@ import re
 import diskcache
 import tempfile
 
-from ..cloudobject import CloudObjectWrapper
+from ..cloudobject import CloudDataType
 
 from dataplug.preprocess.stubs import MapReducePreprocessor
 
@@ -153,7 +153,7 @@ class FASTAPreprocesser(MapReducePreprocessor):
         return None, output
 
 
-@CloudObjectWrapper(preprocessor=FASTAPreprocesser)
+@CloudDataType(preprocessor=FASTAPreprocesser)
 class FASTA:
     def __init__(self, cloud_object):
         self.cloud_object = cloud_object
