@@ -1,22 +1,35 @@
 from io import BytesIO
 
-import pdal
-import laspy.copc
 import json
 import tempfile
 import shutil
+import logging
 
-from ..cloudobject import CloudObjectWrapper, PreprocesserMetadata
-from dataplug.preprocess.stubs import BatchPreprocessor
+from ..cloudobject import CloudDataType
+from ..preprocess import PreprocessorMetadata, BatchPreprocessor
 from ..util import force_delete_path
 
+try:
+    import pdal
+    import laspy.copc
+except ModuleNotFoundError:
+    pass
 
-class LiDARPreprocesser(BatchPreprocessor):
+logger = logging.getLogger(__name__)
+
+
+class LiDARPreprocessor(BatchPreprocessor):
+
     def __init__(self):
+        try:
+            import pdal
+            import laspy.copc
+        except ModuleNotFoundError as e:
+            logger.error("Missing Geospatial packages!")
+            raise e
         super().__init__()
 
-    @staticmethod
-    def preprocess(data_stream: BytesIO, meta: PreprocesserMetadata):
+    def preprocess(self, data_stream: BytesIO, meta: PreprocessorMetadata):
         input_file_path = tempfile.mktemp()
         output_file_path = tempfile.mktemp()
 
@@ -67,7 +80,7 @@ class LiDARPreprocesser(BatchPreprocessor):
             force_delete_path(output_file_path)
 
 
-@CloudObjectWrapper(preprocessor=LiDARPreprocesser)
+@CloudDataType(preprocessor=LiDARPreprocessor)
 class LiDARPointCloud:
     def __init__(self, cloud_object):
         self.cloud_object = cloud_object

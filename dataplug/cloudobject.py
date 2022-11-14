@@ -5,11 +5,8 @@ import logging
 from typing import Union, Callable, List, Concatenate
 from typing import TYPE_CHECKING, Tuple, Dict, Optional
 
-import botocore
-
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
-    from .dataslice import CloudObjectSlice
 else:
     S3Client = object
 
@@ -20,21 +17,21 @@ from .preprocess import BatchPreprocessor, MapReducePreprocessor, PreprocessorBa
 logger = logging.getLogger(__name__)
 
 
-class CloudObjectWrapper:
+class CloudDataType:
     def __init__(self,
                  preprocessor: Union[BatchPreprocessor, MapReducePreprocessor] = None,
-                 inherit_from: 'CloudObjectWrapper' = None):
+                 inherit_from: 'CloudDataType' = None):
         # print(preprocesser, inherit)
         self.co_class: object = None
         self.__preprocessor: Union[BatchPreprocessor, MapReducePreprocessor] = preprocessor
-        self.__parent: 'CloudObjectWrapper' = inherit_from
+        self.__parent: 'CloudDataType' = inherit_from
 
     @property
-    def preprocesser(self) -> Union[BatchPreprocessor, MapReducePreprocessor]:
+    def preprocessor(self) -> Union[BatchPreprocessor, MapReducePreprocessor]:
         if self.__preprocessor is not None:
             return self.__preprocessor
         elif self.__parent is not None:
-            return self.__parent.preprocesser
+            return self.__parent.preprocessor
         else:
             raise Exception('There is not preprocesser')
 
@@ -52,14 +49,14 @@ class CloudObjectWrapper:
 
 class CloudObject:
     def __init__(self,
-                 cloud_object_class: CloudObjectWrapper,
+                 cloud_object_class: CloudDataType,
                  s3_uri_path: str,
                  s3_config: dict = None):
         self._obj_meta: Optional[Dict[str, str]] = None
         self._meta_meta: Optional[Dict[str, str]] = None
         self._obj_path: PureS3Path = PureS3Path.from_uri(s3_uri_path)
         self._meta_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + '.meta', self._obj_path.key)
-        self._cls: CloudObjectWrapper = cloud_object_class
+        self._cls: CloudDataType = cloud_object_class
         self._s3: PickleableS3ClientProxy = PickleableS3ClientProxy(
             aws_access_key_id=s3_config.get('aws_access_key_id'),
             aws_secret_access_key=s3_config.get('aws_secret_access_key'),
@@ -114,14 +111,10 @@ class CloudObject:
 
     def is_preprocessed(self) -> bool:
         try:
-            self._s3.head_object(Bucket=self._meta_path.bucket, Key=self._meta_path.key)
+            head_object(self.s3, bucket=self._meta_path.bucket, key=self._meta_path.key)
             return True
-        except botocore.exceptions.ClientError as e:
-            logger.debug(e.response)
-            if e.response['Error']['Code'] == '404':
-                return False
-            else:
-                raise e
+        except KeyError:
+            return False
 
     def fetch(self, enforce_obj: bool = False, enforce_meta: bool = False) -> \
             Tuple[Optional[Dict[str, str]], Optional[Dict[str, str]]]:
@@ -150,25 +143,26 @@ class CloudObject:
             return self._obj_meta, self._meta_meta
 
     def preprocess(self, preprocessor_backend: PreprocessorBackendBase, chunk_size: int = None,
-                   num_workers: int = None):
-        preprocessor_backend.do_preprocess(self, chunk_size, num_workers)
+                   num_workers: int = None, *args, **kwargs):
+        preprocessor_backend.do_preprocess(preprocessor=self._cls.preprocessor, cloud_object=self,
+                                           chunk_size=chunk_size, num_workers=num_workers, *args, **kwargs)
 
-    def get_meta_obj(self):
-        get_res = self._s3.get_object(Bucket=self._meta_bucket, Key=self._obj_key)
-        return get_res['Body']
+    # def get_meta_obj(self):
+    #     get_res = self._s3.get_object(Bucket=self._meta_path.bucket, Key=self._obj_path.key)
+    #     return get_res['Body']
+    #
+    # def call(self, f, *args, **kwargs):
+    #     if isinstance(f, str):
+    #         func_name = f
+    #     elif inspect.ismethod(f) or inspect.isfunction(f):
+    #         func_name = f.__name__
+    #     else:
+    #         raise Exception(f)
+    #
+    #     attr = getattr(self._child, func_name)
+    #     return attr.__call__(*args, **kwargs)
 
-    def call(self, f, *args, **kwargs):
-        if isinstance(f, str):
-            func_name = f
-        elif inspect.ismethod(f) or inspect.isfunction(f):
-            func_name = f.__name__
-        else:
-            raise Exception(f)
-
-        attr = getattr(self._child, func_name)
-        return attr.__call__(*args, **kwargs)
-
-    def partition(self, strategy: Callable[Concatenate['CloudObject', ...], List[CloudObjectSlice]], *args, **kwargs):
+    def partition(self, strategy, *args, **kwargs):
         slices = strategy(self, *args, **kwargs)
-        [slice.contextualize(self) for slice in slices]
+        [s.contextualize(self) for s in slices]
         return slices

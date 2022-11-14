@@ -8,7 +8,7 @@ from math import ceil
 
 import pandas as pd
 
-from ..cloudobject import CloudObjectWrapper
+from ..cloudobject import CloudDataType
 from ..dataslice import CloudObjectSlice
 from dataplug.preprocess.stubs import BatchPreprocessor
 
@@ -86,7 +86,7 @@ class GZipTextAsyncPreprocesser(BatchPreprocessor):
         return out_stream.getvalue(), {'total_lines': total_lines, 'index_key': gzip_index_key}
 
 
-@CloudObjectWrapper(preprocessor=GZipTextAsyncPreprocesser)
+@CloudDataType(preprocessor=GZipTextAsyncPreprocesser)
 class GZipText:
     @staticmethod
     def _get_ranges_from_line_pairs(cloud_object, pairs):

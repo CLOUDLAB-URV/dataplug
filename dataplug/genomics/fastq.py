@@ -1,8 +1,8 @@
-from ..cloudobject import CloudObjectWrapper
+from ..cloudobject import CloudDataType
 from ..compressed.gzipped import GZipText
 
 
-@CloudObjectWrapper(inherit_from=GZipText)
+@CloudDataType(inherit_from=GZipText)
 class FASTQGZip:
     def __init__(self, *args, **kwargs):
         super().__init__()

@@ -13,5 +13,6 @@ class PreprocessorBackendBase(ABC):
                       preprocessor: Union[BatchPreprocessor, MapReducePreprocessor],
                       cloud_object: CloudObject,
                       chunk_size: Optional[int] = None,
-                      num_workers: Optional[int] = None):
+                      num_workers: Optional[int] = None,
+                      *args, **kwargs):
         raise NotImplementedError()
