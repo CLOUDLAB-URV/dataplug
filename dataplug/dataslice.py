@@ -7,9 +7,9 @@ if TYPE_CHECKING:
 
 
 class CloudObjectSlice:
-    def __init__(self, range_0, range_1):
-        self.range_0 = range_0
-        self.range_1 = range_1
+    def __init__(self, range_0=None, range_1=None):
+        self.range_0: Optional[int] = range_0
+        self.range_1: Optional[int] = range_1
         self.s3: Optional[S3Client] = None
         self.obj_path: Optional[PureS3Path] = None
         self.meta_path: Optional[PureS3Path] = None
@@ -23,7 +23,4 @@ class CloudObjectSlice:
         # self.attributes = cloud_object._obj_attrs
 
     def get(self):
-        res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key,
-                                 Range=f'bytes={self.range_0}-{self.range_1}')
-        body = res['Body']
-        return body.read()
+        raise NotImplementedError()

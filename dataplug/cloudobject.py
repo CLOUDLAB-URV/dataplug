@@ -62,7 +62,8 @@ class CloudObject:
             aws_secret_access_key=s3_config.get('aws_secret_access_key'),
             region_name=s3_config.get('region_name'),
             endpoint_url=s3_config.get('endpoint_url'),
-            config=s3_config.get('s3_config_kwargs')
+            config_kwargs=s3_config.get('s3_config_kwargs'),
+            use_token=s3_config.get('use_token')
         )
 
         logger.debug(f'{self._obj_path=},{self._meta_path=}')
@@ -124,6 +125,7 @@ class CloudObject:
         :param enforce_meta: True to raise KeyError exception if metadata key is not found in storage
         :return: Tuple for object metadata and objectmeta metadata
         """
+        logger.info('Fetching object from S3')
         if not self._obj_meta:
             try:
                 res, _ = head_object(self._s3, self._obj_path.bucket, self._obj_path.key)
