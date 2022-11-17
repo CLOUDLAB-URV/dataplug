@@ -1,9 +1,14 @@
+import logging
+
 from dataplug import CloudObject
 from dataplug.genomics import FASTQGZip
 from dataplug.preprocess import LithopsPreprocessor, LocalPreprocessor
+from dataplug.util import setup_logging
 
 
 def main():
+    setup_logging(logging.DEBUG)
+
     # Localhost minio config
     local_minio = {
         'aws_access_key_id': 'minioadmin',
@@ -19,11 +24,11 @@ def main():
                              s3_config=local_minio)
 
     preprocessed = co.is_preprocessed()
-    print(preprocessed)
-    if not preprocessed:
+    # print(preprocessed)
+    # if not preprocessed:
         # backend = LithopsPreprocessor()
-        backend = LocalPreprocessor()
-        co.preprocess(backend)
+    backend = LocalPreprocessor()
+    co.preprocess(backend)
 
 
 if __name__ == '__main__':
