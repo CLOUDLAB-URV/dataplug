@@ -1,18 +1,13 @@
 import logging
 import time
-
-import botocore.config
-import lithops
-import ray
 from collections import defaultdict
+
+import lithops
 
 from dataplug import CloudObject
 from dataplug.basic import UTF8Text, whole_words_strategy
+from dataplug.util import setup_logging
 
-
-# logging.basicConfig(level=logging.DEBUG)
-# logging.getLogger("botocore").setLevel(logging.WARNING)
-# logging.getLogger('dataplug').setLevel(logging.DEBUG)
 
 def word_count(data_slice):
     t0 = time.perf_counter()
@@ -27,37 +22,26 @@ def word_count(data_slice):
     return dict(words)
 
 
-def lithops_backend(data_slice):
-    fexec = lithops.FunctionExecutor()
-    fexec.map(word_count, data_slices)
-    result = fexec.get_result()
-    return result
-
-
-def ray_backend(data_slice):
-    ray.init()
-    ray_task = ray.remote(word_count)
-    tasks = []
-    for data_slice in data_slices:
-        tasks.append(ray_task.remote(data_slice))
-    return ray.get(tasks)
-
-
 if __name__ == '__main__':
-    config = {
+    setup_logging(logging.DEBUG)
+
+    # Localhost minio config
+    local_minio = {
         'aws_access_key_id': 'minioadmin',
         'aws_secret_access_key': 'minioadmin',
         'region_name': 'us-east-1',
         'endpoint_url': 'http://192.168.1.110:9000',
-        'config': botocore.config.Config(signature_version='s3v4')
+        'botocore_config_kwargs': {'signature_version': 's3v4'},
+        'role_arn': 'arn:aws:iam::123456789012:role/S3Access'
     }
 
-    co = CloudObject.from_s3(UTF8Text, 's3://testdata/lorem_ipsum.txt', s3_config=config)
+    co = CloudObject.from_s3(UTF8Text, 's3://testdata/lorem_ipsum.txt', s3_config=local_minio)
 
     data_slices = co.partition(whole_words_strategy, num_chunks=8)
 
-    # result = lithops_backend(data_slices)
-    result = ray_backend(data_slices)
+    fexec = lithops.FunctionExecutor()
+    fexec.map(word_count, data_slices)
+    result = fexec.get_result()
 
     merged = defaultdict(lambda: 0)
     for map_result in result:
