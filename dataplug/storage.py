@@ -122,10 +122,11 @@ class PickleableS3ClientProxy:
                                    config=botocore.client.Config(**self.botocore_config_kwargs))
 
     def __do_request(self, op, *args, **kwargs):
-        logger.debug('%s.%s => %s %s', self.__class__.__name__, op.__name__, args, kwargs)
+        logger.debug('S3.%s => %s %s', op.__name__, args, kwargs)
         try:
             response = op(*args, **kwargs)
-            logger.debug('%s.head_object => %d', self.__class__.__name__, response['ResponseMetadata']['HTTPStatusCode'])
+            response = response or {}
+            logger.debug('S3.%s => %d', op.__name__, response.get('ResponseMetadata', {}).get('HTTPStatusCode', 200))
             return response
         except botocore.exceptions.ClientError as e:
             logger.debug('%s.head_object => %s', self.__class__.__name__, e)
