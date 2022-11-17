@@ -121,62 +121,72 @@ class PickleableS3ClientProxy:
                                    region_name=self.region_name,
                                    config=botocore.client.Config(**self.botocore_config_kwargs))
 
+    def __do_request(self, op, *args, **kwargs):
+        logger.debug('%s.%s => %s %s', self.__class__.__name__, op.__name__, args, kwargs)
+        try:
+            response = op(*args, **kwargs)
+            logger.debug('%s.head_object => %d', self.__class__.__name__, response['ResponseMetadata']['HTTPStatusCode'])
+            return response
+        except botocore.exceptions.ClientError as e:
+            logger.debug('%s.head_object => %s', self.__class__.__name__, e)
+            raise e
+
     def abort_multipart_upload(self, *args, **kwargs):
-        return self.client.abort_multipart_upload(*args, **kwargs)
+        return self.__do_request(self.client.abort_multipart_upload, *args, **kwargs)
 
     def complete_multipart_upload(self, *args, **kwargs):
-        return self.client.complete_multipart_upload(*args, **kwargs)
+        return self.__do_request(self.client.complete_multipart_upload, *args, **kwargs)
 
     def create_multipart_upload(self, *args, **kwargs):
-        return self.client.create_multipart_upload(*args, **kwargs)
+        return self.__do_request(self.client.create_multipart_upload, *args, **kwargs)
 
     def download_file(self, *args, **kwargs):
-        self.client.download_file(*args, **kwargs)
+        return self.__do_request(self.client.download_file, *args, **kwargs)
 
     def download_fileobj(self, *args, **kwargs):
-        self.client.download_fileobj(*args, **kwargs)
+        return self.__do_request(self.client.download_fileobj, *args, **kwargs)
 
     def generate_presigned_post(self, *args, **kwargs):
-        return self.client.generate_presigned_post(*args, **kwargs)
+        return self.__do_request(self.client.generate_presigned_post, *args, **kwargs)
 
     def generate_presigned_url(self, *args, **kwargs):
-        return self.client.generate_presigned_url(*args, **kwargs)
+        return self.__do_request(self.client.generate_presigned_url, *args, **kwargs)
 
     def get_object(self, *args, **kwargs):
-        return self.client.get_object(*args, **kwargs)
+        return self.__do_request(self.client.get_object, *args, **kwargs)
 
     def head_bucket(self, *args, **kwargs):
-        return self.client.head_bucket(*args, **kwargs)
+        return self.__do_request(self.client.head_bucket, *args, **kwargs)
 
     def head_object(self, *args, **kwargs):
-        return self.client.head_object(*args, **kwargs)
+        return self.__do_request(self.client.head_object, *args, **kwargs)
 
     def list_buckets(self):
-        return self.client.list_buckets()
+        return self.__do_request(self.client.list_buckets)
 
     def list_multipart_uploads(self, *args, **kwargs):
-        return self.client.list_multipart_uploads(*args, **kwargs)
+        return self.__do_request(self.client.list_multipart_uploads, *args, **kwargs)
 
     def list_objects(self, *args, **kwargs):
-        return self.client.list_objects(*args, **kwargs)
+        return self.__do_request(self.client.list_objects, *args, **kwargs)
 
     def list_objects_v2(self, *args, **kwargs):
-        return self.client.list_objects_v2(*args, **kwargs)
+        return self.__do_request(self.client.list_objects_v2, *args, **kwargs)
 
     def list_parts(self, *args, **kwargs):
-        return self.client.list_parts(*args, **kwargs)
+        return self.__do_request(self.client.list_parts, *args, **kwargs)
 
     def put_object(self, *args, **kwargs):
-        return self.client.put_object(*args, **kwargs)
+        return self.__do_request(self.client.put_object, *args, **kwargs)
 
     def upload_file(self, *args, **kwargs):
-        self.client.upload_file(*args, **kwargs)
+        return self.__do_request(self.client.upload_file, *args, **kwargs)
 
     def upload_fileobj(self, *args, **kwargs):
-        self.client.upload_fileobj(*args, **kwargs)
+        return self.__do_request(self.client.upload_fileobj, *args, **kwargs)
 
     def upload_part(self, *args, **kwargs):
-        return self.client.upload_part(*args, **kwargs)
+        return self.__do_request(self.client.upload_part, *args, **kwargs)
 
 
 class _S3Flavour(_PosixFlavour):
