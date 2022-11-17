@@ -38,7 +38,6 @@ def force_delete_path(path):
 
 
 def head_object(s3client, bucket, key):
-    logger.debug(f'head {bucket=} {key=}')
     metadata = {}
     try:
         head_res = s3client.head_object(Bucket=bucket, Key=key)
