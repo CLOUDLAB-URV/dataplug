@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import logging
+import time
+import uuid
 
 from typing import TYPE_CHECKING, Optional, Union, IO, Any, Literal, Dict, Callable, Mapping, List
 from contextlib import suppress
@@ -34,24 +36,37 @@ S3_FULL_ACCESS_POLICY = json.dumps(
 
 class PickleableS3ClientProxy:
     def __init__(self, aws_access_key_id: str, aws_secret_access_key: str,
-                 region_name: str, endpoint_url: str, use_token: Optional[bool] = True,
-                 config_kwargs: Optional[dict] = None):
+                 region_name: str, endpoint_url: str, use_token: Optional[bool] = None,
+                 role_arn: Optional[str] = None, token_duration_seconds: Optional[int] = None,
+                 botocore_config_kwargs: Optional[dict] = None):
         self.region_name = region_name
         self.endpoint_url = endpoint_url
-        self.config_kwargs = config_kwargs or {}
+        self.botocore_config_kwargs = botocore_config_kwargs or {}
+        self.role_arn = role_arn
+        self.session_name = None
+        self.token_duration_seconds = token_duration_seconds or 86400
+        use_token = use_token or True
 
         if use_token:
+            logger.debug('Using token for S3 authentication')
             sts_admin = boto3.client('sts',
                                      aws_access_key_id=aws_access_key_id,
                                      aws_secret_access_key=aws_secret_access_key,
                                      region_name=region_name,
                                      endpoint_url=endpoint_url,
-                                     config=botocore.client.Config(**self.config_kwargs))
+                                     config=botocore.client.Config(**self.botocore_config_kwargs))
 
-            response = sts_admin.assume_role(RoleArn='arn:x:ignored:by:minio:',
-                                             RoleSessionName='ignored-by-minio',
-                                             Policy=S3_FULL_ACCESS_POLICY,
-                                             DurationSeconds=86400)
+            if role_arn is not None:
+                self.session_name = '-'.join(['dataplug', str(int(time.time())), uuid.uuid4().hex])
+                logger.debug('Assuming role %s with generated session name %s', self.role_arn, self.session_name)
+
+                response = sts_admin.assume_role(RoleArn=self.role_arn,
+                                                 RoleSessionName=self.session_name,
+                                                 Policy=S3_FULL_ACCESS_POLICY,
+                                                 DurationSeconds=self.token_duration_seconds)
+            else:
+                logger.debug('Getting session token')
+                response = sts_admin.get_session_token(DurationSeconds=self.token_duration_seconds)
 
             self.credentials = response['Credentials']
 
@@ -61,10 +76,10 @@ class PickleableS3ClientProxy:
                                        aws_session_token=self.credentials['SessionToken'],
                                        endpoint_url=self.endpoint_url,
                                        region_name=self.region_name,
-                                       config=botocore.client.Config(**self.config_kwargs))
+                                       config=botocore.client.Config(**self.botocore_config_kwargs))
         else:
-            logger.warning('Using user credentials is discouraged for security reasons -'
-                           ' consider using token-based authentication instead')
+            logger.warning('Using user credentials is discouraged for security reasons! '
+                           'Consider using token-based authentication instead')
             self.credentials = {
                 'AccessKeyId': aws_access_key_id,
                 'SecretAccessKey': aws_secret_access_key
@@ -73,26 +88,38 @@ class PickleableS3ClientProxy:
                                        aws_access_key_id=self.credentials['AccessKeyId'],
                                        aws_secret_access_key=self.credentials['SecretAccessKey'],
                                        endpoint_url=self.endpoint_url,
-                                       region_name=self.region_name)
+                                       region_name=self.region_name,
+                                       config=botocore.client.Config(**self.botocore_config_kwargs))
 
     def __getstate__(self):
+        logger.debug('Pickling S3 client')
         return {
             'credentials': self.credentials,
             'endpoint_url': self.endpoint_url,
-            'region_name': self.region_name
+            'region_name': self.region_name,
+            'botocore_config_kwargs': self.botocore_config_kwargs,
+            'role_arn': self.role_arn,
+            'session_name': self.session_name,
+            'token_duration_seconds': self.token_duration_seconds
         }
 
     def __setstate__(self, state):
+        logger.debug('Restoring S3 client')
         self.credentials = state['credentials']
         self.endpoint_url = state['endpoint_url']
         self.region_name = state['region_name']
+        self.botocore_config_kwargs = state['botocore_config_kwargs']
+        self.role_arn = state['role_arn']
+        self.session_name = state['session_name']
+        self.token_duration_seconds = state['token_duration_seconds']
 
         self.client = boto3.client('s3',
                                    aws_access_key_id=self.credentials['AccessKeyId'],
                                    aws_secret_access_key=self.credentials['SecretAccessKey'],
                                    aws_session_token=self.credentials.get('SessionToken'),
                                    endpoint_url=self.endpoint_url,
-                                   region_name=self.region_name)
+                                   region_name=self.region_name,
+                                   config=botocore.client.Config(**self.botocore_config_kwargs))
 
     def abort_multipart_upload(self, *args, **kwargs):
         return self.client.abort_multipart_upload(*args, **kwargs)
@@ -175,6 +202,7 @@ class PureS3Path(PurePath):
     Source: https://github.com/liormizr/s3path
     S3 is not a file-system but we can look at it like a POSIX system.
     """
+
     _flavour = _S3Flavour()
     __slots__ = ()
 
@@ -246,3 +274,6 @@ class PureS3Path(PurePath):
     def _absolute_path_validation(self):
         if not self.is_absolute():
             raise ValueError('relative path have no bucket, key specification')
+
+    def __repr__(self) -> str:
+        return '{}(bucket={},key={})'.format(self.__class__.__name__, self.bucket, self.key)
