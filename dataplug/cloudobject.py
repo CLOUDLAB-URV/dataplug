@@ -62,8 +62,10 @@ class CloudObject:
             aws_secret_access_key=s3_config.get('aws_secret_access_key'),
             region_name=s3_config.get('region_name'),
             endpoint_url=s3_config.get('endpoint_url'),
-            config_kwargs=s3_config.get('s3_config_kwargs'),
-            use_token=s3_config.get('use_token')
+            botocore_config_kwargs=s3_config.get('s3_config_kwargs'),
+            use_token=s3_config.get('use_token'),
+            role_arn=s3_config.get('role_arn'),
+            token_duration_seconds=s3_config.get('token_duration_seconds')
         )
 
         logger.debug(f'{self._obj_path=},{self._meta_path=}')
