@@ -3,7 +3,7 @@ from __future__ import annotations
 import inspect
 import logging
 from typing import Union, Callable, List, Concatenate
-from typing import TYPE_CHECKING, Tuple, Dict, Optional
+from typing import TYPE_CHECKING, Tuple, Dict, Optional, Type
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
@@ -19,15 +19,14 @@ logger = logging.getLogger(__name__)
 
 class CloudDataType:
     def __init__(self,
-                 preprocessor: Union[BatchPreprocessor, MapReducePreprocessor] = None,
+                 preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = None,
                  inherit_from: 'CloudDataType' = None):
-        # print(preprocesser, inherit)
         self.co_class: object = None
-        self.__preprocessor: Union[BatchPreprocessor, MapReducePreprocessor] = preprocessor
+        self.__preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = preprocessor
         self.__parent: 'CloudDataType' = inherit_from
 
     @property
-    def preprocessor(self) -> Union[BatchPreprocessor, MapReducePreprocessor]:
+    def preprocessor(self) -> Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]]:
         if self.__preprocessor is not None:
             return self.__preprocessor
         elif self.__parent is not None:
