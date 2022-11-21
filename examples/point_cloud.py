@@ -3,7 +3,7 @@ import logging
 import botocore
 
 from dataplug import CloudObject
-from dataplug.geospatial import LiDARPointCloud
+from dataplug.geospatial.laspc import LiDARPointCloud
 from dataplug.preprocess import LithopsPreprocessor, LocalPreprocessor
 from dataplug.util import setup_logging
 

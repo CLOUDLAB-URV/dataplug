@@ -1,8 +1,8 @@
 import logging
 
 from dataplug import CloudObject
-from dataplug.genomics import FASTQGZip
-from dataplug.preprocess import LithopsPreprocessor, LocalPreprocessor
+from dataplug.genomics.fastq import FASTQGZip, partition_reads_batches
+from dataplug.preprocess import LocalPreprocessor
 from dataplug.util import setup_logging
 
 
@@ -23,12 +23,31 @@ def main():
                              's3://genomics/SRR21394969.fastq.gz',
                              s3_config=local_minio)
 
-    preprocessed = co.is_preprocessed()
-    # print(preprocessed)
-    # if not preprocessed:
-        # backend = LithopsPreprocessor()
-    backend = LocalPreprocessor()
-    co.preprocess(backend)
+    if not co.is_preprocessed():
+        backend = LocalPreprocessor()
+        co.preprocess(backend)
+
+    # backend = LocalPreprocessor()
+    # co.preprocess(backend)
+
+    data_slices = co.partition(partition_reads_batches, num_batches=100)
+
+    # for data_slice in data_slices:
+    #     batch = data_slice.get()
+    #     print(batch)
+
+    batch = data_slices[3].get()
+    # batch = data_slices[1].get()
+
+    for data_slice in data_slices:
+        batch = data_slice.get()
+        for line in batch[:4]:
+            print(line)
+        print('...')
+        for line in batch[-4:]:
+            print(line)
+        print('---')
+
 
 
 if __name__ == '__main__':
