@@ -4,12 +4,14 @@ import re
 import io
 import subprocess
 import tempfile
+import threading
 from math import ceil
 from typing import BinaryIO, Tuple, Dict
 
 import pandas as pd
+import numpy as np
 
-from ..cloudobject import CloudDataType
+from ..cloudobject import CloudDataType, CloudObject
 from ..dataslice import CloudObjectSlice
 from ..preprocess.stubs import BatchPreprocessor, PreprocessorMetadata
 from ..util import force_delete_path
@@ -25,10 +27,10 @@ RE_NUMS = re.compile(r'\d+')
 RE_NLINES = re.compile(r'Number of lines\s+:\s+\d+')
 
 
-def _get_gztool_exec():
+def _get_gztool_path():
     """
-    Utility funtcion that returns the absolute path for gzip file binary or raises exception if it is not found
-    (currently only works on unix-based systems)
+    Utility function that returns the absolute path for gzip file binary or raises exception if it is not found
+    TODO currently only works on unix-based systems
     """
     proc = subprocess.run(['which', 'gztool'], check=True, capture_output=True, text=True)
     path = proc.stdout.rstrip('\n')
@@ -47,7 +49,7 @@ class GZipTextPreprocessor(BatchPreprocessor):
         :param meta:
         :return:
         """
-        gztool = _get_gztool_exec()
+        gztool = _get_gztool_path()
         tmp_index_file_name = tempfile.mktemp()
         try:
             force_delete_path(tmp_index_file_name)
@@ -77,7 +79,7 @@ class GZipTextPreprocessor(BatchPreprocessor):
             proc = subprocess.run([gztool, '-ell', '-I', tmp_index_file_name], check=True,
                                   capture_output=True, text=True)
             output = proc.stdout
-            logger.debug(output)
+            # logger.debug(output)
 
             # Store index binary file
             gzip_index_key = meta.meta_path.key + '.idx'
@@ -85,14 +87,15 @@ class GZipTextPreprocessor(BatchPreprocessor):
 
             # Get the total number of lines
             total_lines = RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop()
+            logger.debug('Indexed gzipped text file with %d total lines', total_lines)
 
-            # Generator that parses output to avoid copying all window data as lists
+            # Generator function that parses output to avoid copying all window data as lists
             def _lines_generator():
                 for f in RE_WINDOWS.finditer(output):
                     nums = [int(n) for n in RE_NUMS.findall(f.group())]
                     yield nums
 
-            # Generate data frame that stores window data
+            # Generate data frame that stores gzip index windows offsets
             df = pd.DataFrame(_lines_generator(),
                               columns=['window', 'compressed_byte', 'uncompressed_byte',
                                        'line_number', 'window_size', 'window_offset'])
@@ -101,7 +104,7 @@ class GZipTextPreprocessor(BatchPreprocessor):
             # Store data frame as parquet
             out_stream = io.BytesIO()
             df.to_parquet(out_stream, engine='pyarrow')
-            # df.to_csv('test.csv')  # debug
+            # df.to_csv(os.path.join(tempfile.gettempdir(), f'{meta.obj_path.stem}.csv'))  # debug
 
             out_stream.seek(0)
             os.remove(tmp_index_file_name)
@@ -111,35 +114,57 @@ class GZipTextPreprocessor(BatchPreprocessor):
             force_delete_path(tmp_index_file_name)
 
 
-def _get_ranges_from_line_pairs(cloud_object, pairs):
-    meta_obj = cloud_object.s3.get_object(Bucket=cloud_object._meta_bucket, Key=cloud_object._meta_key)
-    # meta_buff = io.BytesIO(meta_obj.read())
-    # meta_buff.seek(0)
-    df = pd.read_parquet(meta_obj)
+def _get_ranges_from_line_pairs(cloud_object: CloudObject, pairs):
+    meta_obj = cloud_object.s3.get_object(Bucket=cloud_object.meta_path.bucket, Key=cloud_object.meta_path.key)
+    meta_buff = io.BytesIO(meta_obj['Body'].read())
+    meta_buff.seek(0)
+    df = pd.read_parquet(meta_buff)
+    line_indexes = df['line_number'].to_numpy()
+    num_windows = df.shape[0]
 
     byte_ranges = [None] * len(pairs)
     for i, (line_0, line_1) in enumerate(pairs):
-        window = df.loc[(df['line_number'] >= line_0) & (df['line_number'] <= line_1)]
-        window0 = window.head(1)['compressed_byte'].values[0].item()
-        window1 = df.loc[window.tail(1).index + 1]['compressed_byte'].values[0].item()
-        byte_ranges[i] = (window0, window1)
+        # Find the closest window index for line_0
+        window_head_idx = (np.abs(line_indexes - line_0)).argmin()
+        # Check if window line entry pont is past requested line_0, if so, get previous window
+        window_head_line = df.iloc[window_head_idx]['line_number']
+        if window_head_line > line_0:
+            window_head_idx = window_head_idx - 1
+        # Get offset in compressed archive for window 0
+        window0_offset = df.iloc[window_head_idx]['compressed_byte']
+
+        # Find the closest window index for line_0
+        widow_tail_idx = (np.abs(line_indexes - line_1)).argmin()
+        # Check if window line entry pont is before requested line_1, if so, get next window
+        window_tail_line = df.iloc[widow_tail_idx]['line_number']
+        if window_tail_line < line_1:
+            widow_tail_idx = widow_tail_idx + 1
+        if widow_tail_idx >= num_windows:
+            # Adjust offset for lines inside last window, use end of compressed archive for 2nd offset
+            window1_offset = cloud_object.size
+        else:
+            window1_offset = df.iloc[widow_tail_idx]['compressed_byte']
+
+        byte_ranges[i] = (window0_offset, window1_offset)
 
     return byte_ranges
 
 
-def partition_chunk_lines(cloud_object, lines_per_chunk, strategy='expand'):
+def partition_chunk_lines(cloud_object: CloudObject, lines_per_chunk, strategy='expand'):
     """
-
-    :param cloud_object:
-    :param lines_per_chunk:
-    :param strategy:
+    Partitioning strategy for GZipped compressed text files, it partitions the text based on number of lines
+    per partition
+    :param cloud_object: Parent cloud object
+    :param lines_per_chunk: Number of lines for each partition
+    :param strategy: What to do with remaining lines: 'expand' to create a new chunk with them (less than lines_per_chunk),
+           or 'merge' to add these lines to the previous chunk (more than lines_per_chunk).
     :return:
     """
     total_lines = int(cloud_object.get_attribute('total_lines'))
     parts = ceil(total_lines / lines_per_chunk)
-    pairs = [(lines_per_chunk * i, (lines_per_chunk * i) + lines_per_chunk - 1) for i in range(parts)]
+    pairs = [((lines_per_chunk * i) + 1, (lines_per_chunk * i) + lines_per_chunk) for i in range(parts)]
 
-    # adjust last pair
+    # Adjust last pair
     if pairs[-1][1] > total_lines:
         if strategy == 'expand':
             l0, _ = pairs[-1]
@@ -160,7 +185,7 @@ def partition_chunk_lines(cloud_object, lines_per_chunk, strategy='expand'):
 
 
 def partition_num_chunks(self, n_chunks):
-    # TODO
+    # TODO implement this strategy
     raise NotImplementedError()
 
 
@@ -177,25 +202,67 @@ class GZipTextSlice(CloudObjectSlice):
 
     def get(self, stream=False):
         tmp_index_file = tempfile.mktemp()
+        gztool = _get_gztool_path()
 
-        # Get index and store it to temp file
-        self.s3.download_file(Bucket=self.meta_bucket, Key=self.attributes['index_key'], Filename=tmp_index_file)
+        try:
+            # Get index and store it to temp file
+            self.s3.download_file(Bucket=self.meta_path.bucket,
+                                  Key=self.attributes['index_key'], Filename=tmp_index_file)
 
-        # Get compressed byte range
-        res = self.s3.get_object(Bucket=self.object_bucket, Key=self.object_key,
-                                 Range=f'bytes={self.range_0 - 1}-{self.range_1 - 1}')
-        body = res['Body']
+            # Get compressed byte range
+            res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key,
+                                     Range=f'bytes={self.range_0 - 1}-{self.range_1 - 1}')
+            body = res['Body']
 
-        cmd = [GZTOOL_PATH, '-I', tmp_index_file, '-n', str(self.range_0), '-L', str(self.line_0)]
-        proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            cmd = [gztool, '-I', tmp_index_file, '-n', str(self.range_0), '-L', str(self.line_0)]
+            proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
-        chunk = body.read(CHUNK_SIZE)
-        while chunk != b"":
-            proc.stdin.write(chunk)
-            chunk = body.read(CHUNK_SIZE)
+            # TODO program might get stuck if subprocess fails, blocking io should be done in a backgroun thread or using async/await
+            def _writer_feeder():
+                logger.debug('Writer thread started')
+                chunk = body.read(CHUNK_SIZE)
+                while chunk != b"":
+                    # logger.debug('Writing %d bytes to pipe', len(chunk))
+                    proc.stdin.write(chunk)
+                    chunk = body.read(CHUNK_SIZE)
+                proc.stdin.flush()
+                proc.stdin.close()
+                logger.debug('Writer thread finished')
 
-        stdout, stderr = proc.communicate()
-        # logger.debug(stdout.decode('utf-8'))
-        logger.debug(stderr.decode('utf-8'))
+            lines = []
 
-        return stdout
+            writer_thread = threading.Thread(target=_writer_feeder)
+            writer_thread.start()
+
+            chunk = proc.stdout.read(CHUNK_SIZE)
+            last_line = None
+            while chunk != b"":
+                # logger.debug('Read %d bytes from pipe', len(chunk))
+                text = chunk.decode('utf-8')
+                chunk_lines = text.splitlines()
+
+                if last_line is not None:
+                    last_line = last_line + chunk_lines.pop(0)
+                    chunk_lines.append(last_line)
+                    last_line = None
+
+                if text[-1] != "\n":
+                    last_line = chunk_lines.pop()
+
+                lines.extend(chunk_lines)
+                # ValueError is raised if writer process closes the pipe
+                try:
+                    chunk = proc.stdout.read(CHUNK_SIZE)
+                except ValueError:
+                    chunk = b""
+
+            try:
+                proc.wait()
+            except ValueError as e:
+                logger.error(e)
+
+            writer_thread.join()
+
+            return lines[:self.line_1 - self.line_0 - 1]
+        finally:
+            force_delete_path(tmp_index_file)

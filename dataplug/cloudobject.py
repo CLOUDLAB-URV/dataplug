@@ -13,6 +13,7 @@ else:
 from .util import split_s3_path, head_object
 from .storage import PureS3Path, PickleableS3ClientProxy
 from .preprocess import BatchPreprocessor, MapReducePreprocessor, PreprocessorBackendBase
+from .dataslice import CloudObjectSlice
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 class CloudDataType:
     def __init__(self,
                  preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = None,
-                 inherit_from: 'CloudDataType' = None):
+                 inherit_from: Type['CloudDataType'] = None):
         self.co_class: object = None
         self.__preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = preprocessor
         self.__parent: 'CloudDataType' = inherit_from
@@ -66,6 +67,7 @@ class CloudObject:
             role_arn=s3_config.get('role_arn'),
             token_duration_seconds=s3_config.get('token_duration_seconds')
         )
+        self._obj_attrs: Dict[str, str] = {}
 
         logger.debug(f'{self._obj_path=},{self._meta_path=}')
 
@@ -137,8 +139,9 @@ class CloudObject:
                     raise e
         if not self._meta_meta:
             try:
-                res, _ = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
+                res, attrs = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
                 self._meta_meta = res
+                self._obj_attrs = attrs
             except KeyError as e:
                 self._meta_meta = None
                 if enforce_meta:
@@ -150,22 +153,10 @@ class CloudObject:
         preprocessor_backend.do_preprocess(preprocessor=self._cls.preprocessor, cloud_object=self,
                                            chunk_size=chunk_size, num_workers=num_workers, *args, **kwargs)
 
-    # def get_meta_obj(self):
-    #     get_res = self._s3.get_object(Bucket=self._meta_path.bucket, Key=self._obj_path.key)
-    #     return get_res['Body']
-    #
-    # def call(self, f, *args, **kwargs):
-    #     if isinstance(f, str):
-    #         func_name = f
-    #     elif inspect.ismethod(f) or inspect.isfunction(f):
-    #         func_name = f.__name__
-    #     else:
-    #         raise Exception(f)
-    #
-    #     attr = getattr(self._child, func_name)
-    #     return attr.__call__(*args, **kwargs)
+    def get_attribute(self, key: str) -> str:
+        return self._obj_attrs[key]
 
-    def partition(self, strategy, *args, **kwargs):
+    def partition(self, strategy, *args, **kwargs) -> List[CloudObjectSlice]:
         slices = strategy(self, *args, **kwargs)
         [s.contextualize(self) for s in slices]
         return slices
