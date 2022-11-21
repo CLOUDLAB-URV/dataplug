@@ -45,7 +45,7 @@ class TestCSVPartition(unittest.TestCase):
         self.assertEqual(len(data_slices), 1000)
 
     def test_samelines(self):
-        data_slices = self.co.partition(whole_csv_strategy, num_chunks=2000, threshold=200)
+        data_slices = self.co.partition(whole_line_csv_strategy, num_chunks=2000, threshold=200)
         f1 = "../sample_data/partitioned.csv"
         f2 = "../sample_data/test.csv"
         f = open(f1, "w")
@@ -53,6 +53,7 @@ class TestCSVPartition(unittest.TestCase):
             f.write(i.get())
         f.close()
         self.assertEqual(self.count_lines(f1), self.count_lines(f2))
+        os.remove(f1)
 
 
 
