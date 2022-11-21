@@ -1,5 +1,5 @@
 from dataplug import CloudObject
-from dataplug.geospatial import CloudOptimizedPointCloud, copc_square_split_strategy
+from dataplug.geospatial.copc import CloudOptimizedPointCloud, copc_square_split_strategy
 
 import logging
 import laspy
@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     co = CloudObject.from_s3(CloudOptimizedPointCloud,
                              's3://geospatial/copc/cnig/PNOA_2016_CAT_324-4570_ORT-CLA-COL.laz',
-                             s3_config=config)
+                             s3_config=local_minio)
     slices = co.partition(copc_square_split_strategy, num_chunks=9)
 
     for i, data_slice in enumerate(slices):
