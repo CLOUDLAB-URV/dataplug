@@ -71,8 +71,6 @@ if __name__ == '__main__':
     data_slices = co.partition(whole_line_csv_strategy, num_chunks=2000, threshold=200)
     for i in data_slices[2].generator_csv():
         print(i)
-    
-    for i in data_slices[2].generator_csv():
-        print(i)
+
     
     
