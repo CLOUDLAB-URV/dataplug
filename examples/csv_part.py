@@ -2,8 +2,6 @@ import logging
 import time
 
 import botocore.config
-import lithops
-import ray
 from collections import defaultdict
 
 from dataplug import CloudObject
@@ -23,8 +21,9 @@ class TestCSVPartition(unittest.TestCase):
         'aws_access_key_id': 'minioadmin',
         'aws_secret_access_key': 'minioadmin',
         'region_name': 'us-east-1',
-        'endpoint_url': 'http://127.0.0.1:9000/',
-        'config': botocore.config.Config(signature_version='s3v4')
+        'endpoint_url': 'http://localhost:9000',
+        'botocore_config_kwargs': {'signature_version': 's3v4'},
+        'role_arn': 'arn:aws:iam::123456789012:role/S3Access'
     }
     co = CloudObject.from_s3(CSV, 's3://testdata/test.csv', s3_config=config)
 
@@ -59,8 +58,21 @@ class TestCSVPartition(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    #unittest.main()
+    config = {
+        'aws_access_key_id': 'minioadmin',
+        'aws_secret_access_key': 'minioadmin',
+        'region_name': 'us-east-1',
+        'endpoint_url': 'http://localhost:9000',
+        'botocore_config_kwargs': {'signature_version': 's3v4'},
+        'role_arn': 'arn:aws:iam::123456789012:role/S3Access'
+    }
+    co = CloudObject.from_s3(CSV, 's3://testdata/test.csv', s3_config=config)
+    data_slices = co.partition(whole_line_csv_strategy, num_chunks=2000, threshold=200)
+    for i in data_slices[2].generator_csv():
+        print(i)
     
-
+    for i in data_slices[2].generator_csv():
+        print(i)
     
     
