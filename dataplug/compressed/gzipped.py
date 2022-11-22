@@ -13,7 +13,7 @@ import numpy as np
 
 from ..cloudobject import CloudDataType, CloudObject
 from ..dataslice import CloudObjectSlice
-from ..preprocess.stubs import BatchPreprocessor, PreprocessorMetadata
+from ..preprocess.preprocessor import BatchPreprocessor, PreprocessorMetadata
 from ..util import force_delete_path
 
 logger = logging.getLogger(__name__)

@@ -5,7 +5,7 @@ import tempfile
 
 from ..cloudobject import CloudDataType
 
-from dataplug.preprocess.stubs import MapReducePreprocessor
+from dataplug.preprocess.preprocessor import MapReducePreprocessor
 
 
 class FASTAPreprocesser(MapReducePreprocessor):

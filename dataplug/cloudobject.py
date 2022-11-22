@@ -12,7 +12,7 @@ else:
 
 from .util import split_s3_path, head_object
 from .storage import PureS3Path, PickleableS3ClientProxy
-from .preprocess import BatchPreprocessor, MapReducePreprocessor, PreprocessorBackendBase
+from .preprocess import BatchPreprocessor, MapReducePreprocessor, MetadataPreprocessor, PreprocessorBackendBase
 from .dataslice import CloudObjectSlice
 
 logger = logging.getLogger(__name__)
@@ -148,10 +148,17 @@ class CloudObject:
                     raise e
             return self._obj_meta, self._meta_meta
 
-    def preprocess(self, preprocessor_backend: PreprocessorBackendBase, chunk_size: int = None,
-                   num_workers: int = None, *args, **kwargs):
-        preprocessor_backend.do_preprocess(preprocessor=self._cls.preprocessor, cloud_object=self,
-                                           chunk_size=chunk_size, num_workers=num_workers, *args, **kwargs)
+    def preprocess(self, preprocessor_backend: PreprocessorBackendBase, *args, **kwargs):
+        # FIXME implement this properly
+        if issubclass(self._cls.preprocessor, MetadataPreprocessor):
+            metadata_preprocessor: MetadataPreprocessor = self._cls.preprocessor(*args, **kwargs)
+            preprocessor_backend.preprocess_metadata(metadata_preprocessor, self)
+        elif issubclass(self._cls.preprocessor, BatchPreprocessor):
+            batch_preprocessor: BatchPreprocessor = self._cls.preprocessor(*args, **kwargs)
+            preprocessor_backend.preprocess_batch(batch_preprocessor, self)
+        elif issubclass(self._cls.preprocessor, MapReducePreprocessor):
+            mapreduce_preprocessor: MapReducePreprocessor = self._cls.preprocessor(*args, **kwargs)
+            preprocessor_backend.preprocess_map_reduce(mapreduce_preprocessor, self)
 
     def get_attribute(self, key: str) -> str:
         return self._obj_attrs[key]
