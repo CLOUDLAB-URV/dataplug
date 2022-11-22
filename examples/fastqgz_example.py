@@ -2,7 +2,7 @@ import logging
 
 from dataplug import CloudObject
 from dataplug.genomics.fastq import FASTQGZip, partition_reads_batches
-from dataplug.preprocess import LocalPreprocessor
+from dataplug.preprocess import DummyPreprocessor
 from dataplug.util import setup_logging
 
 
@@ -24,7 +24,7 @@ def main():
                              s3_config=local_minio)
 
     if not co.is_preprocessed():
-        backend = LocalPreprocessor()
+        backend = DummyPreprocessor()
         co.preprocess(backend)
 
     # backend = LocalPreprocessor()

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Union, Optional
 
-from ..base import PreprocessorBackendBase
-from ..stubs import BatchPreprocessor, MapReducePreprocessor
+from ..backendbase import PreprocessorBackendBase
+from ..preprocessor import BatchPreprocessor, MapReducePreprocessor
 
 if TYPE_CHECKING:
     from ...cloudobject import CloudObject

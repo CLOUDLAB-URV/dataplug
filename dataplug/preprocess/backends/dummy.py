@@ -4,8 +4,8 @@ import logging
 import math
 from typing import TYPE_CHECKING, Union, Optional
 
-from ..base import PreprocessorBackendBase
-from ..stubs import BatchPreprocessor, MapReducePreprocessor, PreprocessorMetadata
+from ..backendbase import PreprocessorBackendBase
+from ..preprocessor import BatchPreprocessor, MapReducePreprocessor, PreprocessorMetadata
 
 if TYPE_CHECKING:
     from ...cloudobject import CloudObject
@@ -15,35 +15,10 @@ else:
 logger = logging.getLogger(__name__)
 
 
-class LocalPreprocessor(PreprocessorBackendBase):
-    def do_preprocess(self,
-                      preprocessor: Union[BatchPreprocessor, MapReducePreprocessor],
-                      cloud_object: CloudObject,
-                      chunk_size: Optional[int] = None,
-                      num_workers: Optional[int] = None,
-                      *args, **kwargs):
-        if issubclass(preprocessor, BatchPreprocessor):
-            batch_pp: BatchPreprocessor = preprocessor(*args, **kwargs)
-            self._do_local_batch(cloud_object, batch_pp)
-        elif issubclass(preprocessor, MapReducePreprocessor):
-            mapreduce_pp: MapReducePreprocessor = preprocessor(*args, **kwargs)
-            self._do_local_mapreduce(cloud_object, mapreduce_pp, chunk_size, num_workers)
-
-    @staticmethod
-    def _do_local_batch(cloud_object, preprocessor):
+class DummyPreprocessor(PreprocessorBackendBase):
+    def preprocess_metadata(self):
         get_res = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
-        logger.debug(get_res)
-        obj_size = get_res['ContentLength']
 
-        meta = PreprocessorMetadata(
-            s3=cloud_object.s3,
-            obj_path=cloud_object.path,
-            meta_path=cloud_object.meta_path,
-            worker_id=1,
-            chunk_size=obj_size,
-            obj_size=obj_size,
-            partitions=1
-        )
 
         result = preprocessor.preprocess(data_stream=get_res['Body'], meta=meta)
 
@@ -64,6 +39,29 @@ class LocalPreprocessor(PreprocessorBackendBase):
 
         if hasattr(body, 'close'):
             body.close()
+
+    def preprocess_batch(self):
+        super().preprocess_batch()
+
+    def preprocess_map_reduce(self):
+        super().preprocess_map_reduce()
+
+    def do_preprocess(self,
+                      preprocessor: Union[BatchPreprocessor, MapReducePreprocessor],
+                      cloud_object: CloudObject,
+                      chunk_size: Optional[int] = None,
+                      num_workers: Optional[int] = None,
+                      *args, **kwargs):
+        if issubclass(preprocessor, BatchPreprocessor):
+            batch_pp: BatchPreprocessor = preprocessor(*args, **kwargs)
+            self._do_local_batch(cloud_object, batch_pp)
+        elif issubclass(preprocessor, MapReducePreprocessor):
+            mapreduce_pp: MapReducePreprocessor = preprocessor(*args, **kwargs)
+            self._do_local_mapreduce(cloud_object, mapreduce_pp, chunk_size, num_workers)
+
+    @staticmethod
+    def _do_local_batch(cloud_object, preprocessor):
+        pass
 
     @staticmethod
     def _do_local_mapreduce(cloud_object, preprocessor, chunk_size, num_workers):

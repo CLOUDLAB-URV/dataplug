@@ -1,2 +1,2 @@
-from .local import LocalPreprocessor
+from .dummy import DummyPreprocessor
 from .lithops import LithopsPreprocessor
