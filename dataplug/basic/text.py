@@ -47,7 +47,7 @@ class UTF8TextSlice(CloudObjectSlice):
                     r1 = self.obj_size if r1 > self.obj_size else r1
                     res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key,
                                              Range=f'bytes={r0}-{r1}')
-                    body += res['Body'].decode('utf-8')
+                    body += res['Body'].read().decode('utf-8')
                     pad_count += 1
                 c = body[s1]
 

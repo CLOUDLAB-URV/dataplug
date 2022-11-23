@@ -4,9 +4,10 @@ import json
 import tempfile
 import shutil
 import logging
+from typing import BinaryIO, Tuple, Dict, ByteString
 
-from ..cloudobject import CloudDataType
-from ..preprocess import PreprocessorMetadata, BatchPreprocessor
+from ..cloudobject import CloudDataType, CloudObject
+from ..preprocess import BatchPreprocessor
 from ..util import force_delete_path
 
 try:
@@ -29,7 +30,7 @@ class LiDARPreprocessor(BatchPreprocessor):
             raise e
         super().__init__()
 
-    def preprocess(self, data_stream: BytesIO, meta: PreprocessorMetadata):
+    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject) -> Tuple[ByteString, Dict[str, str]]:
         input_file_path = tempfile.mktemp()
         output_file_path = tempfile.mktemp()
 
@@ -74,7 +75,7 @@ class LiDARPreprocessor(BatchPreprocessor):
                     'root_size': str(copc_reader.copc_info.hierarchy_root_size)
                 }
 
-            return open(output_file_path, 'rb'), copc_meta
+            return open(output_file_path, 'rb').read(), copc_meta
         finally:
             force_delete_path(input_file_path)
             force_delete_path(output_file_path)
