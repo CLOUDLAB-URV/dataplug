@@ -27,8 +27,8 @@ def main():
         backend = DummyPreprocessor()
         co.preprocess(backend)
 
-    # backend = LocalPreprocessor()
-    # co.preprocess(backend)
+    backend = DummyPreprocessor()
+    co.preprocess(backend)
 
     data_slices = co.partition(partition_reads_batches, num_batches=100)
 

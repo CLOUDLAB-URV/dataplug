@@ -6,14 +6,14 @@ import subprocess
 import tempfile
 import threading
 from math import ceil
-from typing import BinaryIO, Tuple, Dict
+from typing import BinaryIO, Tuple, Dict, ByteString
 
 import pandas as pd
 import numpy as np
 
 from ..cloudobject import CloudDataType, CloudObject
 from ..dataslice import CloudObjectSlice
-from ..preprocess.preprocessor import BatchPreprocessor, PreprocessorMetadata
+from ..preprocess.preprocessor import BatchPreprocessor
 from ..util import force_delete_path
 
 logger = logging.getLogger(__name__)
@@ -42,12 +42,9 @@ class GZipTextPreprocessor(BatchPreprocessor):
     def __init__(self):
         super().__init__()
 
-    def preprocess(self, data_stream: BinaryIO, meta: PreprocessorMetadata) -> Tuple[BinaryIO, Dict[str, str]]:
+    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject) -> Tuple[ByteString, Dict[str, str]]:
         """
         Create index file from gzip archive using gztool (https://github.com/circulosmeos/gztool)
-        :param data_stream: Input gzip archive stream
-        :param meta:
-        :return:
         """
         gztool = _get_gztool_path()
         tmp_index_file_name = tempfile.mktemp()
@@ -82,12 +79,13 @@ class GZipTextPreprocessor(BatchPreprocessor):
             # logger.debug(output)
 
             # Store index binary file
-            gzip_index_key = meta.meta_path.key + '.idx'
-            meta.s3.upload_file(Filename=tmp_index_file_name, Bucket=meta.meta_path.bucket, Key=gzip_index_key)
+            gzip_index_key = cloud_object.meta_path.key + '.idx'
+            cloud_object.s3.upload_file(Filename=tmp_index_file_name, Bucket=cloud_object.meta_path.bucket,
+                                        Key=gzip_index_key)
 
             # Get the total number of lines
-            total_lines = RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop()
-            logger.debug('Indexed gzipped text file with %d total lines', total_lines)
+            total_lines: str = RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop()
+            logger.debug('Indexed gzipped text file with %s total lines', total_lines)
 
             # Generator function that parses output to avoid copying all window data as lists
             def _lines_generator():
@@ -106,10 +104,9 @@ class GZipTextPreprocessor(BatchPreprocessor):
             df.to_parquet(out_stream, engine='pyarrow')
             # df.to_csv(os.path.join(tempfile.gettempdir(), f'{meta.obj_path.stem}.csv'))  # debug
 
-            out_stream.seek(0)
             os.remove(tmp_index_file_name)
 
-            return out_stream, {'total_lines': total_lines, 'index_key': gzip_index_key}
+            return out_stream.getvalue(), {'total_lines': total_lines, 'index_key': gzip_index_key}
         finally:
             force_delete_path(tmp_index_file_name)
 
