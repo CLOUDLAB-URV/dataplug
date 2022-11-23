@@ -200,6 +200,8 @@ class GZipTextSlice(CloudObjectSlice):
     def get(self, stream=False):
         tmp_index_file = tempfile.mktemp()
         gztool = _get_gztool_path()
+        lines = []
+        lines_to_read = self.line_1 - self.line_0 - 1
 
         try:
             # Get index and store it to temp file
@@ -220,13 +222,17 @@ class GZipTextSlice(CloudObjectSlice):
                 chunk = body.read(CHUNK_SIZE)
                 while chunk != b"":
                     # logger.debug('Writing %d bytes to pipe', len(chunk))
-                    proc.stdin.write(chunk)
+                    try:
+                        proc.stdin.write(chunk)
+                    except BrokenPipeError:
+                        break
                     chunk = body.read(CHUNK_SIZE)
-                proc.stdin.flush()
-                proc.stdin.close()
+                try:
+                    proc.stdin.flush()
+                    proc.stdin.close()
+                except BrokenPipeError:
+                    pass
                 logger.debug('Writer thread finished')
-
-            lines = []
 
             writer_thread = threading.Thread(target=_writer_feeder)
             writer_thread.start()
@@ -247,7 +253,14 @@ class GZipTextSlice(CloudObjectSlice):
                     last_line = chunk_lines.pop()
 
                 lines.extend(chunk_lines)
-                # ValueError is raised if writer process closes the pipe
+
+                # Stop decompressing lines if number of lines to read in this chunk is reached
+                if len(lines) > lines_to_read:
+                    proc.stdout.close()
+                    break
+
+                # Try to read next decompressed chunk
+                # a ValueError is raised if the pipe is closed, meaning the writer or the subprocess closed it
                 try:
                     chunk = proc.stdout.read(CHUNK_SIZE)
                 except ValueError:
