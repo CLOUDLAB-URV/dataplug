@@ -122,7 +122,7 @@ class PickleableS3ClientProxy:
                                    config=botocore.client.Config(**self.botocore_config_kwargs))
 
     def __do_request(self, op, *args, **kwargs):
-        logger.debug('S3.%s => %s %s', op.__name__, args, kwargs)
+        # logger.debug('S3.%s => %s %s', op.__name__, args, kwargs)
         try:
             response = op(*args, **kwargs)
             response = response or {}

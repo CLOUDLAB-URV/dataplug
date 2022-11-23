@@ -30,23 +30,23 @@ def main():
     backend = DummyPreprocessor()
     co.preprocess(backend)
 
-    data_slices = co.partition(partition_reads_batches, num_batches=100)
+    data_slices = co.partition(partition_reads_batches, num_batches=256)
 
     # for data_slice in data_slices:
     #     batch = data_slice.get()
     #     print(batch)
 
     batch = data_slices[3].get()
-    # batch = data_slices[1].get()
+    batch = data_slices[1].get()
 
-    for data_slice in data_slices:
-        batch = data_slice.get()
-        for line in batch[:4]:
-            print(line)
-        print('...')
-        for line in batch[-4:]:
-            print(line)
-        print('---')
+    # for data_slice in data_slices:
+    #     batch = data_slice.get()
+    #     for line in batch[:4]:
+    #         print(line)
+    #     print('...')
+    #     for line in batch[-4:]:
+    #         print(line)
+    #     print('---')
 
 
 
