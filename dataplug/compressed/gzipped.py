@@ -5,6 +5,7 @@ import io
 import subprocess
 import tempfile
 import threading
+import time
 from math import ceil
 from typing import BinaryIO, Tuple, Dict, ByteString
 
@@ -50,6 +51,7 @@ class GZipTextPreprocessor(BatchPreprocessor):
         tmp_index_file_name = tempfile.mktemp()
         try:
             force_delete_path(tmp_index_file_name)
+            t0 = time.perf_counter()
 
             # Create index and save to tmp file
             # TODO tmp file is needed, sending to stdout is not working at the moment (todo fix)
@@ -86,6 +88,8 @@ class GZipTextPreprocessor(BatchPreprocessor):
             # Get the total number of lines
             total_lines: str = RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop()
             logger.debug('Indexed gzipped text file with %s total lines', total_lines)
+            t1 = time.perf_counter()
+            logger.debug('Index generated in %.3f seconds', t1 - t0)
 
             # Generator function that parses output to avoid copying all window data as lists
             def _lines_generator():
@@ -204,6 +208,7 @@ class GZipTextSlice(CloudObjectSlice):
         lines_to_read = self.line_1 - self.line_0 - 1
 
         try:
+            t0 = time.perf_counter()
             # Get index and store it to temp file
             self.s3.download_file(Bucket=self.meta_path.bucket,
                                   Key=self.attributes['index_key'], Filename=tmp_index_file)
@@ -272,6 +277,9 @@ class GZipTextSlice(CloudObjectSlice):
                 logger.error(e)
 
             writer_thread.join()
+
+            t1 = time.perf_counter()
+            logger.debug('Got partition in %.3f seconds', t1 - t0)
 
             return lines[:self.line_1 - self.line_0 - 1]
         finally:
