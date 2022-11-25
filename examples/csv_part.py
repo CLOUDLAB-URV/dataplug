@@ -69,8 +69,11 @@ if __name__ == '__main__':
     }
     co = CloudObject.from_s3(CSV, 's3://testdata/test.csv', s3_config=config)
     data_slices = co.partition(whole_line_csv_strategy, num_chunks=2000, threshold=200)
-    for i in data_slices[2].generator_csv():
-        print(i)
-
+    total = 0
     
+    print(data_slices[1].get())
+    
+    print("-----------------")
+    for i in data_slices[1].generator_csv(200):
+        print(i)
     
