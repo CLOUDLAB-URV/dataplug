@@ -27,7 +27,6 @@ class CSVSlice(CloudObjectSlice):
         r1 = self.range_1 + self.threshold if not self.last else self.range_1
         res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key, Range=f'bytes={r0}-{r1}')
         retval = res['Body'].read().decode('utf-8')
-
         
         first_row_start_pos = 0
         last_row_end_pos = self.range_1-self.range_0 
@@ -41,10 +40,12 @@ class CSVSlice(CloudObjectSlice):
             while retval[last_row_end_pos] != '\n':
                 last_row_end_pos += 1
         
+        
         #store the header of the first slice as an attribute
         if self.first:
             self.header = retval[first_row_start_pos:last_row_end_pos].split("\n")[0] + '\n'
         
+
         return retval[first_row_start_pos:last_row_end_pos]
 
     def generator_csv(self, read_size):
@@ -53,56 +54,53 @@ class CSVSlice(CloudObjectSlice):
         r1 = self.range_1 + self.threshold if not self.last else self.range_1
         res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key, Range=f'bytes={r0}-{r1}')
         last_row_end_pos = self.range_1-self.range_0 
+
         total_bytes_read = read_size
         buffer = b''
+        b_new_line = b'\n'
 
-        #find the nearest first row start position
+        #find the nearest first row start position, discard the first partitial row
         if not self.first:
-            ch = res['Body'].read(1)
-            while ch != b'\n':
-                ch = res['Body'].read(1)
+            chars = b''
+            while chars != b_new_line:
+                chars = res['Body'].read(1)
+                total_bytes_read+=1
+        total_bytes_read = total_bytes_read - 1
 
+        #yield the n-2 reads
         while total_bytes_read <= last_row_end_pos:
             buffer = buffer + res['Body'].read(read_size)
-            for line in buffer.splitlines():
-                if ( len(buffer.split(b'\n', 1)) > 1):
-                    yield line.decode('utf-8')
-                    buffer = buffer.split(b'\n', 1)[1]                
+            for line in buffer.splitlines(keepends = True):
+                if len(buffer.split(b_new_line, 1)) > 1:
+                    yield line
+                    buffer = buffer.split(b_new_line, 1)[1]                
+            total_bytes_read += read_size
+        
+        #yield the n-1 read (rows left until last_row_end_pos)
+        if total_bytes_read > last_row_end_pos:
+            last_read_size = last_row_end_pos - (total_bytes_read - read_size)
+            buffer = buffer + res['Body'].read(last_read_size)
+            for line in buffer.splitlines(keepends = True):
+                if len(buffer.split(b_new_line, 1)) > 1:
+                    yield line
+                    buffer = buffer.split(b_new_line, 1)[1]
             
-            if total_bytes_read + read_size > last_row_end_pos:
-                total_bytes_read += (last_row_end_pos - read_size)
-                if not self.last:
-                    read_size = (total_bytes_read - read_size)
-            else:
-                total_bytes_read += read_size
-
-        "Check if the buffer isn't empty, if it isn't, return the last "
-        "line + the until the first ocurrence of  \n and yield it"
+        #If the buffer has contents in it, there is one partial line that
+        #has been omited, read until a \n has been found (within the threshold) and yield it
+        
         if len(buffer) > 0:
             next_el = res['Body'].read(1)
             counter = 0
-            while next_el != b'\n' and counter <= self.threshold:
+            while next_el != b_new_line and counter <= self.threshold:
                 buffer = buffer + next_el
                 next_el = res['Body'].read(1)
                 counter += 1
             
-            yield buffer.decode('utf-8')
+            if not self.first:
+                yield buffer + b_new_line
+            else:
+                yield buffer 
             
-
-        
-            
-        
-
-            
-            
-        
-        
-        
-        
-        
-
-
-        
 
     def as_pandas(self):
         "Return the slice as a pandas dataframe"
