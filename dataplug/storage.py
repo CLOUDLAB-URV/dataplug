@@ -45,7 +45,7 @@ class PickleableS3ClientProxy:
         self.role_arn = role_arn
         self.session_name = None
         self.token_duration_seconds = token_duration_seconds or 86400
-        use_token = use_token or True
+        use_token = use_token if use_token is not None else True
 
         if use_token:
             logger.debug('Using token for S3 authentication')
