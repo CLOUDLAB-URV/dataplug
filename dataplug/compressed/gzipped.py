@@ -224,14 +224,14 @@ class GZipTextSlice(CloudObjectSlice):
             # TODO program might get stuck if subprocess fails, blocking io should be done in a backgroun thread or using async/await
             def _writer_feeder():
                 logger.debug('Writer thread started')
-                chunk = body.read(CHUNK_SIZE)
-                while chunk != b"":
+                input_chunk = body.read(CHUNK_SIZE)
+                while input_chunk != b"":
                     # logger.debug('Writing %d bytes to pipe', len(chunk))
                     try:
-                        proc.stdin.write(chunk)
+                        proc.stdin.write(input_chunk)
                     except BrokenPipeError:
                         break
-                    chunk = body.read(CHUNK_SIZE)
+                    input_chunk = body.read(CHUNK_SIZE)
                 try:
                     proc.stdin.flush()
                     proc.stdin.close()
@@ -242,11 +242,11 @@ class GZipTextSlice(CloudObjectSlice):
             writer_thread = threading.Thread(target=_writer_feeder)
             writer_thread.start()
 
-            chunk = proc.stdout.read(CHUNK_SIZE)
+            output_chunk = proc.stdout.read(CHUNK_SIZE)
             last_line = None
-            while chunk != b"":
+            while output_chunk != b"":
                 # logger.debug('Read %d bytes from pipe', len(chunk))
-                text = chunk.decode('utf-8')
+                text = output_chunk.decode('utf-8')
                 chunk_lines = text.splitlines()
 
                 if last_line is not None:
@@ -267,9 +267,9 @@ class GZipTextSlice(CloudObjectSlice):
                 # Try to read next decompressed chunk
                 # a ValueError is raised if the pipe is closed, meaning the writer or the subprocess closed it
                 try:
-                    chunk = proc.stdout.read(CHUNK_SIZE)
+                    output_chunk = proc.stdout.read(CHUNK_SIZE)
                 except ValueError:
-                    chunk = b""
+                    output_chunk = b""
 
             try:
                 proc.wait()
