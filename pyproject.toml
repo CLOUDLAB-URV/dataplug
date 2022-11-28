@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dataplug"
+version = "0.0.1"
+authors = [
+    { name = "Aitor Arjona", email = "aitor.arjona@urv.cat" },
+]
+description = "Pluggable data types for cloud-native scientific workloads"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3 :: Only",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Development Status :: 2 - Pre-Alpha"
+]
+dependencies = [
+    "numpy",
+    "pandas"
+]
+
+[project.optional-dependencies]
+lithops = [
+    "lithops==2.7.1"
+]
+
+[tool.setuptools.packages.find]
+include = ["dataplug"]
+
+[project.urls]
+"Homepage" = "https://github.com/aitorarjona/cloud-native-datasets"
