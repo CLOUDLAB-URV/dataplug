@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Tuple, BinaryIO, Dict, List, Type, ByteString
+from typing import TYPE_CHECKING, Tuple, BinaryIO, Dict, List, Type, ByteString, Union
 
 if TYPE_CHECKING:
     from ..cloudobject import CloudObject
@@ -45,7 +45,8 @@ class BatchPreprocessor:
     def __init__(self, *args, **kwargs):
         pass
 
-    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject) -> Tuple[ByteString, Dict[str, str]]:
+    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject) \
+            -> Tuple[Union[ByteString, BinaryIO], Dict[str, str]]:
         """
         Preprocess function for batch preprocessing
         :param data_stream: object body stream to be preprocessed
