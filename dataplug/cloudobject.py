@@ -57,6 +57,7 @@ class CloudObject:
         self._obj_path: PureS3Path = PureS3Path.from_uri(s3_uri_path)
         self._meta_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + '.meta', self._obj_path.key)
         self._cls: CloudDataType = cloud_object_class
+        s3_config = s3_config or {}
         self._s3: PickleableS3ClientProxy = PickleableS3ClientProxy(
             aws_access_key_id=s3_config.get('aws_access_key_id'),
             aws_secret_access_key=s3_config.get('aws_secret_access_key'),

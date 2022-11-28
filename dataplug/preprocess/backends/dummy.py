@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import logging
-import math
 from typing import TYPE_CHECKING, Union, Optional
+from boto3.s3.transfer import TransferConfig
 
 from ..backendbase import PreprocessorBackendBase
 from ..preprocessor import BatchPreprocessor, MapReducePreprocessor, MetadataPreprocessor
@@ -45,22 +45,31 @@ class DummyPreprocessor(PreprocessorBackendBase):
         result = preprocessor.preprocess(get_res['Body'], cloud_object)
 
         try:
-            body, meta = result
+            stream, meta = result
         except TypeError:
             raise Exception(f'Preprocessing result is {result}')
 
-        if body is None or meta is None:
-            raise Exception(f'Preprocessing result is {body, meta}')
+        if stream is None or meta is None:
+            raise Exception(f'Preprocessing result is {stream, meta}')
 
-        cloud_object.s3.put_object(
-            Body=body,
-            Bucket=cloud_object.meta_path.bucket,
-            Key=cloud_object.path.key,
-            Metadata=meta
-        )
+        if hasattr(stream, 'read'):
+            cloud_object.s3.upload_fileobj(
+                Fileobj=stream,
+                Bucket=cloud_object.meta_path.bucket,
+                Key=cloud_object.path.key,
+                ExtraArgs={'Metadata': meta},
+                Config=TransferConfig(use_threads=True, max_concurrency=256)
+            )
+        else:
+            cloud_object.s3.put_object(
+                Body=stream,
+                Bucket=cloud_object.meta_path.bucket,
+                Key=cloud_object.path.key,
+                Metadata=meta
+            )
 
-        if hasattr(body, 'close'):
-            body.close()
+        if hasattr(stream, 'close'):
+            stream.close()
 
     def preprocess_map_reduce(self, preprocessor: MapReducePreprocessor, cloud_object: CloudObject):
         raise NotImplementedError()
