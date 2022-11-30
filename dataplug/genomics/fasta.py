@@ -1,11 +1,13 @@
 import json
 import re
+from typing import BinaryIO, ByteString, List, Tuple, Dict
+
 import diskcache
 import tempfile
 
-from ..cloudobject import CloudDataType
+from ..cloudobject import CloudDataType, CloudObject
 
-from dataplug.preprocess.stubs import MapReducePreprocessor
+from dataplug.preprocess.preprocessor import MapReducePreprocessor
 
 
 class FASTAPreprocesser(MapReducePreprocessor):
@@ -21,12 +23,12 @@ class FASTAPreprocesser(MapReducePreprocessor):
         # name_id num_chunks_has_divided offset_head offset_bases len_bases
         content[-1] = f'{content[-1]} {len_base}'
 
-    @staticmethod
-    def map(data_stream, meta):
-        min_range = meta.worker_id * meta.chunk_size
-        max_range = int(meta.obj_size) \
-            if meta.worker_id == meta.partitions - 1 \
-            else (meta.worker_id + 1) * meta.chunk_size
+    def map(self, data_stream: BinaryIO, cloud_object: CloudObject,
+            mapper: int, chunk_size: int, n_mappers: int) -> ByteString:
+        min_range = mapper * chunk_size
+        max_range = int(cloud_object.size) \
+            if mapper == n_mappers - 1 \
+            else (mapper + 1) * chunk_size
         # data = self.storage.get_object(bucket=self.bucket, key=key,
         #                                extra_get_args={'Range': f'bytes={min_range}-{max_range - 1}'}).decode('utf-8')
         data = data_stream.read().decode('utf-8')
@@ -45,7 +47,7 @@ class FASTAPreprocesser(MapReducePreprocessor):
                 end = min_range + m.end()
                 if first_sequence:
                     first_sequence = False
-                    if meta.worker_id > 0 and start - 1 > min_range:
+                    if mapper > 0 and start - 1 > min_range:
                         # If it is not the worker of the first part of the file and in addition it
                         # turns out that the partition begins in the middle of the base of a sequence.
                         # (start-1): avoid having a split sequence in the index that only has '\n'
@@ -93,18 +95,18 @@ class FASTAPreprocesser(MapReducePreprocessor):
                 # Add length of bases to last sequence
                 FASTAPreprocesser.__get_length(min_range, sequences, data, prev, max_range)
 
-        return json.dumps(sequences)
+        return json.dumps(sequences).encode('utf-8')
 
-    @staticmethod
-    def reduce(results, meta):
+    def reduce(self, results: List[BinaryIO], cloud_object: CloudObject,
+               n_mappers: int) -> Tuple[ByteString, Dict[str, str]]:
         if len(results) == 1:
-            sequences = json.loads(results.pop())
+            sequences = json.loads(results.pop().read().decode('utf-8'))
             output = "\n".join(sequences)
-            return None, sequences
+            return output.encode('utf-8'), {}
 
         cache = diskcache.Cache(tempfile.mktemp())
         for i, result in enumerate(results):
-            sequences = json.loads(result)
+            sequences = json.loads(result.read())
             # dict_prev = results[i - 1]
             # seq_range_prev = dict_prev['sequences']
             if i > 0 and '>>' in sequences[0]:
@@ -150,7 +152,7 @@ class FASTAPreprocesser(MapReducePreprocessor):
             output += "\n".join(cache[i])
             output += "\n"
 
-        return None, output
+        return output.encode('utf-8'), {}
 
 
 @CloudDataType(preprocessor=FASTAPreprocesser)
