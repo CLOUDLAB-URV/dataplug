@@ -45,7 +45,7 @@ class PickleableS3ClientProxy:
         self.role_arn = role_arn
         self.session_name = None
         self.token_duration_seconds = token_duration_seconds or 86400
-        use_token = use_token or True
+        use_token = use_token if use_token is not None else True
 
         if use_token:
             logger.debug('Using token for S3 authentication')
@@ -70,13 +70,13 @@ class PickleableS3ClientProxy:
 
             self.credentials = response['Credentials']
 
-            self.client = boto3.client('s3',
-                                       aws_access_key_id=self.credentials['AccessKeyId'],
-                                       aws_secret_access_key=self.credentials['SecretAccessKey'],
-                                       aws_session_token=self.credentials['SessionToken'],
-                                       endpoint_url=self.endpoint_url,
-                                       region_name=self.region_name,
-                                       config=botocore.client.Config(**self.botocore_config_kwargs))
+            self.__client = boto3.client('s3',
+                                         aws_access_key_id=self.credentials['AccessKeyId'],
+                                         aws_secret_access_key=self.credentials['SecretAccessKey'],
+                                         aws_session_token=self.credentials['SessionToken'],
+                                         endpoint_url=self.endpoint_url,
+                                         region_name=self.region_name,
+                                         config=botocore.client.Config(**self.botocore_config_kwargs))
         else:
             logger.warning('Using user credentials is discouraged for security reasons! '
                            'Consider using token-based authentication instead')
@@ -84,12 +84,12 @@ class PickleableS3ClientProxy:
                 'AccessKeyId': aws_access_key_id,
                 'SecretAccessKey': aws_secret_access_key
             }
-            self.client = boto3.client('s3',
-                                       aws_access_key_id=self.credentials['AccessKeyId'],
-                                       aws_secret_access_key=self.credentials['SecretAccessKey'],
-                                       endpoint_url=self.endpoint_url,
-                                       region_name=self.region_name,
-                                       config=botocore.client.Config(**self.botocore_config_kwargs))
+            self.__client = boto3.client('s3',
+                                         aws_access_key_id=self.credentials['AccessKeyId'],
+                                         aws_secret_access_key=self.credentials['SecretAccessKey'],
+                                         endpoint_url=self.endpoint_url,
+                                         region_name=self.region_name,
+                                         config=botocore.client.Config(**self.botocore_config_kwargs))
 
     def __getstate__(self):
         logger.debug('Pickling S3 client')
@@ -113,81 +113,104 @@ class PickleableS3ClientProxy:
         self.session_name = state['session_name']
         self.token_duration_seconds = state['token_duration_seconds']
 
-        self.client = boto3.client('s3',
-                                   aws_access_key_id=self.credentials['AccessKeyId'],
-                                   aws_secret_access_key=self.credentials['SecretAccessKey'],
-                                   aws_session_token=self.credentials.get('SessionToken'),
-                                   endpoint_url=self.endpoint_url,
-                                   region_name=self.region_name,
-                                   config=botocore.client.Config(**self.botocore_config_kwargs))
-
-    def __do_request(self, op, *args, **kwargs):
-        logger.debug('S3.%s => %s %s', op.__name__, args, kwargs)
-        try:
-            response = op(*args, **kwargs)
-            response = response or {}
-            logger.debug('S3.%s => %d', op.__name__, response.get('ResponseMetadata', {}).get('HTTPStatusCode', 200))
-            return response
-        except botocore.exceptions.ClientError as e:
-            logger.debug('%s.head_object => %s', self.__class__.__name__, e)
-            raise e
+        self.__client = boto3.client('s3',
+                                     aws_access_key_id=self.credentials['AccessKeyId'],
+                                     aws_secret_access_key=self.credentials['SecretAccessKey'],
+                                     aws_session_token=self.credentials.get('SessionToken'),
+                                     endpoint_url=self.endpoint_url,
+                                     region_name=self.region_name,
+                                     config=botocore.client.Config(**self.botocore_config_kwargs))
 
     def abort_multipart_upload(self, *args, **kwargs):
-        return self.__do_request(self.client.abort_multipart_upload, *args, **kwargs)
+        response = self.__client.abort_multipart_upload(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def complete_multipart_upload(self, *args, **kwargs):
-        return self.__do_request(self.client.complete_multipart_upload, *args, **kwargs)
+        response = self.__client.complete_multipart_upload(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def create_multipart_upload(self, *args, **kwargs):
-        return self.__do_request(self.client.create_multipart_upload, *args, **kwargs)
+        response = self.__client.create_multipart_upload(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def download_file(self, *args, **kwargs):
-        return self.__do_request(self.client.download_file, *args, **kwargs)
+        self.__client.download_file(*args, **kwargs)
+        logger.debug('%s', {'HTTP-Status': '200'})
 
     def download_fileobj(self, *args, **kwargs):
-        return self.__do_request(self.client.download_fileobj, *args, **kwargs)
+        self.__client.download_fileobj(*args, **kwargs)
+        logger.debug('%s', {'HTTP-Status': '200'})
 
     def generate_presigned_post(self, *args, **kwargs):
-        return self.__do_request(self.client.generate_presigned_post, *args, **kwargs)
+        response = self.__client.generate_presigned_post(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def generate_presigned_url(self, *args, **kwargs):
-        return self.__do_request(self.client.generate_presigned_url, *args, **kwargs)
+        response = self.__client.generate_presigned_url(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def get_object(self, *args, **kwargs):
-        return self.__do_request(self.client.get_object, *args, **kwargs)
+        response = self.__client.get_object(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def head_bucket(self, *args, **kwargs):
-        return self.__do_request(self.client.head_bucket, *args, **kwargs)
+        response = self.__client.head_bucket(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def head_object(self, *args, **kwargs):
-        return self.__do_request(self.client.head_object, *args, **kwargs)
+        response = self.__client.head_object(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def list_buckets(self):
-        return self.__do_request(self.client.list_buckets)
+        response = self.__client.list_buckets()
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def list_multipart_uploads(self, *args, **kwargs):
-        return self.__do_request(self.client.list_multipart_uploads, *args, **kwargs)
+        response = self.__client.list_multipart_uploads(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def list_objects(self, *args, **kwargs):
-        return self.__do_request(self.client.list_objects, *args, **kwargs)
+        response = self.__client.list_objects(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def list_objects_v2(self, *args, **kwargs):
-        return self.__do_request(self.client.list_objects_v2, *args, **kwargs)
+        response = self.__client.list_objects_v2(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def list_parts(self, *args, **kwargs):
-        return self.__do_request(self.client.list_parts, *args, **kwargs)
+        response = self.__client.list_parts(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def put_object(self, *args, **kwargs):
-        return self.__do_request(self.client.put_object, *args, **kwargs)
+        response = self.__client.put_object(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
     def upload_file(self, *args, **kwargs):
-        return self.__do_request(self.client.upload_file, *args, **kwargs)
+        self.__client.upload_file(*args, **kwargs)
+        logger.debug('%s', {'HTTP-Status': '200'})
 
     def upload_fileobj(self, *args, **kwargs):
-        return self.__do_request(self.client.upload_fileobj, *args, **kwargs)
+        self.__client.upload_fileobj(*args, **kwargs)
+        logger.debug('%s', {'HTTP-Status': '200'})
 
     def upload_part(self, *args, **kwargs):
-        return self.__do_request(self.client.upload_part, *args, **kwargs)
+        response = self.__client.upload_part(*args, **kwargs)
+        logger.debug('%s', response.get('ResponseMetadata', {}))
+        return response
 
 
 class _S3Flavour(_PosixFlavour):

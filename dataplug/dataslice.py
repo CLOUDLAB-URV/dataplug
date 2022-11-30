@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Optional
+from copy import deepcopy
+from typing import TYPE_CHECKING, Optional, Dict
 
 if TYPE_CHECKING:
     from .cloudobject import CloudObject
@@ -14,13 +15,14 @@ class CloudObjectSlice:
         self.obj_path: Optional[PureS3Path] = None
         self.meta_path: Optional[PureS3Path] = None
         self.size: Optional[int] = None
+        self.attributes: Optional[Dict[str, str]] = None
 
     def contextualize(self, cloud_object: 'CloudObject'):
         self.s3 = cloud_object.s3
         self.obj_path = cloud_object.path
         self.meta_path = cloud_object.meta_path
         self.size = cloud_object.size
-        # self.attributes = cloud_object._obj_attrs
+        self.attributes = deepcopy(cloud_object._obj_attrs)
 
     def get(self):
         raise NotImplementedError()
