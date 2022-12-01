@@ -12,7 +12,8 @@ else:
 
 from .util import split_s3_path, head_object
 from .storage import PureS3Path, PickleableS3ClientProxy
-from .preprocess import BatchPreprocessor, MapReducePreprocessor, PreprocessorBackendBase
+from .preprocess import BatchPreprocessor, MapReducePreprocessor, MetadataPreprocessor, PreprocessorBackendBase
+from .dataslice import CloudObjectSlice
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 class CloudDataType:
     def __init__(self,
                  preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = None,
-                 inherit_from: 'CloudDataType' = None):
+                 inherit_from: Type['CloudDataType'] = None):
         self.co_class: object = None
         self.__preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = preprocessor
         self.__parent: 'CloudDataType' = inherit_from
@@ -56,6 +57,7 @@ class CloudObject:
         self._obj_path: PureS3Path = PureS3Path.from_uri(s3_uri_path)
         self._meta_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + '.meta', self._obj_path.key)
         self._cls: CloudDataType = cloud_object_class
+        s3_config = s3_config or {}
         self._s3: PickleableS3ClientProxy = PickleableS3ClientProxy(
             aws_access_key_id=s3_config.get('aws_access_key_id'),
             aws_secret_access_key=s3_config.get('aws_secret_access_key'),
@@ -66,6 +68,7 @@ class CloudObject:
             role_arn=s3_config.get('role_arn'),
             token_duration_seconds=s3_config.get('token_duration_seconds')
         )
+        self._obj_attrs: Dict[str, str] = {}
 
         logger.debug(f'{self._obj_path=},{self._meta_path=}')
 
@@ -137,35 +140,31 @@ class CloudObject:
                     raise e
         if not self._meta_meta:
             try:
-                res, _ = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
+                res, attrs = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
                 self._meta_meta = res
+                self._obj_attrs = attrs
             except KeyError as e:
                 self._meta_meta = None
                 if enforce_meta:
                     raise e
             return self._obj_meta, self._meta_meta
 
-    def preprocess(self, preprocessor_backend: PreprocessorBackendBase, chunk_size: int = None,
-                   num_workers: int = None, *args, **kwargs):
-        preprocessor_backend.do_preprocess(preprocessor=self._cls.preprocessor, cloud_object=self,
-                                           chunk_size=chunk_size, num_workers=num_workers, *args, **kwargs)
+    def preprocess(self, preprocessor_backend: PreprocessorBackendBase, *args, **kwargs):
+        # FIXME implement this properly
+        if issubclass(self._cls.preprocessor, MetadataPreprocessor):
+            metadata_preprocessor: MetadataPreprocessor = self._cls.preprocessor(*args, **kwargs)
+            preprocessor_backend.preprocess_metadata(metadata_preprocessor, self)
+        elif issubclass(self._cls.preprocessor, BatchPreprocessor):
+            batch_preprocessor: BatchPreprocessor = self._cls.preprocessor(*args, **kwargs)
+            preprocessor_backend.preprocess_batch(batch_preprocessor, self)
+        elif issubclass(self._cls.preprocessor, MapReducePreprocessor):
+            mapreduce_preprocessor: MapReducePreprocessor = self._cls.preprocessor(*args, **kwargs)
+            preprocessor_backend.preprocess_map_reduce(mapreduce_preprocessor, self)
 
-    # def get_meta_obj(self):
-    #     get_res = self._s3.get_object(Bucket=self._meta_path.bucket, Key=self._obj_path.key)
-    #     return get_res['Body']
-    #
-    # def call(self, f, *args, **kwargs):
-    #     if isinstance(f, str):
-    #         func_name = f
-    #     elif inspect.ismethod(f) or inspect.isfunction(f):
-    #         func_name = f.__name__
-    #     else:
-    #         raise Exception(f)
-    #
-    #     attr = getattr(self._child, func_name)
-    #     return attr.__call__(*args, **kwargs)
+    def get_attribute(self, key: str) -> str:
+        return self._obj_attrs[key]
 
-    def partition(self, strategy, *args, **kwargs):
+    def partition(self, strategy, *args, **kwargs) -> List[CloudObjectSlice]:
         slices = strategy(self, *args, **kwargs)
         [s.contextualize(self) for s in slices]
         return slices

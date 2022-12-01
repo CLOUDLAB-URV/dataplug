@@ -4,9 +4,10 @@ import json
 import tempfile
 import shutil
 import logging
+from typing import BinaryIO, Tuple, Dict, ByteString
 
-from ..cloudobject import CloudDataType
-from ..preprocess import PreprocessorMetadata, BatchPreprocessor
+from ..cloudobject import CloudDataType, CloudObject
+from ..preprocess import BatchPreprocessor
 from ..util import force_delete_path
 
 try:
@@ -29,7 +30,7 @@ class LiDARPreprocessor(BatchPreprocessor):
             raise e
         super().__init__()
 
-    def preprocess(self, data_stream: BytesIO, meta: PreprocessorMetadata):
+    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject) -> Tuple[BinaryIO, Dict[str, str]]:
         input_file_path = tempfile.mktemp()
         output_file_path = tempfile.mktemp()
 
@@ -54,25 +55,26 @@ class LiDARPreprocessor(BatchPreprocessor):
             pipeline = pdal.Pipeline(json.dumps(pipeline_json))
             pipeline.execute()
 
-            with open(output_file_path, 'rb') as copc_file:
-                copc_reader = laspy.copc.CopcReader(copc_file)
-                copc_meta = {
-                    'points': str(copc_reader.header.point_count),
-                    'x_scale': str(copc_reader.header.x_scale),
-                    'y_scale': str(copc_reader.header.y_scale),
-                    'z_scale': str(copc_reader.header.z_scale),
-                    'x_offset': str(copc_reader.header.x_offset),
-                    'y_offset': str(copc_reader.header.y_offset),
-                    'z_offset': str(copc_reader.header.z_offset),
-                    'x_max': str(copc_reader.header.x_max),
-                    'y_max': str(copc_reader.header.y_max),
-                    'z_max': str(copc_reader.header.z_max),
-                    'x_min': str(copc_reader.header.x_min),
-                    'y_min': str(copc_reader.header.y_min),
-                    'z_min': str(copc_reader.header.z_min),
-                    'root_offset': str(copc_reader.copc_info.hierarchy_root_offset),
-                    'root_size': str(copc_reader.copc_info.hierarchy_root_size)
-                }
+            # with open(output_file_path, 'rb') as copc_file:
+            #     copc_reader = laspy.copc.CopcReader(copc_file)
+            #     copc_meta = {
+            #         'points': str(copc_reader.header.point_count),
+            #         'x_scale': str(copc_reader.header.x_scale),
+            #         'y_scale': str(copc_reader.header.y_scale),
+            #         'z_scale': str(copc_reader.header.z_scale),
+            #         'x_offset': str(copc_reader.header.x_offset),
+            #         'y_offset': str(copc_reader.header.y_offset),
+            #         'z_offset': str(copc_reader.header.z_offset),
+            #         'x_max': str(copc_reader.header.x_max),
+            #         'y_max': str(copc_reader.header.y_max),
+            #         'z_max': str(copc_reader.header.z_max),
+            #         'x_min': str(copc_reader.header.x_min),
+            #         'y_min': str(copc_reader.header.y_min),
+            #         'z_min': str(copc_reader.header.z_min),
+            #         'root_offset': str(copc_reader.copc_info.hierarchy_root_offset),
+            #         'root_size': str(copc_reader.copc_info.hierarchy_root_size)
+            #     }
+            copc_meta = {}
 
             return open(output_file_path, 'rb'), copc_meta
         finally:

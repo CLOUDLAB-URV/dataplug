@@ -3,8 +3,8 @@ import logging
 import botocore
 
 from dataplug import CloudObject
-from dataplug.geospatial import LiDARPointCloud
-from dataplug.preprocess import LithopsPreprocessor, LocalPreprocessor
+from dataplug.geospatial.laspc import LiDARPointCloud
+from dataplug.preprocess import LithopsPreprocessor, DummyPreprocessor
 from dataplug.util import setup_logging
 
 
@@ -29,7 +29,7 @@ def main():
     print(preprocessed)
     if not preprocessed:
         # backend = LithopsPreprocessor()
-        backend = LocalPreprocessor()
+        backend = DummyPreprocessor()
         co.preprocess(backend)
 
 
