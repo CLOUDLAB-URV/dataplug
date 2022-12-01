@@ -49,7 +49,8 @@ class CSVSlice(CloudObjectSlice):
         return retval[first_row_start_pos:last_row_end_pos]
 
     def generator_csv(self, read_size):
-        "Return the slice as a generator"
+        "Return the slices as generators"
+        
         r0 = self.range_0 - 1 if not self.first else self.range_0
         r1 = self.range_1 + self.threshold if not self.last else self.range_1
         res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key, Range=f'bytes={r0}-{r1}')
