@@ -11,3 +11,6 @@ pytz
 s3transfer
 six
 urllib3
+lithops
+ray
+pyimzml
