@@ -5,7 +5,6 @@ import botocore
 
 from dataplug import CloudObject
 from dataplug.metabolomics import IMZML, pt_strat
-from dataplug.preprocess import LithopsPreprocessor, LocalPreprocessor
 from dataplug.util import setup_logging
 
 
@@ -21,14 +20,24 @@ if __name__ == '__main__':
         'role_arn': 'arn:aws:iam::123456789012:role/S3Access'
     }
     
+    #Local instance
+    f = open('../sample_data/Example_Processed.imzML', 'rb')
+    f1 = open('../sample_data/Example_Processed.ibd', 'rb')
+    parser = ImzMLParser(f, ibd_file=f1)
     
+    #Remote instance
     co = CloudObject.from_s3(IMZML,
                             's3://testdata/Example_Processed.imzML',
                             s3_config=config)
 
 
     slice = co.partition(pt_strat)
-    print(slice[1].get_mz_array_point())
+
+    #Example of the usage of all methods
+    print(slice[0].get_mz_info_point())
+    print(slice[0].get_coordinate())
+    print(slice[0].get_intensity_info_point())
+    print(slice[0].get_data_point_cloud('Example_Processed.ibd'))
     
     
     
