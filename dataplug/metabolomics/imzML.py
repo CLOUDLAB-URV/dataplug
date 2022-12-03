@@ -29,8 +29,7 @@ class imzMLSlice(CloudObjectSlice):
         """
         body_imzml = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key)['Body']
         tmp = tempfile.NamedTemporaryFile()
-        with open(tmp.name, 'wb') as f:
-            f.write(body_imzml.read())
+        tmp.write(body_imzml.read())
         parser = ImzMLParser(tmp.name, ibd_file=None)
         position = parser.coordinates.index(self.coordinate)
 
@@ -41,7 +40,6 @@ class imzMLSlice(CloudObjectSlice):
 
         info = {"mz Offsets": parser.mzOffsets[position], "mz Group Id": parser.mzGroupId,
                 "mz Precision": precision_aux_mz_point, "mz Lengths": parser.mzLengths[position]}
-        f.close()
         return info
 
 
@@ -60,11 +58,10 @@ class imzMLSlice(CloudObjectSlice):
         precision_aux_intensity_point = 0
         body_imzml = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key)['Body']
         tmp = tempfile.NamedTemporaryFile()
-        with open(tmp.name, 'wb') as f:
-            f.write(body_imzml.read())
+        
+        tmp.write(body_imzml.read())
         parser = ImzMLParser(tmp.name, ibd_file=None)
         position = parser.coordinates.index(self.coordinate)
-
         # Get precision in understandable words.
         for key, value in parser.precisionDict.items():
             if parser.intensityPrecision == value:
@@ -93,23 +90,20 @@ class imzMLSlice(CloudObjectSlice):
         """
         body_imzml = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key)['Body']
         tmp = tempfile.NamedTemporaryFile()
-        with open(tmp.name, 'wb') as f:
-            f.write(body_imzml.read())
+        tmp.write(body_imzml.read())
         parser = ImzMLParser(tmp.name, ibd_file=None)
         position = parser.coordinates.index(self.coordinate)
-
         mzOffset = parser.mzOffsets[position]
         mzSize = (parser.sizeDict.get(parser.mzPrecision) * parser.mzLengths[position]) - 1
-
         # Download our specific data.
         header_request = self.s3.get_object(Bucket=self.obj_path.bucket, Key=key_ibd,
                                                  Range='bytes={}-{}'.format(mzOffset,
                                                                             mzOffset + mzSize))
+        #mzArray = [np.frombuffer(i, dtype=parser.intensityPrecision) for i in header_request['Body']]
         mzArray = []
         for i in header_request['Body']:
             mzArray = np.append(mzArray, np.frombuffer(i, dtype=parser.intensityPrecision))
 
-        f.close()
         return mzArray
 
     def get_intensity_array_point(self, key_ibd: str):
@@ -121,38 +115,29 @@ class imzMLSlice(CloudObjectSlice):
         """
         body_imzml = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key)['Body']
         tmp = tempfile.NamedTemporaryFile()
-        with open(tmp.name, 'wb') as f:
-            f.write(body_imzml.read())
-        
+        tmp.write(body_imzml.read())
         parser = ImzMLParser(tmp.name, ibd_file=None)
-        
         position = parser.coordinates.index(self.coordinate)
         intensityOffset = parser.intensityOffsets[position]
         intensitySize = (parser.sizeDict.get(parser.intensityPrecision) * parser.intensityLengths[position]) - 1
-
         header_request = self.s3.get_object(Bucket=self.obj_path.bucket, Key=key_ibd,
                                                  Range='bytes={}-{}'.format(intensityOffset,
                                                                             intensityOffset + intensitySize))
+        #intensityArray = [np.frombuffer(i, dtype=parser.intensityPrecision) for i in header_request['Body']]
         intensityArray = []
         for i in header_request['Body']:
             intensityArray = np.append(intensityArray, np.frombuffer(i, dtype=parser.intensityPrecision))
-
-        f.close()
-        
+  
         return intensityArray
 
     
 def pt_strat(cloud_object: IMZML):
-    
     body_imzml = cloud_object.s3.get_object(Bucket=cloud_object._obj_path.bucket, Key=cloud_object._obj_path.key)['Body']
     tmp = tempfile.NamedTemporaryFile()
-    with open(tmp.name, 'wb') as f:
-        f.write(body_imzml.read())
+    tmp.write(body_imzml.read())
     parser = ImzMLParser(tmp.name, ibd_file=None)
     position = parser.coordinates
-    slices = []
-    for tuple in position:
-        slices.append(imzMLSlice(tuple))
+    slices = [imzMLSlice(tuple) for tuple in position]
     
     return slices
 
