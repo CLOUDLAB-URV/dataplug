@@ -55,7 +55,7 @@ class GZipTextPreprocessor(BatchPreprocessor):
 
             # Create index and save to tmp file
             # TODO tmp file is needed, sending to stdout is not working at the moment (todo fix)
-            index_proc = subprocess.Popen([gztool, '-i', '-x', '-s', '1', '-I', tmp_index_file_name],
+            index_proc = subprocess.Popen([gztool, '-i', '-x', '-I', tmp_index_file_name],
                                           stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             # TODO program might get stuck if subprocess fails, blocking io should be done in a backgroun thread or using async/await
