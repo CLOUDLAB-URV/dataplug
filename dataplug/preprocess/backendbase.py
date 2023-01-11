@@ -5,13 +5,10 @@ from typing import TYPE_CHECKING, Union, Optional
 
 if TYPE_CHECKING:
     from ..cloudobject import CloudObject
-    from .preprocessor import MetadataPreprocessor, BatchPreprocessor, MapReducePreprocessor
+    from .preprocessor import BatchPreprocessor, MapReducePreprocessor
 
 
 class PreprocessorBackendBase:
-    def preprocess_metadata(self, preprocessor: MetadataPreprocessor, cloud_object: CloudObject):
-        raise NotImplementedError()
-
     def preprocess_batch(self, preprocessor: BatchPreprocessor, cloud_object: CloudObject):
         raise NotImplementedError()
 

@@ -13,8 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class CSVPreprocessor(BatchPreprocessor):
-    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject):
-        header = data_stream.readline()
+    def extract_metadata(self, data_stream: BinaryIO, cloud_object: CloudObject):
+        head = ''.join(data_stream.readline().decode('utf-8') for _ in range(25))
+        df = pd.read_csv(io.StringIO(head))
+        return None, None, {'columns': df.columns.values.tolist(), 'dtypes': df.dtypes.tolist()}
 
 
 @CloudDataType(preprocessor=CSVPreprocessor)

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import logging
+import pickle
 from typing import TYPE_CHECKING, Union, Optional
 from boto3.s3.transfer import TransferConfig
-from smart_open import smart_open
+import smart_open
 
 from ..backendbase import PreprocessorBackendBase
 from ..preprocessor import BatchPreprocessor, MapReducePreprocessor, MetadataPreprocessor
@@ -17,33 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 class DummyPreprocessor(PreprocessorBackendBase):
-    def preprocess_metadata(self, preprocessor: MetadataPreprocessor, cloud_object: CloudObject):
-        get_res = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
-
-        result = preprocessor.extract_metadata(get_res['Body'], cloud_object)
-
-        try:
-            body, meta = result
-        except TypeError:
-            raise Exception(f'Preprocessing result is {result}')
-
-        if body is None or meta is None:
-            raise Exception(f'Preprocessing result is {body, meta}')
-
-        cloud_object.s3.upload_fileobj(
-            Fileobj=body,
-            Bucket=cloud_object.meta_path.bucket,
-            Key=cloud_object.path.key,
-            ExtraArgs={'Metadata': meta}
-        )
-
-        if hasattr(body, 'close'):
-            body.close()
-
     def preprocess_batch(self, preprocessor: BatchPreprocessor, cloud_object: CloudObject):
         obj_uri = cloud_object.path.as_uri()
-        client = cloud_object.s3._get_client()
-        stream = smart_open(obj_uri, 'rb', transport_params={'client': client})
+        client = cloud_object.s3._new_client()
+        stream = smart_open.open(obj_uri, 'rb', transport_params={'client': client})
         result = preprocessor.preprocess(stream, cloud_object)
 
         try:
