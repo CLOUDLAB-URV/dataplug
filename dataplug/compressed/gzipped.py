@@ -251,7 +251,7 @@ class GZipTextSlice(CloudObjectSlice):
 
                 if last_line is not None:
                     last_line = last_line + chunk_lines.pop(0)
-                    chunk_lines.append(last_line)
+                    lines.append(last_line)
                     last_line = None
 
                 if text[-1] != "\n":
