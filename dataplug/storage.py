@@ -91,6 +91,15 @@ class PickleableS3ClientProxy:
                                          region_name=self.region_name,
                                          config=botocore.client.Config(**self.botocore_config_kwargs))
 
+    def _new_client(self):
+        session = boto3.Session(
+            aws_access_key_id=self.credentials['AccessKeyId'],
+            aws_secret_access_key=self.credentials['SecretAccessKey'],
+            aws_session_token=self.credentials['SessionToken'],
+            region_name=self.region_name)
+        return session.client('s3', endpoint_url=self.endpoint_url,
+                              config=botocore.client.Config(**self.botocore_config_kwargs))
+
     def __getstate__(self):
         logger.debug('Pickling S3 client')
         return {

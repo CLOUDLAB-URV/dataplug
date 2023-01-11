@@ -4,6 +4,8 @@ import re
 import os
 import shutil
 
+from io import StringIO
+
 import botocore
 
 logger = logging.getLogger(__name__)

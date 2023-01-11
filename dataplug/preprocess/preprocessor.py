@@ -53,7 +53,7 @@ class BatchPreprocessor:
         :param cloud_object: CloudObject instance to be preprocessed
         :return: tuple of preprocessed object as a bytearray and metadata attributes
         """
-        pass
+        raise NotImplementedError()
 
 
 class MapReducePreprocessor:
