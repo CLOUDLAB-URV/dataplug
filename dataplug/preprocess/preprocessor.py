@@ -5,48 +5,16 @@ from typing import TYPE_CHECKING, Tuple, BinaryIO, Dict, List, Type, ByteString,
 
 if TYPE_CHECKING:
     from ..cloudobject import CloudObject
+    from .result import Metadata
 
 logger = logging.getLogger(__name__)
-
-
-# @dataclass
-# class PreprocessorMetadata:
-#     """
-#     Data Class structure containing the metadata used by the preprocessor class
-#     """
-#     s3: boto3.client
-#     obj_path: PureS3Path
-#     meta_path: PureS3Path
-#     worker_id: int
-#     chunk_size: int
-#     obj_size: int
-#     partitions: int = 1
-
-
-class MetadataPreprocessor:
-    """
-    MetadataPreprocessor is used to extract metadata from an object without requiring to overwrite it
-    """
-
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def extract_metadata(self, data_stream: BinaryIO, cloud_object: CloudObject) -> Dict[str, str]:
-        """
-        Metadata extractor preprocessor function
-        :param data_stream: object body stream to be preprocessed
-        :param cloud_object: CloudObject instance to be preprocessed
-        :return: metadata attributes
-        """
-        raise NotImplementedError()
 
 
 class BatchPreprocessor:
     def __init__(self, *args, **kwargs):
         pass
 
-    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject) \
-            -> Tuple[Union[ByteString, BinaryIO], Dict[str, str]]:
+    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject) -> Metadata:
         """
         Preprocess function for batch preprocessing
         :param data_stream: object body stream to be preprocessed
@@ -61,7 +29,7 @@ class MapReducePreprocessor:
         pass
 
     def map(self, data_stream: BinaryIO, cloud_object: CloudObject,
-            mapper: int, chunk_size: int, n_mappers: int) -> ByteString:
+            mapper: int, chunk_size: int, n_mappers: int) -> Metadata:
         """
         Map function for Map-Reduce preprocessor
         :param data_stream: object body stream to be preprocessed
@@ -73,8 +41,7 @@ class MapReducePreprocessor:
         """
         raise NotImplementedError()
 
-    def reduce(self, results: List[BinaryIO], cloud_object: CloudObject,
-               n_mappers: int) -> Tuple[ByteString, Dict[str, str]]:
+    def reduce(self, results: List[BinaryIO], cloud_object: CloudObject, n_mappers: int) -> Metadata:
         """
         Reduce function for Map-Reduce preprocessor
         :param cloud_object: CloudObject instance to be preprocessed

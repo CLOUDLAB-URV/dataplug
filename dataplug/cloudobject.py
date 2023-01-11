@@ -2,17 +2,17 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import Union, Callable, List, Concatenate
-from typing import TYPE_CHECKING, Tuple, Dict, Optional, Type
+from typing import TYPE_CHECKING, Union, List, Tuple, Dict, Optional, Type, Any
+from types import SimpleNamespace
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
 else:
     S3Client = object
 
-from .util import split_s3_path, head_object
+from .util import split_s3_path, head_object, load_attributes
 from .storage import PureS3Path, PickleableS3ClientProxy
-from .preprocess import BatchPreprocessor, MapReducePreprocessor, MetadataPreprocessor, PreprocessorBackendBase
+from .preprocess import BatchPreprocessor, MapReducePreprocessor, PreprocessorBackendBase
 from .dataslice import CloudObjectSlice
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,6 @@ class CloudObject:
         self._meta_meta: Optional[Dict[str, str]] = None
         self._obj_path: PureS3Path = PureS3Path.from_uri(s3_uri_path)
         self._meta_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + '.meta', self._obj_path.key)
-        self._attrs_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + '.meta', self._obj_path.key + '.attrs')
         self._cls: CloudDataType = cloud_object_class
         s3_config = s3_config or {}
         self._s3: PickleableS3ClientProxy = PickleableS3ClientProxy(
@@ -69,7 +68,7 @@ class CloudObject:
             role_arn=s3_config.get('role_arn'),
             token_duration_seconds=s3_config.get('token_duration_seconds')
         )
-        self._obj_attrs: Dict[str, str] = {}
+        self._obj_attrs: SimpleNamespace = SimpleNamespace()
 
         logger.debug(f'{self._obj_path=},{self._meta_path=}')
 
@@ -90,6 +89,10 @@ class CloudObject:
     @property
     def s3(self) -> S3Client:
         return self._s3
+
+    @property
+    def attributes(self) -> Any:
+        return self._obj_attrs
 
     @classmethod
     def from_s3(cls, cloud_object_class, s3_path, s3_config=None, fetch=True) -> 'CloudObject':
@@ -141,9 +144,9 @@ class CloudObject:
                     raise e
         if not self._meta_meta:
             try:
-                res, attrs = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
+                res, encoded_attrs = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
                 self._meta_meta = res
-                self._obj_attrs = attrs
+                self._obj_attrs = SimpleNamespace(**load_attributes(encoded_attrs))
             except KeyError as e:
                 self._meta_meta = None
                 if enforce_meta:
@@ -152,10 +155,7 @@ class CloudObject:
 
     def preprocess(self, preprocessor_backend: PreprocessorBackendBase, *args, **kwargs):
         # FIXME implement this properly
-        if issubclass(self._cls.preprocessor, MetadataPreprocessor):
-            metadata_preprocessor: MetadataPreprocessor = self._cls.preprocessor(*args, **kwargs)
-            preprocessor_backend.preprocess_metadata(metadata_preprocessor, self)
-        elif issubclass(self._cls.preprocessor, BatchPreprocessor):
+        if issubclass(self._cls.preprocessor, BatchPreprocessor):
             batch_preprocessor: BatchPreprocessor = self._cls.preprocessor(*args, **kwargs)
             preprocessor_backend.preprocess_batch(batch_preprocessor, self)
         elif issubclass(self._cls.preprocessor, MapReducePreprocessor):
@@ -163,7 +163,7 @@ class CloudObject:
             preprocessor_backend.preprocess_map_reduce(mapreduce_preprocessor, self)
 
     def get_attribute(self, key: str) -> str:
-        return self._obj_attrs[key]
+        return getattr(self._obj_attrs, key)
 
     def partition(self, strategy, *args, **kwargs) -> List[CloudObjectSlice]:
         slices = strategy(self, *args, **kwargs)

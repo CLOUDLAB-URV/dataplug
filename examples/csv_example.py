@@ -5,7 +5,7 @@ import botocore.config
 from collections import defaultdict
 
 from dataplug import CloudObject
-from dataplug.basic.csv import CSV, whole_line_csv_strategy
+from dataplug.basic.csvcloudobject import CSVCloudObject, batches_partition_strategy, partition_size_strategy
 from dataplug.preprocess import DummyPreprocessor
 
 import unittest
@@ -60,14 +60,21 @@ if __name__ == '__main__':
         'aws_access_key_id': 'minioadmin',
         'aws_secret_access_key': 'minioadmin',
         'region_name': 'us-east-1',
-        'endpoint_url': 'http://localhost:9000',
+        'endpoint_url': 'http://192.168.1.110:9000',
         'botocore_config_kwargs': {'signature_version': 's3v4'},
         'role_arn': 'arn:aws:iam::123456789012:role/S3Access'
     }
-    co = CloudObject.from_s3(CSV, 's3://testdata/cities.csv', s3_config=config)
+    # Create Cloud Object reference
+    co = CloudObject.from_s3(CSVCloudObject, 's3://testdata/cities.csv', s3_config=config)
 
-    backend = DummyPreprocessor()
+    backend = LithopsPreprocessor()
     co.preprocess(backend)
 
-    data_slices = co.partition(whole_line_csv_strategy, num_chunks=1000, threshold=200)
+    co.fetch()
+    print(co.attributes.columns)
+
+    data_slices = co.partition(batches_partition_strategy, num_batches=10)
+
+    x = data_slices[0].as_pandas_dataframe()
+    print(x)
 

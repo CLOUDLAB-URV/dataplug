@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+import io
 import logging
-import pickle
 from typing import TYPE_CHECKING, Union, Optional
 from boto3.s3.transfer import TransferConfig
 import smart_open
 
 from ..backendbase import PreprocessorBackendBase
-from ..preprocessor import BatchPreprocessor, MapReducePreprocessor, MetadataPreprocessor
+from ..preprocessor import BatchPreprocessor, MapReducePreprocessor
+from ...util import dump_attributes
 
 if TYPE_CHECKING:
     from ...cloudobject import CloudObject
@@ -22,30 +23,30 @@ class DummyPreprocessor(PreprocessorBackendBase):
         obj_uri = cloud_object.path.as_uri()
         client = cloud_object.s3._new_client()
         stream = smart_open.open(obj_uri, 'rb', transport_params={'client': client})
-        result = preprocessor.preprocess(stream, cloud_object)
+        preprocess_result = preprocessor.preprocess(stream, cloud_object)
 
-        try:
-            stream, meta = result
-        except TypeError:
-            raise Exception(f'Preprocessing result is {result}')
+        if preprocess_result.attributes is not None:
+            attrs_dict = dump_attributes(preprocess_result.attributes)
+        else:
+            attrs_dict = {}
 
-        if stream is None or meta is None:
-            raise Exception(f'Preprocessing result is {stream, meta}')
+        if preprocess_result.metadata is None:
+            preprocess_result.metadata = io.BytesIO(b"")
 
         if hasattr(stream, 'read'):
             cloud_object.s3.upload_fileobj(
-                Fileobj=stream,
+                Fileobj=preprocess_result.metadata,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.path.key,
-                ExtraArgs={'Metadata': meta},
+                ExtraArgs={'Metadata': attrs_dict},
                 Config=TransferConfig(use_threads=True, max_concurrency=256)
             )
         else:
             cloud_object.s3.put_object(
-                Body=stream,
+                Body=preprocess_result.metadata,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.path.key,
-                Metadata=meta
+                Metadata=attrs_dict
             )
 
         if hasattr(stream, 'close'):

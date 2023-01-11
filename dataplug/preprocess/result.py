@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from typing import BinaryIO, Dict, Any, AnyStr
+from typing import BinaryIO, Dict, Any
 
 
 @dataclass
-class PreprocessingResult:
+class Metadata:
     metadata: BinaryIO = None
     object_body: BinaryIO = None
-    attributes: Dict[AnyStr, Any] = None
+    attributes: Dict[str, Any] = None

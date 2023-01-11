@@ -1,13 +1,6 @@
 boto3
 botocore
-diskcache
-jmespath
-laspy
 numpy
 pandas
 pyarrow
-python-dateutil
-pytz
-s3transfer
-six
-urllib3
+smart_open

@@ -2,30 +2,33 @@ import logging
 from math import ceil
 from typing import BinaryIO, List, Tuple, Union, ByteString, Dict
 import pandas as pd
-
+import numpy as np
 from .. import CloudObject
 from ..cloudobject import CloudDataType
 from ..dataslice import CloudObjectSlice
-from ..preprocess import BatchPreprocessor
+from ..preprocess import BatchPreprocessor, Metadata
 import io
 
 logger = logging.getLogger(__name__)
 
 
 class CSVPreprocessor(BatchPreprocessor):
-    def extract_metadata(self, data_stream: BinaryIO, cloud_object: CloudObject):
+    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject, separator=','):
         head = ''.join(data_stream.readline().decode('utf-8') for _ in range(25))
-        df = pd.read_csv(io.StringIO(head))
-        return None, None, {'columns': df.columns.values.tolist(), 'dtypes': df.dtypes.tolist()}
+        df = pd.read_csv(io.StringIO(head), sep=separator)
+        attrs = {'columns': df.columns.values.tolist(), 'dtypes': df.dtypes.tolist(), 'separator': separator}
+        return Metadata(attributes=attrs)
 
 
 @CloudDataType(preprocessor=CSVPreprocessor)
-class CSV:
-    header: int
+class CSVCloudObject:
+    columns: List[str]
+    dtypes: List[np.dtype]
+    separator: str
 
 
 class CSVSlice(CloudObjectSlice):
-    def __init__(self, threshold, *args, **kwargs):
+    def __init__(self, threshold=None, *args, **kwargs):
         self.threshold = threshold
         self.first = False
         self.last = False
@@ -33,6 +36,9 @@ class CSVSlice(CloudObjectSlice):
         super().__init__(*args, **kwargs)
 
     def get(self):
+        return self.get_rows_as_string()
+
+    def get_rows_as_string(self):
         "Return the slice as a string"
         r0 = self.range_0 - 1 if not self.first else self.range_0
         r1 = self.range_1 + self.threshold if not self.last else self.range_1
@@ -110,23 +116,22 @@ class CSVSlice(CloudObjectSlice):
             else:
                 yield buffer
 
-    def as_pandas(self):
-        "Return the slice as a pandas dataframe"
-        if not self.first:
-            dataframe = pd.read_csv(io.StringIO(self.get()), sep=',')
-        else:
-            dataframe = pd.read_csv(self.header + io.StringIO(self.get()), sep=',')
+    def as_pandas_dataframe(self):
+        columns = self.attributes.columns
+        dtypes = dict(zip(columns, self.attributes.dtypes))
+        dataframe = pd.read_csv(io.StringIO(self.get_rows_as_string()), sep=',',
+                                index_col=False, usecols=columns, dtype=dtypes)
         return dataframe
 
 
-def whole_line_csv_strategy(cloud_object: CSV, num_chunks: int, threshold: int = 32) -> List[CSVSlice]:
+def batches_partition_strategy(cloud_object: CSVCloudObject, num_batches: int, threshold: int = 32) -> List[CSVSlice]:
     """
     This partition strategy chunks csv files by number of chunks avoiding to cut rows in half
     """
-    chunk_sz = ceil(cloud_object.size / num_chunks)
+    chunk_sz = ceil(cloud_object.size / num_batches)
 
     slices = []
-    for i in range(num_chunks):
+    for i in range(num_batches):
         r0 = chunk_sz * i
         r1 = (chunk_sz * i) + chunk_sz
         r1 = cloud_object.size if r1 > cloud_object.size else r1
@@ -135,5 +140,19 @@ def whole_line_csv_strategy(cloud_object: CSV, num_chunks: int, threshold: int =
         slices.append(data_slice)
 
     slices[-1].last = True
+
+    return slices
+
+
+def partition_size_strategy(cloud_object: CSVCloudObject, partition_size: int) -> List[CSVSlice]:
+    num_batches = ceil(cloud_object.size / partition_size)
+
+    slices = []
+    for i in range(num_batches):
+        r0 = partition_size * i
+        r1 = (partition_size * i) + partition_size
+        r1 = cloud_object.size if r1 > cloud_object.size else r1
+        data_slice = CSVSlice(range_0=r0, range_1=r1)
+        slices.append(data_slice)
 
     return slices
