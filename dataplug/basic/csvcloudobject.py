@@ -39,7 +39,7 @@ class CSVSlice(CloudObjectSlice):
         return self.get_rows_as_string()
 
     def get_rows_as_string(self):
-        "Return the slice as a string"
+        """Return the slice as a string"""
         r0 = self.range_0 - 1 if not self.first else self.range_0
         r1 = self.range_1 + self.threshold if not self.last else self.range_1
         res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key, Range=f'bytes={r0}-{r1}')
@@ -48,9 +48,8 @@ class CSVSlice(CloudObjectSlice):
         first_row_start_pos = 0
         last_row_end_pos = self.range_1 - self.range_0
         # find the nearest first row start position
-        if not self.first:
-            while retval[first_row_start_pos] != '\n':
-                first_row_start_pos += 1
+        while retval[first_row_start_pos] != '\n':
+            first_row_start_pos += 1
 
         # find the nearest last row end position within the threshold
         if not self.last:
@@ -120,7 +119,7 @@ class CSVSlice(CloudObjectSlice):
         columns = self.attributes.columns
         dtypes = dict(zip(columns, self.attributes.dtypes))
         dataframe = pd.read_csv(io.StringIO(self.get_rows_as_string()), sep=',',
-                                index_col=False, usecols=columns, dtype=dtypes)
+                                header=None, names=columns, dtype=dtypes)
         return dataframe
 
 

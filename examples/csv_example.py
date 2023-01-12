@@ -67,14 +67,14 @@ if __name__ == '__main__':
     # Create Cloud Object reference
     co = CloudObject.from_s3(CSVCloudObject, 's3://testdata/cities.csv', s3_config=config)
 
-    backend = LithopsPreprocessor()
-    co.preprocess(backend)
+    # backend = LithopsPreprocessor()
+    # co.preprocess(backend)
 
-    co.fetch()
-    print(co.attributes.columns)
+    # co.fetch()
+    # print(co.attributes.columns)
 
     data_slices = co.partition(batches_partition_strategy, num_batches=10)
 
-    x = data_slices[0].as_pandas_dataframe()
-    print(x)
-
+    for data_slice in data_slices:
+        x = data_slice.as_pandas_dataframe()
+        print(x)
