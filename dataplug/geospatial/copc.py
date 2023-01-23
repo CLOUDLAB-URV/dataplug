@@ -80,7 +80,7 @@ class COPCSlice(CloudObjectSlice):
         points, header = self._get_points()
 
         out_buff = io.BytesIO()
-        with laspy.open(file_name, mode='w', header=header, closefd=False) as output:
+        with laspy.open(file_name, mode='w', header=header) as output:
             output.write_points(points)
 
 
