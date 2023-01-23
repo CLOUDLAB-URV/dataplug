@@ -160,7 +160,7 @@ class PickleableS3ClientProxy:
 
     def generate_presigned_url(self, *args, **kwargs):
         response = self.__client.generate_presigned_url(*args, **kwargs)
-        logger.debug('%s', response.get('ResponseMetadata', {}))
+        logger.debug('%s', response)
         return response
 
     def get_object(self, *args, **kwargs):

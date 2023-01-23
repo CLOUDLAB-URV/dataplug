@@ -3,9 +3,22 @@ from dataplug.geospatial.copc import CloudOptimizedPointCloud, copc_square_split
 
 import logging
 import laspy
+import sys
 from dataplug.util import setup_logging
 
-setup_logging(logging.INFO)
+# setup_logging(logging.INFO)
+
+logging.basicConfig(format="%(asctime)s.%(msecs)03d[%(levelname)-8s] <%(created).6f> %(message)s",
+                    datefmt="%Y-%m-%d %H:%M:%S",
+                    stream=sys.stdout)
+logging.getLogger().setLevel(logging.DEBUG)
+botocore_log = logging.getLogger("botocore")
+botocore_log.setLevel(logging.CRITICAL)
+# requests_log.propagate = True
+
+requests_log = logging.getLogger("urllib3")
+requests_log.setLevel(logging.DEBUG)
+requests_log.propagate = True
 
 if __name__ == '__main__':
     # Localhost minio config
