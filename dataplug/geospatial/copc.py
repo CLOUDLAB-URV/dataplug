@@ -38,7 +38,7 @@ class COPCSlice(CloudObjectSlice):
             min_x, min_y = copc_file.header.mins[0], copc_file.header.mins[1]
             max_x, max_y = copc_file.header.maxs[0], copc_file.header.maxs[1]
 
-            x_size = (max_x - min_y) / self.splits_x
+            x_size = (max_x - min_x) / self.splits_x
             y_size = (max_y - min_y) / self.splits_y
 
             x_min_bound = (x_size * self.slice_x) + min_x

@@ -8,17 +8,17 @@ from dataplug.util import setup_logging
 
 # setup_logging(logging.INFO)
 
-logging.basicConfig(format="%(asctime)s.%(msecs)03d[%(levelname)-8s] <%(created).6f> %(message)s",
-                    datefmt="%Y-%m-%d %H:%M:%S",
-                    stream=sys.stdout)
-logging.getLogger().setLevel(logging.DEBUG)
-botocore_log = logging.getLogger("botocore")
-botocore_log.setLevel(logging.CRITICAL)
+# logging.basicConfig(format="%(asctime)s.%(msecs)03d[%(levelname)-8s] <%(created).6f> %(message)s",
+#                     datefmt="%Y-%m-%d %H:%M:%S",
+#                     stream=sys.stdout)
+# logging.getLogger().setLevel(logging.DEBUG)
+# botocore_log = logging.getLogger("botocore")
+# botocore_log.setLevel(logging.CRITICAL)
+# # requests_log.propagate = True
+#
+# requests_log = logging.getLogger("urllib3")
+# requests_log.setLevel(logging.DEBUG)
 # requests_log.propagate = True
-
-requests_log = logging.getLogger("urllib3")
-requests_log.setLevel(logging.DEBUG)
-requests_log.propagate = True
 
 if __name__ == '__main__':
     # Localhost minio config
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     }
 
     co = CloudObject.from_s3(CloudOptimizedPointCloud,
-                             's3://geospatial/copc/cnig/PNOA_2016_CAT_324-4570_ORT-CLA-COL.laz',
+                             's3://geospatial/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz',
                              s3_config=local_minio)
     slices = co.partition(copc_square_split_strategy, num_chunks=9)
 
