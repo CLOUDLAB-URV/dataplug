@@ -25,7 +25,7 @@ class COPCSlice(CloudObjectSlice):
         self.slice_y = slice_y
         super().__init__()
 
-    def get(self):
+    def _get_points(self):
         from laspy.copc import CopcReader, Bounds
         import laspy
 
@@ -61,13 +61,27 @@ class COPCSlice(CloudObjectSlice):
             crs = copc_file.header.parse_crs()
             new_header.add_crs(crs, keep_compatibility=True)
 
-            out_buff = io.BytesIO()
-            with laspy.open(out_buff, mode='w', header=new_header, closefd=False) as output:
-                output.write_points(points)
+            return points, new_header
 
-            return_value = out_buff.getvalue()
+    def get(self):
+        import laspy
+        points, header = self._get_points()
+
+        out_buff = io.BytesIO()
+        with laspy.open(out_buff, mode='w', header=header, closefd=False) as output:
+            output.write_points(points)
+
+        return_value = out_buff.getvalue()
 
         return return_value
+
+    def to_file(self, file_name):
+        import laspy
+        points, header = self._get_points()
+
+        out_buff = io.BytesIO()
+        with laspy.open(file_name, mode='w', header=header, closefd=False) as output:
+            output.write_points(points)
 
 
 def copc_square_split_strategy(cloud_object: CloudOptimizedPointCloud, num_chunks: int) -> List[COPCSlice]:
