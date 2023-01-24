@@ -19,12 +19,14 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
-    "pandas"
+    "pandas",
+    "smart_open",
+    "boto3"
 ]
 
 [project.optional-dependencies]
 lithops = [
-    "lithops==2.7.1"
+    "lithops"
 ]
 
 [tool.setuptools.packages.find]
