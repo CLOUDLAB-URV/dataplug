@@ -1,1 +1,1 @@
-from .cloudobject import CloudObject
+from dataplug.cloudobject import CloudObject

@@ -1,9 +1,8 @@
 from math import ceil
 from typing import List
 
-from ..cloudobject import CloudDataType
-from ..dataslice import CloudObjectSlice
-from ..compressed.gzipped import GZipText, _get_ranges_from_line_pairs, GZipTextSlice
+from dataplug.cloudobject import CloudDataType
+from dataplug.compressed.gzipped import GZipText, _get_ranges_from_line_pairs, GZipTextSlice
 
 
 @CloudDataType(inherit_from=GZipText)

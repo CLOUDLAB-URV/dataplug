@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING, List
 
 import numpy as np
 
-from ..cloudobject import CloudDataType
-from ..dataslice import CloudObjectSlice
+from dataplug.cloudobject import CloudDataType, CloudObjectSlice
 
 logger = logging.getLogger(__name__)
 

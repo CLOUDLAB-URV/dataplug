@@ -10,10 +10,10 @@ if TYPE_CHECKING:
 else:
     S3Client = object
 
-from .util import split_s3_path, head_object, load_attributes
-from .storage import PureS3Path, PickleableS3ClientProxy
-from .preprocess import BatchPreprocessor, MapReducePreprocessor, PreprocessorBackendBase
-from .dataslice import CloudObjectSlice
+from dataplug.util import split_s3_path, head_object, load_attributes
+from dataplug.storage import PureS3Path, PickleableS3ClientProxy
+from dataplug.preprocess import BatchPreprocessor, MapReducePreprocessor, PreprocessorBackendBase
+from dataplug.dataslice import CloudObjectSlice
 
 logger = logging.getLogger(__name__)
 

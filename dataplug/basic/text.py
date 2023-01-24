@@ -2,8 +2,7 @@ import logging
 from math import ceil
 from typing import BinaryIO, List
 
-from ..cloudobject import CloudDataType
-from ..dataslice import CloudObjectSlice
+from dataplug.cloudobject import CloudDataType, CloudObjectSlice
 
 logger = logging.getLogger(__name__)
 

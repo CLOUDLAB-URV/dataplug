@@ -4,8 +4,8 @@ import logging
 from typing import TYPE_CHECKING, Tuple, BinaryIO, Dict, List, Type, ByteString, Union
 
 if TYPE_CHECKING:
-    from ..cloudobject import CloudObject
-    from .result import Metadata
+    from dataplug.cloudobject import CloudObject
+    from dataplug.preprocess.result import Metadata
 
 logger = logging.getLogger(__name__)
 

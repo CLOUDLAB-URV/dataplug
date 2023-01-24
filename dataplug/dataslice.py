@@ -2,8 +2,8 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, Optional, Dict
 
 if TYPE_CHECKING:
-    from .cloudobject import CloudObject
-    from .storage import PureS3Path
+    from dataplug.cloudobject import CloudObject
+    from dataplug.storage import PureS3Path
     from mypy_boto3_s3 import S3Client
 
 

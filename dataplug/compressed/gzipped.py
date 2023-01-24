@@ -12,10 +12,9 @@ from typing import BinaryIO, Tuple, Dict, ByteString
 import pandas as pd
 import numpy as np
 
-from ..cloudobject import CloudDataType, CloudObject
-from ..dataslice import CloudObjectSlice
-from ..preprocess.preprocessor import BatchPreprocessor
-from ..util import force_delete_path
+from dataplug.cloudobject import CloudDataType, CloudObject, CloudObjectSlice
+from dataplug.preprocess.preprocessor import BatchPreprocessor
+from dataplug.util import force_delete_path
 
 logger = logging.getLogger(__name__)
 

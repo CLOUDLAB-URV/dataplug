@@ -1,4 +1,4 @@
-from .preprocessor import BatchPreprocessor, MapReducePreprocessor
-from .result import Metadata
-from .backendbase import PreprocessorBackendBase
-from .backends import *
+from dataplug.preprocess.preprocessor import BatchPreprocessor, MapReducePreprocessor
+from dataplug.preprocess.result import Metadata
+from dataplug.preprocess.backendbase import PreprocessorBackendBase
+from dataplug.preprocess.backends import *

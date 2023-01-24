@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING, Union, Optional
 from boto3.s3.transfer import TransferConfig
 import smart_open
 
-from ..backendbase import PreprocessorBackendBase
-from ..preprocessor import BatchPreprocessor, MapReducePreprocessor
-from ...util import dump_attributes
+from dataplug.preprocess.backendbase import PreprocessorBackendBase
+from dataplug.preprocess.preprocessor import BatchPreprocessor, MapReducePreprocessor
+from dataplug.util import dump_attributes
 
 if TYPE_CHECKING:
-    from ...cloudobject import CloudObject
+    from dataplug.cloudobject import CloudObject
 else:
     CloudObject = object
 

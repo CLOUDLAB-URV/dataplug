@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from abc import ABC
 from typing import TYPE_CHECKING, Union, Optional
 
 if TYPE_CHECKING:
-    from ..cloudobject import CloudObject
-    from .preprocessor import BatchPreprocessor, MapReducePreprocessor
+    from dataplug.cloudobject import CloudObject
+    from dataplug.preprocess.preprocessor import BatchPreprocessor, MapReducePreprocessor
 
 
 class PreprocessorBackendBase:
