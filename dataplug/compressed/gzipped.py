@@ -58,12 +58,18 @@ class GZipTextPreprocessor(BatchPreprocessor):
                                           stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             # TODO program might get stuck if subprocess fails, blocking io should be done in a backgroun thread or using async/await
-            chunk = data_stream.read(CHUNK_SIZE)
-            while chunk != b"":
-                index_proc.stdin.write(chunk)
+            try:
                 chunk = data_stream.read(CHUNK_SIZE)
-            if hasattr(data_stream, 'close'):
-                data_stream.close()
+                while chunk != b"":
+                    index_proc.stdin.write(chunk)
+                    chunk = data_stream.read(CHUNK_SIZE)
+                if hasattr(data_stream, 'close'):
+                    data_stream.close()
+            except BrokenPipeError as e:
+                stdout, stderr = index_proc.communicate()
+                logger.error(stdout.decode('utf-8'))
+                logger.error(stderr.decode('utf-8'))
+                raise e
 
             stdout, stderr = index_proc.communicate()
             # logger.debug(stdout.decode('utf-8'))

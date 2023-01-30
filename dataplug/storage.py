@@ -82,7 +82,8 @@ class PickleableS3ClientProxy:
                            'Consider using token-based authentication instead')
             self.credentials = {
                 'AccessKeyId': aws_access_key_id,
-                'SecretAccessKey': aws_secret_access_key
+                'SecretAccessKey': aws_secret_access_key,
+                'SessionToken': None
             }
             self.__client = boto3.client('s3',
                                          aws_access_key_id=self.credentials['AccessKeyId'],
