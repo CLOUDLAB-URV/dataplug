@@ -21,8 +21,9 @@ logger = logging.getLogger(__name__)
 class DummyPreprocessor(PreprocessorBackendBase):
     def preprocess_batch(self, preprocessor: BatchPreprocessor, cloud_object: CloudObject):
         obj_uri = cloud_object.path.as_uri()
-        client = cloud_object.s3._new_client()
-        stream = smart_open.open(obj_uri, 'rb', transport_params={'client': client})
+        # client = cloud_object.s3._new_client()
+        # stream = smart_open.open(obj_uri, 'rb', transport_params={'client': client})
+        stream = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)['Body']
         preprocess_result = preprocessor.preprocess(stream, cloud_object)
 
         if preprocess_result.attributes is not None:
