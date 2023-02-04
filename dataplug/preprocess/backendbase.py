@@ -4,7 +4,10 @@ from typing import TYPE_CHECKING, Union, Optional
 
 if TYPE_CHECKING:
     from dataplug.cloudobject import CloudObject
-    from dataplug.preprocess.preprocessor import BatchPreprocessor, MapReducePreprocessor
+    from dataplug.preprocess.preprocessor import (
+        BatchPreprocessor,
+        MapReducePreprocessor,
+    )
 
 
 class PreprocessorBackendBase:

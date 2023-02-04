@@ -2,7 +2,11 @@ from math import ceil
 from typing import List
 
 from dataplug.cloudobject import CloudDataType
-from dataplug.compressed.gzipped import GZipText, _get_ranges_from_line_pairs, GZipTextSlice
+from dataplug.compressed.gzipped import (
+    GZipText,
+    _get_ranges_from_line_pairs,
+    GZipTextSlice,
+)
 
 
 @CloudDataType(inherit_from=GZipText)
@@ -12,13 +16,12 @@ class FASTQGZip:
         # super().__init__(*args, **kwargs)
 
 
-def partition_reads_batches(cloud_object: FASTQGZip,
-                            num_batches: int) -> List[GZipTextSlice]:
-    total_lines = int(cloud_object.get_attribute('total_lines'))
+def partition_reads_batches(cloud_object: FASTQGZip, num_batches: int) -> List[GZipTextSlice]:
+    total_lines = int(cloud_object.get_attribute("total_lines"))
 
     # Check if number of lines is a multiple of 4 (FASTQ reads are 4 lines each)
     if (total_lines % 4) != 0:
-        raise Exception('Number of lines does not correspond to FASTQ reads format!')
+        raise Exception("Number of lines does not correspond to FASTQ reads format!")
 
     # Split by number of reads per worker (each read is composed of 4 lines)
     num_reads = total_lines // 4
@@ -35,7 +38,9 @@ def partition_reads_batches(cloud_object: FASTQGZip,
 
     # Get byte ranges from line pairs using GZip index
     byte_ranges = _get_ranges_from_line_pairs(cloud_object, line_pairs)
-    chunks = [GZipTextSlice(line_0, line_1, range_0, range_1)
-              for (line_0, line_1), (range_0, range_1) in zip(line_pairs, byte_ranges)]
+    chunks = [
+        GZipTextSlice(line_0, line_1, range_0, range_1)
+        for (line_0, line_1), (range_0, range_1) in zip(line_pairs, byte_ranges)
+    ]
 
     return chunks

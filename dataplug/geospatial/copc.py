@@ -28,10 +28,11 @@ class COPCSlice(CloudObjectSlice):
         from laspy.copc import CopcReader, Bounds
         import laspy
 
-        file_url = self.s3.generate_presigned_url('get_object',
-                                                  Params={'Bucket': self.obj_path.bucket,
-                                                          'Key': self.obj_path.key},
-                                                  ExpiresIn=300)
+        file_url = self.s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": self.obj_path.bucket, "Key": self.obj_path.key},
+            ExpiresIn=300,
+        )
 
         with CopcReader.open(file_url) as copc_file:
             min_x, min_y = copc_file.header.mins[0], copc_file.header.mins[1]
@@ -46,7 +47,8 @@ class COPCSlice(CloudObjectSlice):
             y_max_bound = y_min_bound + y_size
 
             query_bounds = Bounds(
-                mins=np.asarray([x_min_bound, y_min_bound]), maxs=np.asarray([x_max_bound, y_max_bound])
+                mins=np.asarray([x_min_bound, y_min_bound]),
+                maxs=np.asarray([x_max_bound, y_max_bound]),
             )
 
             points = copc_file.query(query_bounds)
@@ -64,10 +66,11 @@ class COPCSlice(CloudObjectSlice):
 
     def get(self):
         import laspy
+
         points, header = self._get_points()
 
         out_buff = io.BytesIO()
-        with laspy.open(out_buff, mode='w', header=header, closefd=False) as output:
+        with laspy.open(out_buff, mode="w", header=header, closefd=False) as output:
             output.write_points(points)
 
         return_value = out_buff.getvalue()
@@ -76,10 +79,11 @@ class COPCSlice(CloudObjectSlice):
 
     def to_file(self, file_name):
         import laspy
+
         points, header = self._get_points()
 
         out_buff = io.BytesIO()
-        with laspy.open(file_name, mode='w', header=header) as output:
+        with laspy.open(file_name, mode="w", header=header) as output:
             output.write_points(points)
 
 
@@ -94,9 +98,14 @@ def copc_square_split_strategy(cloud_object: CloudOptimizedPointCloud, num_chunk
     y = round(num_chunks / x)
     real_num_chunks = x * y
     if real_num_chunks != num_chunks:
-        logger.warning('Created %d partitions of size %d x %d as %d is not a perfect square', real_num_chunks, x, y,
-                       num_chunks)
+        logger.warning(
+            "Created %d partitions of size %d x %d as %d is not a perfect square",
+            real_num_chunks,
+            x,
+            y,
+            num_chunks,
+        )
     else:
-        logger.info('Created %d partitions of size %d x %d', real_num_chunks, x, y)
+        logger.info("Created %d partitions of size %d x %d", real_num_chunks, x, y)
     slices = [COPCSlice(x, y, ix, iy) for ix in range(x) for iy in range(y)]
     return slices

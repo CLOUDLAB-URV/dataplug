@@ -12,11 +12,11 @@ import botocore
 
 logger = logging.getLogger(__name__)
 
-S3_PATH_REGEX = re.compile(r'^\w+://.+/.+$')
+S3_PATH_REGEX = re.compile(r"^\w+://.+/.+$")
 
 
 def setup_logging(level=logging.INFO):
-    root_logger = logging.getLogger('dataplug')
+    root_logger = logging.getLogger("dataplug")
     root_logger.setLevel(level)
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
@@ -27,9 +27,9 @@ def setup_logging(level=logging.INFO):
 
 def split_s3_path(path):
     if not S3_PATH_REGEX.fullmatch(path):
-        raise ValueError(f'Path must satisfy regex {S3_PATH_REGEX}')
+        raise ValueError(f"Path must satisfy regex {S3_PATH_REGEX}")
 
-    bucket, key = path.replace('s3://', '').split('/', 1)
+    bucket, key = path.replace("s3://", "").split("/", 1)
     return bucket, key
 
 
@@ -45,13 +45,13 @@ def head_object(s3client, bucket, key):
     metadata = {}
     try:
         head_res = s3client.head_object(Bucket=bucket, Key=key)
-        del head_res['ResponseMetadata']
+        del head_res["ResponseMetadata"]
         response = head_res
-        if 'Metadata' in head_res:
-            metadata.update(head_res['Metadata'])
-            del response['Metadata']
+        if "Metadata" in head_res:
+            metadata.update(head_res["Metadata"])
+            del response["Metadata"]
     except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == '404':
+        if e.response["Error"]["Code"] == "404":
             raise KeyError()
         else:
             raise e
@@ -61,7 +61,7 @@ def head_object(s3client, bucket, key):
 def dump_attributes(attributes: dict):
     dumped_attrs = {}
     for key, value in attributes.items():
-        value_b64 = base64.b64encode(pickle.dumps(value)).decode('utf-8')
+        value_b64 = base64.b64encode(pickle.dumps(value)).decode("utf-8")
         dumped_attrs[key] = value_b64
     return dumped_attrs
 

@@ -28,8 +28,14 @@ class MapReducePreprocessor:
     def __init__(self, *args, **kwargs):
         pass
 
-    def map(self, data_stream: BinaryIO, cloud_object: CloudObject,
-            mapper: int, chunk_size: int, n_mappers: int) -> Metadata:
+    def map(
+        self,
+        data_stream: BinaryIO,
+        cloud_object: CloudObject,
+        mapper: int,
+        chunk_size: int,
+        n_mappers: int,
+    ) -> Metadata:
         """
         Map function for Map-Reduce preprocessor
         :param data_stream: object body stream to be preprocessed

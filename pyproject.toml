@@ -32,5 +32,8 @@ lithops = [
 [tool.setuptools.packages.find]
 include = ["dataplug"]
 
+[tool.black]
+line-length = 119
+
 [project.urls]
 "Homepage" = "https://github.com/aitorarjona/cloud-native-datasets"

@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class LiDARPreprocessor(BatchPreprocessor):
-
     def __init__(self):
         try:
             import pdal
@@ -36,18 +35,12 @@ class LiDARPreprocessor(BatchPreprocessor):
             force_delete_path(input_file_path)
             force_delete_path(output_file_path)
 
-            with open(input_file_path, 'wb') as input_file:
+            with open(input_file_path, "wb") as input_file:
                 shutil.copyfileobj(data_stream, input_file)
 
             pipeline_json = [
-                {
-                    "type": "readers.las",
-                    "filename": input_file_path
-                },
-                {
-                    "type": "writers.copc",
-                    "filename": output_file_path
-                }
+                {"type": "readers.las", "filename": input_file_path},
+                {"type": "writers.copc", "filename": output_file_path},
             ]
 
             pipeline = pdal.Pipeline(json.dumps(pipeline_json))
@@ -74,7 +67,7 @@ class LiDARPreprocessor(BatchPreprocessor):
             #     }
             copc_meta = {}
 
-            return open(output_file_path, 'rb'), copc_meta
+            return open(output_file_path, "rb"), copc_meta
         finally:
             force_delete_path(input_file_path)
             force_delete_path(output_file_path)

@@ -23,13 +23,13 @@ class UTF8TextSlice(CloudObjectSlice):
         r0 = self.range_0 - 1 if not self.first else self.range_0
         r1 = self.range_1 + self.padding if not self.last else self.range_1
 
-        res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key, Range=f'bytes={r0}-{r1}')
-        body = res['Body'].read().decode('utf-8')
+        res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key, Range=f"bytes={r0}-{r1}")
+        body = res["Body"].read().decode("utf-8")
 
         s0 = 0
         if not self.first:
             # trim cut words in first slice
-            while body[s0] != ' ' and body[s0] != '\n':
+            while body[s0] != " " and body[s0] != "\n":
                 s0 += 1
             s0 += 1
 
@@ -38,15 +38,18 @@ class UTF8TextSlice(CloudObjectSlice):
             # add cut words for slices in the middle using padding
             pad_count = 1
             c = body[s1]
-            while c != ' ' and c != '\n':
+            while c != " " and c != "\n":
                 s1 += 1
                 if s1 == len(body):
                     r0 = self.padding * pad_count
                     r1 = (self.padding * pad_count) + self.padding
                     r1 = self.obj_size if r1 > self.obj_size else r1
-                    res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key,
-                                             Range=f'bytes={r0}-{r1}')
-                    body += res['Body'].read().decode('utf-8')
+                    res = self.s3.get_object(
+                        Bucket=self.obj_path.bucket,
+                        Key=self.obj_path.key,
+                        Range=f"bytes={r0}-{r1}",
+                    )
+                    body += res["Body"].read().decode("utf-8")
                     pad_count += 1
                 c = body[s1]
 

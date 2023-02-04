@@ -15,10 +15,13 @@ class LithopsPreprocessor(PreprocessorBackendBase):
     def __init__(self, lithops_config=None):
         self.lithops_config = lithops_config
 
-    def do_preprocess(self,
-                      preprocessor: Union[BatchPreprocessor, MapReducePreprocessor],
-                      cloud_object: CloudObject,
-                      chunk_size: Optional[int] = None,
-                      num_workers: Optional[int] = None,
-                      *args, **kwargs):
+    def do_preprocess(
+        self,
+        preprocessor: Union[BatchPreprocessor, MapReducePreprocessor],
+        cloud_object: CloudObject,
+        chunk_size: Optional[int] = None,
+        num_workers: Optional[int] = None,
+        *args,
+        **kwargs,
+    ):
         raise NotImplementedError()

@@ -22,9 +22,9 @@ logger = logging.getLogger(__name__)
 # https://github.com/circulosmeos/gztool
 
 CHUNK_SIZE = 65536
-RE_WINDOWS = re.compile(r'#\d+: @ \d+ / \d+ L\d+ \( \d+ @\d+ \)')
-RE_NUMS = re.compile(r'\d+')
-RE_NLINES = re.compile(r'Number of lines\s+:\s+\d+')
+RE_WINDOWS = re.compile(r"#\d+: @ \d+ / \d+ L\d+ \( \d+ @\d+ \)")
+RE_NUMS = re.compile(r"\d+")
+RE_NLINES = re.compile(r"Number of lines\s+:\s+\d+")
 
 
 def _get_gztool_path():
@@ -32,9 +32,9 @@ def _get_gztool_path():
     Utility function that returns the absolute path for gzip file binary or raises exception if it is not found
     TODO currently only works on unix-based systems
     """
-    proc = subprocess.run(['which', 'gztool'], check=True, capture_output=True, text=True)
-    path = proc.stdout.rstrip('\n')
-    logger.debug('Using gztool located in %s', path)
+    proc = subprocess.run(["which", "gztool"], check=True, capture_output=True, text=True)
+    path = proc.stdout.rstrip("\n")
+    logger.debug("Using gztool located in %s", path)
     return path
 
 
@@ -54,8 +54,12 @@ class GZipTextPreprocessor(BatchPreprocessor):
 
             # Create index and save to tmp file
             # TODO tmp file is needed, sending to stdout is not working at the moment (todo fix)
-            index_proc = subprocess.Popen([gztool, '-i', '-x', '-I', tmp_index_file_name],
-                                          stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            index_proc = subprocess.Popen(
+                [gztool, "-i", "-x", "-I", tmp_index_file_name],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
 
             # TODO program might get stuck if subprocess fails, blocking io should be done in a backgroun thread or using async/await
             try:
@@ -63,38 +67,45 @@ class GZipTextPreprocessor(BatchPreprocessor):
                 while chunk != b"":
                     index_proc.stdin.write(chunk)
                     chunk = data_stream.read(CHUNK_SIZE)
-                if hasattr(data_stream, 'close'):
+                if hasattr(data_stream, "close"):
                     data_stream.close()
             except BrokenPipeError as e:
                 stdout, stderr = index_proc.communicate()
-                logger.error(stdout.decode('utf-8'))
-                logger.error(stderr.decode('utf-8'))
+                logger.error(stdout.decode("utf-8"))
+                logger.error(stderr.decode("utf-8"))
                 raise e
 
             stdout, stderr = index_proc.communicate()
             # logger.debug(stdout.decode('utf-8'))
             # logger.debug(stderr.decode('utf-8'))
             if index_proc.returncode > 0:
-                logger.debug(stdout.decode('utf-8'))
-                logger.debug(stderr.decode('utf-8'))
-                raise Exception('Error creating gz index')
+                logger.debug(stdout.decode("utf-8"))
+                logger.debug(stderr.decode("utf-8"))
+                raise Exception("Error creating gz index")
 
             # Generate list of access windows from index
-            proc = subprocess.run([gztool, '-ell', '-I', tmp_index_file_name], check=True,
-                                  capture_output=True, text=True)
+            proc = subprocess.run(
+                [gztool, "-ell", "-I", tmp_index_file_name],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
             output = proc.stdout
             # logger.debug(output)
 
             # Store index binary file
-            gzip_index_key = cloud_object.meta_path.key + '.idx'
-            cloud_object.s3.upload_file(Filename=tmp_index_file_name, Bucket=cloud_object.meta_path.bucket,
-                                        Key=gzip_index_key)
+            gzip_index_key = cloud_object.meta_path.key + ".idx"
+            cloud_object.s3.upload_file(
+                Filename=tmp_index_file_name,
+                Bucket=cloud_object.meta_path.bucket,
+                Key=gzip_index_key,
+            )
 
             # Get the total number of lines
             total_lines: str = RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop()
-            logger.debug('Indexed gzipped text file with %s total lines', total_lines)
+            logger.debug("Indexed gzipped text file with %s total lines", total_lines)
             t1 = time.perf_counter()
-            logger.debug('Index generated in %.3f seconds', t1 - t0)
+            logger.debug("Index generated in %.3f seconds", t1 - t0)
 
             # Generator function that parses output to avoid copying all window data as lists
             def _lines_generator():
@@ -103,29 +114,40 @@ class GZipTextPreprocessor(BatchPreprocessor):
                     yield nums
 
             # Generate data frame that stores gzip index windows offsets
-            df = pd.DataFrame(_lines_generator(),
-                              columns=['window', 'compressed_byte', 'uncompressed_byte',
-                                       'line_number', 'window_size', 'window_offset'])
-            df.set_index(['window'], inplace=True)
+            df = pd.DataFrame(
+                _lines_generator(),
+                columns=[
+                    "window",
+                    "compressed_byte",
+                    "uncompressed_byte",
+                    "line_number",
+                    "window_size",
+                    "window_offset",
+                ],
+            )
+            df.set_index(["window"], inplace=True)
 
             # Store data frame as parquet
             out_stream = io.BytesIO()
-            df.to_parquet(out_stream, engine='pyarrow')
+            df.to_parquet(out_stream, engine="pyarrow")
             # df.to_csv(os.path.join(tempfile.gettempdir(), f'{meta.obj_path.stem}.csv'))  # debug
 
             os.remove(tmp_index_file_name)
 
-            return out_stream.getvalue(), {'total_lines': total_lines, 'index_key': gzip_index_key}
+            return out_stream.getvalue(), {
+                "total_lines": total_lines,
+                "index_key": gzip_index_key,
+            }
         finally:
             force_delete_path(tmp_index_file_name)
 
 
 def _get_ranges_from_line_pairs(cloud_object: CloudObject, pairs):
     meta_obj = cloud_object.s3.get_object(Bucket=cloud_object.meta_path.bucket, Key=cloud_object.meta_path.key)
-    meta_buff = io.BytesIO(meta_obj['Body'].read())
+    meta_buff = io.BytesIO(meta_obj["Body"].read())
     meta_buff.seek(0)
     df = pd.read_parquet(meta_buff)
-    line_indexes = df['line_number'].to_numpy()
+    line_indexes = df["line_number"].to_numpy()
     num_windows = df.shape[0]
 
     byte_ranges = [None] * len(pairs)
@@ -133,30 +155,30 @@ def _get_ranges_from_line_pairs(cloud_object: CloudObject, pairs):
         # Find the closest window index for line_0
         window_head_idx = (np.abs(line_indexes - line_0)).argmin()
         # Check if window line entry pont is past requested line_0, if so, get previous window
-        window_head_line = df.iloc[window_head_idx]['line_number']
+        window_head_line = df.iloc[window_head_idx]["line_number"]
         if window_head_line > line_0:
             window_head_idx = window_head_idx - 1
         # Get offset in compressed archive for window 0
-        window0_offset = df.iloc[window_head_idx]['compressed_byte']
+        window0_offset = df.iloc[window_head_idx]["compressed_byte"]
 
         # Find the closest window index for line_0
         widow_tail_idx = (np.abs(line_indexes - line_1)).argmin()
         # Check if window line entry pont is before requested line_1, if so, get next window
-        window_tail_line = df.iloc[widow_tail_idx]['line_number']
+        window_tail_line = df.iloc[widow_tail_idx]["line_number"]
         if window_tail_line < line_1:
             widow_tail_idx = widow_tail_idx + 1
         if widow_tail_idx >= num_windows:
             # Adjust offset for lines inside last window, use end of compressed archive for 2nd offset
             window1_offset = cloud_object.size
         else:
-            window1_offset = df.iloc[widow_tail_idx]['compressed_byte']
+            window1_offset = df.iloc[widow_tail_idx]["compressed_byte"]
 
         byte_ranges[i] = (window0_offset, window1_offset)
 
     return byte_ranges
 
 
-def partition_chunk_lines(cloud_object: CloudObject, lines_per_chunk, strategy='expand'):
+def partition_chunk_lines(cloud_object: CloudObject, lines_per_chunk, strategy="expand"):
     """
     Partitioning strategy for GZipped compressed text files, it partitions the text based on number of lines
     per partition
@@ -166,26 +188,28 @@ def partition_chunk_lines(cloud_object: CloudObject, lines_per_chunk, strategy='
            or 'merge' to add these lines to the previous chunk (more than lines_per_chunk).
     :return:
     """
-    total_lines = int(cloud_object.get_attribute('total_lines'))
+    total_lines = int(cloud_object.get_attribute("total_lines"))
     parts = ceil(total_lines / lines_per_chunk)
     pairs = [((lines_per_chunk * i) + 1, (lines_per_chunk * i) + lines_per_chunk) for i in range(parts)]
 
     # Adjust last pair
     if pairs[-1][1] > total_lines:
-        if strategy == 'expand':
+        if strategy == "expand":
             l0, _ = pairs[-1]
             pairs[-1] = (l0, total_lines)
-        elif strategy == 'merge':
+        elif strategy == "merge":
             l0, l1 = pairs.pop()
             extra = l1 - l0
             pair = pairs[-1]
             pairs[-1] = pair[0], pair[1] + extra
         else:
-            raise Exception(f'Unknown strategy {strategy}')
+            raise Exception(f"Unknown strategy {strategy}")
 
     byte_ranges = _get_ranges_from_line_pairs(cloud_object, pairs)
-    chunks = [GZipTextSlice(line_0, line_1, range_0, range_1)
-              for (line_0, line_1), (range_0, range_1) in zip(byte_ranges, pairs)]
+    chunks = [
+        GZipTextSlice(line_0, line_1, range_0, range_1)
+        for (line_0, line_1), (range_0, range_1) in zip(byte_ranges, pairs)
+    ]
 
     return chunks
 
@@ -215,20 +239,34 @@ class GZipTextSlice(CloudObjectSlice):
         try:
             t0 = time.perf_counter()
             # Get index and store it to temp file
-            self.s3.download_file(Bucket=self.meta_path.bucket,
-                                  Key=self.attributes['index_key'], Filename=tmp_index_file)
+            self.s3.download_file(
+                Bucket=self.meta_path.bucket,
+                Key=self.attributes["index_key"],
+                Filename=tmp_index_file,
+            )
 
             # Get compressed byte range
-            res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key,
-                                     Range=f'bytes={self.range_0 - 1}-{self.range_1 - 1}')
-            body = res['Body']
+            res = self.s3.get_object(
+                Bucket=self.obj_path.bucket,
+                Key=self.obj_path.key,
+                Range=f"bytes={self.range_0 - 1}-{self.range_1 - 1}",
+            )
+            body = res["Body"]
 
-            cmd = [gztool, '-I', tmp_index_file, '-n', str(self.range_0), '-L', str(self.line_0)]
+            cmd = [
+                gztool,
+                "-I",
+                tmp_index_file,
+                "-n",
+                str(self.range_0),
+                "-L",
+                str(self.line_0),
+            ]
             proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
             # TODO program might get stuck if subprocess fails, blocking io should be done in a backgroun thread or using async/await
             def _writer_feeder():
-                logger.debug('Writer thread started')
+                logger.debug("Writer thread started")
                 input_chunk = body.read(CHUNK_SIZE)
                 while input_chunk != b"":
                     # logger.debug('Writing %d bytes to pipe', len(chunk))
@@ -242,7 +280,7 @@ class GZipTextSlice(CloudObjectSlice):
                     proc.stdin.close()
                 except BrokenPipeError:
                     pass
-                logger.debug('Writer thread finished')
+                logger.debug("Writer thread finished")
 
             writer_thread = threading.Thread(target=_writer_feeder)
             writer_thread.start()
@@ -251,7 +289,7 @@ class GZipTextSlice(CloudObjectSlice):
             last_line = None
             while output_chunk != b"":
                 # logger.debug('Read %d bytes from pipe', len(chunk))
-                text = output_chunk.decode('utf-8')
+                text = output_chunk.decode("utf-8")
                 chunk_lines = text.splitlines()
 
                 if last_line is not None:
@@ -284,8 +322,8 @@ class GZipTextSlice(CloudObjectSlice):
             writer_thread.join()
 
             t1 = time.perf_counter()
-            logger.debug('Got partition in %.3f seconds', t1 - t0)
+            logger.debug("Got partition in %.3f seconds", t1 - t0)
 
-            return lines[:self.line_1 - self.line_0 - 1]
+            return lines[: self.line_1 - self.line_0 - 1]
         finally:
             force_delete_path(tmp_index_file)

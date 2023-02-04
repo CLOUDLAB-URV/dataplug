@@ -23,7 +23,7 @@ class DummyPreprocessor(PreprocessorBackendBase):
         obj_uri = cloud_object.path.as_uri()
         # client = cloud_object.s3._new_client()
         # stream = smart_open.open(obj_uri, 'rb', transport_params={'client': client})
-        stream = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)['Body']
+        stream = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)["Body"]
         preprocess_result = preprocessor.preprocess(stream, cloud_object)
 
         if preprocess_result.attributes is not None:
@@ -34,23 +34,23 @@ class DummyPreprocessor(PreprocessorBackendBase):
         if preprocess_result.metadata is None:
             preprocess_result.metadata = io.BytesIO(b"")
 
-        if hasattr(stream, 'read'):
+        if hasattr(stream, "read"):
             cloud_object.s3.upload_fileobj(
                 Fileobj=preprocess_result.metadata,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.path.key,
-                ExtraArgs={'Metadata': attrs_dict},
-                Config=TransferConfig(use_threads=True, max_concurrency=256)
+                ExtraArgs={"Metadata": attrs_dict},
+                Config=TransferConfig(use_threads=True, max_concurrency=256),
             )
         else:
             cloud_object.s3.put_object(
                 Body=preprocess_result.metadata,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.path.key,
-                Metadata=attrs_dict
+                Metadata=attrs_dict,
             )
 
-        if hasattr(stream, 'close'):
+        if hasattr(stream, "close"):
             stream.close()
 
     def preprocess_map_reduce(self, preprocessor: MapReducePreprocessor, cloud_object: CloudObject):
