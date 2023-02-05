@@ -1,19 +1,85 @@
+from __future__ import annotations
+
 import logging
 import math
 import io
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from dataplug.cloudobject import CloudDataType, CloudObjectSlice
+from dataplug.preprocess import BatchPreprocessor
+
+if TYPE_CHECKING:
+    from typing import List, Tuple, BinaryIO, Dict
+    from ..cloudobject import CloudObject
+    from ..preprocess import PreprocessingMetadata
 
 logger = logging.getLogger(__name__)
 
 
-@CloudDataType
+class COPCPreprocessor(BatchPreprocessor):
+    def __init__(self):
+        try:
+            import pdal
+            import laspy.copc
+        except ModuleNotFoundError as e:
+            logger.error("Missing Geospatial packages!")
+            raise e
+        super().__init__()
+
+    def preprocess(self, cloud_object: CloudObject) -> PreprocessingMetadata:
+        """
+        This preprocessing job opens a COPC file and extracts some attributes related to this tile
+        :param cloud_object:
+        :return:
+        """
+        import laspy.copc
+
+        with cloud_object.open('rb') as copc_file:
+            copc_reader = laspy.copc.CopcReader(copc_file)
+            copc_attrs = {
+                'points': copc_reader.header.point_count,
+                'x_scale': copc_reader.header.x_scale,
+                'y_scale': copc_reader.header.y_scale,
+                'z_scale': copc_reader.header.z_scale,
+                'x_offset': copc_reader.header.x_offset,
+                'y_offset': copc_reader.header.y_offset,
+                'z_offset': copc_reader.header.z_offset,
+                'x_max': copc_reader.header.x_max,
+                'y_max': copc_reader.header.y_max,
+                'z_max': copc_reader.header.z_max,
+                'x_min': copc_reader.header.x_min,
+                'y_min': copc_reader.header.y_min,
+                'z_min': copc_reader.header.z_min,
+                'root_offset': copc_reader.copc_info.hierarchy_root_offset,
+                'root_size': copc_reader.copc_info.hierarchy_root_size
+            }
+        print(copc_attrs)
+
+        return PreprocessingMetadata(attributes=copc_attrs)
+
+
+@CloudDataType(preprocessor=COPCPreprocessor)
 class CloudOptimizedPointCloud:
-    def __init__(self, cloud_object):
-        self.cloud_object = cloud_object
+    """
+    Cloud Data Type for the COPC file format
+    """
+    points: int
+    x_scale: float
+    y_scale: float
+    z_scale: float
+    x_offset: float
+    y_offset: float
+    z_offset: float
+    x_max: float
+    y_max: float
+    z_max: float
+    x_min: float
+    y_min: float
+    z_min: float
+    root_offset: float
+    root_size: float
 
 
 class COPCSlice(CloudObjectSlice):

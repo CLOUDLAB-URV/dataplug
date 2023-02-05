@@ -41,7 +41,7 @@ class CloudDataType:
         elif self.__parent is not None:
             return self.__parent.preprocessor
         else:
-            raise Exception("There is not preprocesser")
+            raise Exception("There is not preprocessor")
 
     def __call__(self, cls):
         if not inspect.isclass(cls):
@@ -58,15 +58,21 @@ class CloudDataType:
 class CloudObject:
     def __init__(
         self,
-        cloud_object_class: CloudDataType,
+        data_type: CloudDataType,
         s3_uri_path: str,
         s3_config: dict = None,
     ):
+        """
+        Create a reference to a Cloud Object
+        :param data_type: Specify the Cloud data type for this object
+        :param s3_uri_path: Full S3 uri in form s3://bucket/key for this object
+        :param s3_config: Extra S3 config
+        """
         self._obj_meta: Optional[Dict[str, str]] = None
         self._meta_meta: Optional[Dict[str, str]] = None
         self._obj_path: PureS3Path = PureS3Path.from_uri(s3_uri_path)
         self._meta_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + ".meta", self._obj_path.key)
-        self._cls: CloudDataType = cloud_object_class
+        self._cls: CloudDataType = data_type
         s3_config = s3_config or {}
         self._s3: PickleableS3ClientProxy = PickleableS3ClientProxy(
             aws_access_key_id=s3_config.get("aws_access_key_id"),
@@ -84,6 +90,10 @@ class CloudObject:
 
     @property
     def path(self) -> PureS3Path:
+        """
+        Get the S3Path of this Cloud Object
+        :return: S3Path for this Cloud Object
+        """
         return self._obj_path
 
     @property
@@ -164,7 +174,17 @@ class CloudObject:
                     raise e
             return self._obj_meta, self._meta_meta
 
-    def preprocess(self, preprocessor_backend: PreprocessorBackendBase, *args, **kwargs):
+    def preprocess(self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, *args, **kwargs):
+        """
+        Manually launch the preprocessing job for this cloud object on the specified preprocessing backend
+        :param preprocessor_backend: Preprocessor backend instance on to execute the preprocessing job
+        :param force: Forces preprocessing on this cloud object, even if it is already preprocessed
+        :param args: Optional arguments to pass to the preprocessing job
+        :param kwargs:Optional keyword arguments to pass to the preprocessing job
+        """
+        if not self.is_preprocessed() and not force:
+            raise Exception('Object is already preprocessed')
+
         # FIXME implement this properly
         if issubclass(self._cls.preprocessor, BatchPreprocessor):
             batch_preprocessor: BatchPreprocessor = self._cls.preprocessor(*args, **kwargs)
@@ -172,11 +192,29 @@ class CloudObject:
         elif issubclass(self._cls.preprocessor, MapReducePreprocessor):
             mapreduce_preprocessor: MapReducePreprocessor = self._cls.preprocessor(*args, **kwargs)
             preprocessor_backend.preprocess_map_reduce(mapreduce_preprocessor, self)
+        else:
+            raise Exception('This object cannot be preprocessed')
 
-    def get_attribute(self, key: str) -> str:
+    def get_attribute(self, key: str) -> Any:
+        """
+        Get an attribute of this cloud object. Must be preprocessed first. Raises AttributeError if the
+        specified key does not exist.
+        :param key: Attribute key
+        :return: Attribute
+        """
         return getattr(self._obj_attrs, key)
 
     def partition(self, strategy, *args, **kwargs) -> List[CloudObjectSlice]:
+        """
+        Apply partitioning strategy on this cloud object
+        :param strategy: Partitioning strategy
+        :param args: Optional arguments to pass to the partitioning strategy functions
+        :param kwargs: Optional key-words arguments to pass to the partitioning strategy
+        """
         slices = strategy(self, *args, **kwargs)
-        [s.contextualize(self) for s in slices]
+        [s._contextualize(self) for s in slices]
         return slices
+
+    @property
+    def obj_attrs(self):
+        return self._obj_attrs

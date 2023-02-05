@@ -17,12 +17,12 @@ class CloudObjectSlice:
         self.size: Optional[int] = None
         self.attributes: Optional[Dict[str, str]] = None
 
-    def contextualize(self, cloud_object: "CloudObject"):
+    def _contextualize(self, cloud_object: "CloudObject"):
         self.s3 = cloud_object.s3
         self.obj_path = cloud_object.path
         self.meta_path = cloud_object.meta_path
         self.size = cloud_object.size
-        self.attributes = deepcopy(cloud_object._obj_attrs)
+        self.attributes = deepcopy(cloud_object.obj_attrs)
 
     def get(self):
         raise NotImplementedError()

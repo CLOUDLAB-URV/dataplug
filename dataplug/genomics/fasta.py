@@ -102,15 +102,15 @@ class FASTAPreprocesser(MapReducePreprocessor):
         return json.dumps(sequences).encode("utf-8")
 
     def reduce(
-        self, results: List[BinaryIO], cloud_object: CloudObject, n_mappers: int
+        self, map_results: List[BinaryIO], cloud_object: CloudObject, n_mappers: int
     ) -> Tuple[ByteString, Dict[str, str]]:
-        if len(results) == 1:
-            sequences = json.loads(results.pop().read().decode("utf-8"))
+        if len(map_results) == 1:
+            sequences = json.loads(map_results.pop().read().decode("utf-8"))
             output = "\n".join(sequences)
             return output.encode("utf-8"), {}
 
         cache = diskcache.Cache(tempfile.mktemp())
-        for i, result in enumerate(results):
+        for i, result in enumerate(map_results):
             sequences = json.loads(result.read())
             # dict_prev = results[i - 1]
             # seq_range_prev = dict_prev['sequences']
@@ -155,7 +155,7 @@ class FASTAPreprocesser(MapReducePreprocessor):
             cache[i] = sequences
 
         output = ""
-        for i in range(len(results)):
+        for i in range(len(map_results)):
             output += "\n".join(cache[i])
             output += "\n"
 

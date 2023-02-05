@@ -2,11 +2,14 @@ import json
 import tempfile
 import shutil
 import logging
-from typing import BinaryIO, Tuple, Dict, ByteString
+from typing import TYPE_CHECKING
 
 from dataplug.cloudobject import CloudDataType, CloudObject
 from dataplug.preprocess import BatchPreprocessor
 from dataplug.util import force_delete_path
+
+if TYPE_CHECKING:
+    from typing import BinaryIO, Tuple, Dict
 
 try:
     import pdal
@@ -27,7 +30,7 @@ class LiDARPreprocessor(BatchPreprocessor):
             raise e
         super().__init__()
 
-    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject) -> Tuple[BinaryIO, Dict[str, str]]:
+    def preprocess(self, cloud_object: CloudObject) -> Tuple[BinaryIO, Dict[str, str]]:
         input_file_path = tempfile.mktemp()
         output_file_path = tempfile.mktemp()
 

@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Tuple, BinaryIO, Dict, List, Type, ByteString, Union
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import BinaryIO, Dict, List, Any
     from dataplug.cloudobject import CloudObject
-    from dataplug.preprocess.result import Metadata
 
 logger = logging.getLogger(__name__)
 
@@ -14,10 +15,9 @@ class BatchPreprocessor:
     def __init__(self, *args, **kwargs):
         pass
 
-    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject) -> Metadata:
+    def preprocess(self, cloud_object: CloudObject) -> PreprocessingMetadata:
         """
         Preprocess function for batch preprocessing
-        :param data_stream: object body stream to be preprocessed
         :param cloud_object: CloudObject instance to be preprocessed
         :return: tuple of preprocessed object as a bytearray and metadata attributes
         """
@@ -29,16 +29,14 @@ class MapReducePreprocessor:
         pass
 
     def map(
-        self,
-        data_stream: BinaryIO,
-        cloud_object: CloudObject,
-        mapper: int,
-        chunk_size: int,
-        n_mappers: int,
-    ) -> Metadata:
+            self,
+            cloud_object: CloudObject,
+            mapper: int,
+            chunk_size: int,
+            n_mappers: int,
+    ) -> PreprocessingMetadata:
         """
         Map function for Map-Reduce preprocessor
-        :param data_stream: object body stream to be preprocessed
         :param cloud_object: CloudObject instance to be preprocessed
         :param mapper: indicates the mapper ID in the map-reduce workflow
         :param chunk_size: chunk size in bytes preprocessed in this mapper function
@@ -47,12 +45,19 @@ class MapReducePreprocessor:
         """
         raise NotImplementedError()
 
-    def reduce(self, results: List[BinaryIO], cloud_object: CloudObject, n_mappers: int) -> Metadata:
+    def reduce(self, map_results: List[PreprocessingMetadata], cloud_object: CloudObject, n_mappers: int) -> PreprocessingMetadata:
         """
         Reduce function for Map-Reduce preprocessor
         :param cloud_object: CloudObject instance to be preprocessed
-        :param results: List of mapper results
+        :param map_results: List of mapper results
         :param n_mappers: total number of mappers in the map-reduce workflow
         :return: tuple of reduced result (preprocessed object) as a bytearray and metadata attributes
         """
         raise NotImplementedError()
+
+
+@dataclass
+class PreprocessingMetadata:
+    metadata: BinaryIO = None
+    object_body: BinaryIO = None
+    attributes: Dict[str, Any] = None

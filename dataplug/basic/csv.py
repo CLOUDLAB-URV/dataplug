@@ -4,7 +4,7 @@ from typing import BinaryIO, List, Tuple, Union, ByteString, Dict
 import pandas as pd
 import numpy as np
 from dataplug.cloudobject import CloudObject, CloudDataType, CloudObjectSlice
-from dataplug.preprocess import BatchPreprocessor, Metadata
+from dataplug.preprocess import BatchPreprocessor, PreprocessingMetadata
 import io
 
 logger = logging.getLogger(__name__)
@@ -19,11 +19,11 @@ class CSVPreprocessor(BatchPreprocessor):
             "dtypes": df.dtypes.tolist(),
             "separator": separator,
         }
-        return Metadata(attributes=attrs)
+        return PreprocessingMetadata(attributes=attrs)
 
 
 @CloudDataType(preprocessor=CSVPreprocessor)
-class CSVCloudObject:
+class CSV:
     columns: List[str]
     dtypes: List[np.dtype]
     separator: str
@@ -130,7 +130,7 @@ class CSVSlice(CloudObjectSlice):
         return dataframe
 
 
-def batches_partition_strategy(cloud_object: CSVCloudObject, num_batches: int, threshold: int = 32) -> List[CSVSlice]:
+def batches_partition_strategy(cloud_object: CSV, num_batches: int, threshold: int = 32) -> List[CSVSlice]:
     """
     This partition strategy chunks csv files by number of chunks avoiding to cut rows in half
     """
@@ -150,7 +150,7 @@ def batches_partition_strategy(cloud_object: CSVCloudObject, num_batches: int, t
     return slices
 
 
-def partition_size_strategy(cloud_object: CSVCloudObject, partition_size: int) -> List[CSVSlice]:
+def partition_size_strategy(cloud_object: CSV, partition_size: int) -> List[CSVSlice]:
     num_batches = ceil(cloud_object.size / partition_size)
 
     slices = []

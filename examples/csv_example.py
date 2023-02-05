@@ -5,7 +5,7 @@ import botocore.config
 from collections import defaultdict
 
 from dataplug import CloudObject
-from dataplug.basic.csvcloudobject import CSVCloudObject, batches_partition_strategy, partition_size_strategy
+from dataplug.basic.csv import CSV, batches_partition_strategy, partition_size_strategy
 from dataplug.preprocess import DummyPreprocessor
 
 import unittest
@@ -65,7 +65,7 @@ if __name__ == '__main__':
         'role_arn': 'arn:aws:iam::123456789012:role/S3Access'
     }
     # Create Cloud Object reference
-    co = CloudObject.from_s3(CSVCloudObject, 's3://testdata/cities.csv', s3_config=config)
+    co = CloudObject.from_s3(CSV, 's3://testdata/cities.csv', s3_config=config)
 
     # backend = LithopsPreprocessor()
     # co.preprocess(backend)
