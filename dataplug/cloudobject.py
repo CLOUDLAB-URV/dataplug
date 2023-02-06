@@ -2,11 +2,15 @@ from __future__ import annotations
 
 import inspect
 import logging
+
+import msgpack
+import traceback
 import smart_open
 from types import SimpleNamespace
 from collections import namedtuple
 from typing import TYPE_CHECKING
 from functools import partial
+from copy import deepcopy
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
@@ -35,6 +39,7 @@ class CloudDataType:
         self.co_class: object = None
         self.__preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = preprocessor
         self.__parent: "CloudDataType" = inherit_from
+        self.cls_attributes = {}
 
     @property
     def preprocessor(
@@ -48,6 +53,16 @@ class CloudDataType:
             raise Exception("There is not preprocessor")
 
     def __call__(self, cls):
+        # Get attribute names, types and initial values from decorated class
+        if hasattr(cls, '__annotations__'):
+            # Get annotated attributes
+            for attr_key, _ in cls.__annotations__.items():
+                self.cls_attributes[attr_key] = None
+        # Get attributes with value
+        for attr_key in filter(lambda attr: not attr.startswith('__') and not attr.endswith('__'), dir(cls)):
+            attr_val = getattr(cls, attr_key)
+            self.cls_attributes[attr_key] = attr_val
+
         if not inspect.isclass(cls):
             raise TypeError(f"CloudObject expected to use with class type, not {type(cls)}")
 
@@ -141,10 +156,8 @@ class CloudObject:
         return self._s3
 
     @property
-    def attributes(self) -> Dict[str, Any]:
-        # TODO
-        # Return a copy of the attributes
-        ...
+    def attributes(self) -> Any:
+        return self._attrs
 
     @property
     def open(self):
@@ -184,7 +197,7 @@ class CloudObject:
             return False
 
     def fetch(
-            self, enforce_obj: bool = False, enforce_meta: bool = False
+            self, enforce_obj: bool = True, enforce_meta: bool = False
     ) -> Tuple[Optional[Dict[str, str]], Optional[Dict[str, str]]]:
         """
         Get object metadata from storage with HEAD object request
@@ -193,6 +206,7 @@ class CloudObject:
         :return: Tuple for object metadata and objectmeta metadata
         """
         logger.info("Fetching object from S3")
+
         if not self._obj_headers:
             try:
                 res, _ = head_object(self._s3, self._obj_path.bucket, self._obj_path.key)
@@ -201,16 +215,38 @@ class CloudObject:
                 self._obj_headers = None
                 if enforce_obj:
                     raise e
+
         if not self._meta_headers:
             try:
-                res, encoded_attrs = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
+                # TODO check if dataplug version metadata from meta object matches local dataplug version
+                res, _ = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
                 self._meta_headers = res
-                self._attrs = SimpleNamespace(**load_attributes(encoded_attrs))
             except KeyError as e:
                 self._meta_headers = None
                 if enforce_meta:
                     raise e
-            return self._obj_headers, self._meta_headers
+
+        if not self._attrs_headers:
+            try:
+                # TODO check if dataplug version metadata from attrs object matches local dataplug version
+                res, _ = head_object(self._s3, self._attrs_path.bucket, self._attrs_path.key)
+                self._attrs_headers = res
+                get_res = self.s3.get_object(Bucket=self._attrs_path.bucket, Key=self._attrs_path.key)
+                try:
+                    attrs_dict = msgpack.load(get_res['Body'])
+                    base_attrs = deepcopy(self._cls.cls_attributes)
+                    base_attrs.update(attrs_dict)
+                    co_named_tuple = namedtuple(self._cls.co_class.__name__+'Attributes', base_attrs.keys())
+                    self._attrs = co_named_tuple(**base_attrs)
+                except Exception as e:
+                    logger.error(e)
+
+            except KeyError as e:
+                self._meta_headers = None
+                if enforce_meta:
+                    raise e
+
+        return self._obj_headers, self._meta_headers, self._attrs_headers
 
     def preprocess(self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, *args, **kwargs):
         """
@@ -232,6 +268,7 @@ class CloudObject:
             preprocessor_backend.preprocess_map_reduce(mapreduce_preprocessor, self)
         else:
             raise Exception('This object cannot be preprocessed')
+        self.fetch()
 
     def get_attribute(self, key: str) -> Any:
         """
@@ -253,6 +290,5 @@ class CloudObject:
         [s._contextualize(self) for s in slices]
         return slices
 
-    @property
-    def obj_attrs(self):
-        return self._attrs
+    def __getitem__(self, item):
+        return self._attrs.__getattribute__(item)

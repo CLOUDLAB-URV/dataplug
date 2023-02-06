@@ -5,6 +5,7 @@ import logging
 import laspy
 import sys
 
+import dataplug
 from dataplug.preprocess import DummyPreprocessor
 from dataplug.util import setup_logging
 
@@ -37,18 +38,21 @@ if __name__ == '__main__':
     co = CloudObject.from_s3(CloudOptimizedPointCloud,
                              's3://geospatial/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz',
                              s3_config=local_minio)
+    # backend = DummyPreprocessor()
+    # co.preprocess(backend, force=True)
 
-    backend = DummyPreprocessor()
-    co.preprocess(backend, force=True)
+    print(co.get_attribute('points'))
+    print(co.attributes.points)
+    print(co['points'])
 
-    slices = co.partition(copc_square_split_strategy, num_chunks=9)
-
-    for i, data_slice in enumerate(slices):
-        las_data = data_slice.get()
-        lidar_file = laspy.open(las_data)
-        print(f'LiDAR slice #{i}:')
-        print(f'Bounds: '
-              f'({round(lidar_file.header.mins[0], 3)},{round(lidar_file.header.mins[1], 3)}) - '
-              f'({round(lidar_file.header.maxs[0], 3)},{round(lidar_file.header.maxs[1], 3)})')
-        print(f'Point count: {lidar_file.header.point_count}')
-        print('---')
+    # slices = co.partition(copc_square_split_strategy, num_chunks=9)
+    #
+    # for i, data_slice in enumerate(slices):
+    #     las_data = data_slice.get()
+    #     lidar_file = laspy.open(las_data)
+    #     print(f'LiDAR slice #{i}:')
+    #     print(f'Bounds: '
+    #           f'({round(lidar_file.header.mins[0], 3)},{round(lidar_file.header.mins[1], 3)}) - '
+    #           f'({round(lidar_file.header.maxs[0], 3)},{round(lidar_file.header.maxs[1], 3)})')
+    #     print(f'Point count: {lidar_file.header.point_count}')
+    #     print('---')

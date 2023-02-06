@@ -64,6 +64,8 @@ class CloudOptimizedPointCloud:
     """
     Cloud Data Type for the COPC file format
     """
+    attribute1 = None
+    attribute2: int = -2
     points: int
     x_scale: float
     y_scale: float

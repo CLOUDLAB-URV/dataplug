@@ -3,11 +3,14 @@ from __future__ import annotations
 import io
 import logging
 from typing import TYPE_CHECKING, Union, Optional
+
+import msgpack
 from boto3.s3.transfer import TransferConfig
 import smart_open
 
 from dataplug.preprocess.backendbase import PreprocessorBackendBase
 from dataplug.preprocess.preprocessor import BatchPreprocessor, MapReducePreprocessor
+from dataplug.version import __version__
 
 if TYPE_CHECKING:
     from dataplug.cloudobject import CloudObject
@@ -22,19 +25,19 @@ class DummyPreprocessor(PreprocessorBackendBase):
         preprocess_result = preprocessor.preprocess(cloud_object)
 
         if preprocess_result.attributes is not None:
-            attrs_dict = dump_attributes(preprocess_result.attributes)
+            attrs_bin = msgpack.dumps(preprocess_result.attributes)
         else:
-            attrs_dict = {}
+            attrs_bin = b""
 
         if preprocess_result.metadata is None:
             preprocess_result.metadata = io.BytesIO(b"")
 
-        if hasattr(stream, "read"):
+        if hasattr(preprocess_result.metadata, "read"):
             cloud_object.s3.upload_fileobj(
                 Fileobj=preprocess_result.metadata,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.path.key,
-                ExtraArgs={"Metadata": attrs_dict},
+                ExtraArgs={"Metadata": {'dataplug': __version__}},
                 Config=TransferConfig(use_threads=True, max_concurrency=256),
             )
         else:
@@ -42,11 +45,18 @@ class DummyPreprocessor(PreprocessorBackendBase):
                 Body=preprocess_result.metadata,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.path.key,
-                Metadata=attrs_dict,
+                Metadata={'dataplug': __version__}
             )
 
-        if hasattr(stream, "close"):
-            stream.close()
+        cloud_object.s3.put_object(
+            Body=attrs_bin,
+            Bucket=cloud_object._attrs_path.bucket,
+            Key=cloud_object._attrs_path.key,
+            Metadata={'dataplug': __version__}
+        )
+
+        if hasattr(preprocess_result.metadata, "close"):
+            preprocess_result.metadata.close()
 
     def preprocess_map_reduce(self, preprocessor: MapReducePreprocessor, cloud_object: CloudObject):
         raise NotImplementedError()
