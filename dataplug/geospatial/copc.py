@@ -8,12 +8,11 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from dataplug.cloudobject import CloudDataType, CloudObjectSlice
-from dataplug.preprocess import BatchPreprocessor
+from dataplug.preprocess import BatchPreprocessor, PreprocessingMetadata
 
 if TYPE_CHECKING:
     from typing import List, Tuple, BinaryIO, Dict
     from ..cloudobject import CloudObject
-    from ..preprocess import PreprocessingMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +35,7 @@ class COPCPreprocessor(BatchPreprocessor):
         """
         import laspy.copc
 
-        with cloud_object.open('rb') as copc_file:
+        with cloud_object.open(mode='rb') as copc_file:
             copc_reader = laspy.copc.CopcReader(copc_file)
             copc_attrs = {
                 'points': copc_reader.header.point_count,

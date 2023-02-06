@@ -1,12 +1,7 @@
-import base64
-import json
 import logging
-import pickle
 import re
 import os
 import shutil
-
-from io import StringIO
 
 import botocore
 
@@ -56,19 +51,3 @@ def head_object(s3client, bucket, key):
         else:
             raise e
     return response, metadata
-
-
-def dump_attributes(attributes: dict):
-    dumped_attrs = {}
-    for key, value in attributes.items():
-        value_b64 = base64.b64encode(pickle.dumps(value)).decode("utf-8")
-        dumped_attrs[key] = value_b64
-    return dumped_attrs
-
-
-def load_attributes(dumped_attributes: dict):
-    attributes = {}
-    for key, value in dumped_attributes.items():
-        value = pickle.loads(base64.b64decode(value))
-        attributes[key] = value
-    return attributes

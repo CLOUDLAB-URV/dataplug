@@ -39,7 +39,7 @@ if __name__ == '__main__':
                              s3_config=local_minio)
 
     backend = DummyPreprocessor()
-    co.preprocess(backend)
+    co.preprocess(backend, force=True)
 
     slices = co.partition(copc_square_split_strategy, num_chunks=9)
 

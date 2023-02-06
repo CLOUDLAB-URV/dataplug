@@ -21,7 +21,8 @@ dependencies = [
     "numpy",
     "pandas",
     "smart_open",
-    "boto3"
+    "boto3",
+    "msgpack"
 ]
 
 [project.optional-dependencies]

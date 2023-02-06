@@ -8,7 +8,6 @@ import smart_open
 
 from dataplug.preprocess.backendbase import PreprocessorBackendBase
 from dataplug.preprocess.preprocessor import BatchPreprocessor, MapReducePreprocessor
-from dataplug.util import dump_attributes
 
 if TYPE_CHECKING:
     from dataplug.cloudobject import CloudObject
@@ -20,11 +19,7 @@ logger = logging.getLogger(__name__)
 
 class DummyPreprocessor(PreprocessorBackendBase):
     def preprocess_batch(self, preprocessor: BatchPreprocessor, cloud_object: CloudObject):
-        obj_uri = cloud_object.path.as_uri()
-        # client = cloud_object.s3._new_client()
-        # stream = smart_open.open(obj_uri, 'rb', transport_params={'client': client})
-        stream = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)["Body"]
-        preprocess_result = preprocessor.preprocess(stream, cloud_object)
+        preprocess_result = preprocessor.preprocess(cloud_object)
 
         if preprocess_result.attributes is not None:
             attrs_dict = dump_attributes(preprocess_result.attributes)

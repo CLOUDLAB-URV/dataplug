@@ -2,15 +2,19 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, Union, List, Tuple, Dict, Optional, Type, Any
+import smart_open
 from types import SimpleNamespace
+from collections import namedtuple
+from typing import TYPE_CHECKING
+from functools import partial
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
+    from typing import Union, List, Tuple, Dict, Optional, Type, Any
 else:
     S3Client = object
 
-from dataplug.util import split_s3_path, head_object, load_attributes
+from dataplug.util import split_s3_path, head_object
 from dataplug.storage import PureS3Path, PickleableS3ClientProxy
 from dataplug.preprocess import (
     BatchPreprocessor,
@@ -24,9 +28,9 @@ logger = logging.getLogger(__name__)
 
 class CloudDataType:
     def __init__(
-        self,
-        preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = None,
-        inherit_from: Type["CloudDataType"] = None,
+            self,
+            preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = None,
+            inherit_from: Type["CloudDataType"] = None,
     ):
         self.co_class: object = None
         self.__preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = preprocessor
@@ -34,7 +38,7 @@ class CloudDataType:
 
     @property
     def preprocessor(
-        self,
+            self,
     ) -> Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]]:
         if self.__preprocessor is not None:
             return self.__preprocessor
@@ -57,10 +61,10 @@ class CloudDataType:
 
 class CloudObject:
     def __init__(
-        self,
-        data_type: CloudDataType,
-        s3_uri_path: str,
-        s3_config: dict = None,
+            self,
+            data_type: CloudDataType,
+            s3_uri_path: str,
+            s3_config: dict = None,
     ):
         """
         Create a reference to a Cloud Object
@@ -68,11 +72,18 @@ class CloudObject:
         :param s3_uri_path: Full S3 uri in form s3://bucket/key for this object
         :param s3_config: Extra S3 config
         """
-        self._obj_meta: Optional[Dict[str, str]] = None
-        self._meta_meta: Optional[Dict[str, str]] = None
-        self._obj_path: PureS3Path = PureS3Path.from_uri(s3_uri_path)
-        self._meta_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + ".meta", self._obj_path.key)
-        self._cls: CloudDataType = data_type
+        self._obj_headers: Optional[Dict[str, str]] = None  # Storage headers of the data object
+        self._meta_headers: Optional[Dict[str, str]] = None  # Storage headers of the metadata object
+        self._attrs_headers: Optional[Dict[str, str]] = None  # Storage headers of the attributes object
+
+        self._obj_path: PureS3Path = PureS3Path.from_uri(s3_uri_path)  # S3 Path for the data object
+        self._meta_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + ".meta",
+                                                                 self._obj_path.key)  # S3 Path for the metadata object. Located in bucket suffixed with .meta with the same key as original data object
+        self._attrs_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + ".meta",
+                                                                  self._obj_path.key + '.attrs')  # S3 Path for the attributes object. Located in bucket suffixed with .meta with key as original data object suffixed with .attrs
+
+        self._cls: CloudDataType = data_type  # cls reference for the CloudDataType of this object
+
         s3_config = s3_config or {}
         self._s3: PickleableS3ClientProxy = PickleableS3ClientProxy(
             aws_access_key_id=s3_config.get("aws_access_key_id"),
@@ -84,7 +95,8 @@ class CloudObject:
             role_arn=s3_config.get("role_arn"),
             token_duration_seconds=s3_config.get("token_duration_seconds"),
         )
-        self._obj_attrs: SimpleNamespace = SimpleNamespace()
+
+        self._attrs: Optional[SimpleNamespace] = None
 
         logger.debug(f"{self._obj_path=},{self._meta_path=}")
 
@@ -98,21 +110,47 @@ class CloudObject:
 
     @property
     def meta_path(self) -> PureS3Path:
+        """
+        Get the S3Path of the metadata of this Cloud Object
+        :return: S3Path of the metadata for this Cloud Object
+        """
         return self._meta_path
 
     @property
     def size(self) -> int:
-        if not self._obj_meta:
+        """
+        Returns the data size of this Cloud Object
+        :return: Size in bytes of this Cloud Object
+        """
+        if not self._obj_headers:
             self.fetch()
-        return int(self._obj_meta["ContentLength"])
+        return int(self._obj_headers["ContentLength"])
+
+    @property
+    def meta_size(self) -> int:
+        """
+        Returns the size of the metadata object of this Cloud Object
+        :return: Size in bytes of the metadata object of this Cloud Object
+        """
+        if self._meta_headers is None or 'ContentLength' not in self._meta_headers:
+            raise AttributeError()
+        return int(self._meta_headers['ContentLength'])
 
     @property
     def s3(self) -> S3Client:
         return self._s3
 
     @property
-    def attributes(self) -> Any:
-        return self._obj_attrs
+    def attributes(self) -> Dict[str, Any]:
+        # TODO
+        # Return a copy of the attributes
+        ...
+
+    @property
+    def open(self):
+        logger.debug('Creating new smart_open client for uri %s', self.path.as_uri())
+        client = self.s3._new_client()
+        return partial(smart_open.open, uri=self.path.as_uri(), transport_params={'client': client})
 
     @classmethod
     def from_s3(cls, cloud_object_class, s3_path, s3_config=None, fetch=True) -> "CloudObject":
@@ -134,9 +172,9 @@ class CloudObject:
         return co_instance
 
     def exists(self) -> bool:
-        if not self._obj_meta:
+        if not self._obj_headers:
             self.fetch()
-        return bool(self._obj_meta)
+        return bool(self._obj_headers)
 
     def is_preprocessed(self) -> bool:
         try:
@@ -146,7 +184,7 @@ class CloudObject:
             return False
 
     def fetch(
-        self, enforce_obj: bool = False, enforce_meta: bool = False
+            self, enforce_obj: bool = False, enforce_meta: bool = False
     ) -> Tuple[Optional[Dict[str, str]], Optional[Dict[str, str]]]:
         """
         Get object metadata from storage with HEAD object request
@@ -155,24 +193,24 @@ class CloudObject:
         :return: Tuple for object metadata and objectmeta metadata
         """
         logger.info("Fetching object from S3")
-        if not self._obj_meta:
+        if not self._obj_headers:
             try:
                 res, _ = head_object(self._s3, self._obj_path.bucket, self._obj_path.key)
-                self._obj_meta = res
+                self._obj_headers = res
             except KeyError as e:
-                self._obj_meta = None
+                self._obj_headers = None
                 if enforce_obj:
                     raise e
-        if not self._meta_meta:
+        if not self._meta_headers:
             try:
                 res, encoded_attrs = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
-                self._meta_meta = res
-                self._obj_attrs = SimpleNamespace(**load_attributes(encoded_attrs))
+                self._meta_headers = res
+                self._attrs = SimpleNamespace(**load_attributes(encoded_attrs))
             except KeyError as e:
-                self._meta_meta = None
+                self._meta_headers = None
                 if enforce_meta:
                     raise e
-            return self._obj_meta, self._meta_meta
+            return self._obj_headers, self._meta_headers
 
     def preprocess(self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, *args, **kwargs):
         """
@@ -202,7 +240,7 @@ class CloudObject:
         :param key: Attribute key
         :return: Attribute
         """
-        return getattr(self._obj_attrs, key)
+        return getattr(self._attrs, key)
 
     def partition(self, strategy, *args, **kwargs) -> List[CloudObjectSlice]:
         """
@@ -217,4 +255,4 @@ class CloudObject:
 
     @property
     def obj_attrs(self):
-        return self._obj_attrs
+        return self._attrs
