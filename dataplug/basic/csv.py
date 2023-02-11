@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class CSVPreprocessor(BatchPreprocessor):
     def preprocess(self, cloud_object: CloudObject, separator=","):
-        with cloud_object.open('r', encoding='utf-8') as csv_file:
+        with cloud_object.open("r", encoding="utf-8") as csv_file:
             head = "".join(csv_file.readline() for _ in range(25))
             head_buff = io.StringIO(head)
             head_buff.seek(0)
@@ -49,7 +49,9 @@ class CSVSlice(CloudObjectSlice):
         """Return the slice as a string"""
         r0 = self.range_0 - 1 if not self.first else self.range_0
         r1 = self.range_1 + self.threshold if not self.last else self.range_1
-        res = self.cloud_object.s3.get_object(Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=f"bytes={r0}-{r1}")
+        res = self.cloud_object.s3.get_object(
+            Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=f"bytes={r0}-{r1}"
+        )
         retval = res["Body"].read().decode("utf-8")
 
         first_row_start_pos = 0

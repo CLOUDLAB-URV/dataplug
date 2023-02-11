@@ -23,7 +23,9 @@ class UTF8TextSlice(CloudObjectSlice):
         r0 = self.range_0 - 1 if not self.first else self.range_0
         r1 = self.range_1 + self.padding if not self.last else self.range_1
 
-        res = self.cloud_object.s3.get_object(Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=f"bytes={r0}-{r1}")
+        res = self.cloud_object.s3.get_object(
+            Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=f"bytes={r0}-{r1}"
+        )
         body = res["Body"].read().decode("utf-8")
 
         s0 = 0

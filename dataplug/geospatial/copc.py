@@ -35,24 +35,24 @@ class COPCPreprocessor(BatchPreprocessor):
         """
         import laspy.copc
 
-        with cloud_object.open(mode='rb') as copc_file:
+        with cloud_object.open(mode="rb") as copc_file:
             copc_reader = laspy.copc.CopcReader(copc_file)
             copc_attrs = {
-                'points': copc_reader.header.point_count,
-                'x_scale': copc_reader.header.x_scale,
-                'y_scale': copc_reader.header.y_scale,
-                'z_scale': copc_reader.header.z_scale,
-                'x_offset': copc_reader.header.x_offset,
-                'y_offset': copc_reader.header.y_offset,
-                'z_offset': copc_reader.header.z_offset,
-                'x_max': copc_reader.header.x_max,
-                'y_max': copc_reader.header.y_max,
-                'z_max': copc_reader.header.z_max,
-                'x_min': copc_reader.header.x_min,
-                'y_min': copc_reader.header.y_min,
-                'z_min': copc_reader.header.z_min,
-                'root_offset': copc_reader.copc_info.hierarchy_root_offset,
-                'root_size': copc_reader.copc_info.hierarchy_root_size
+                "points": copc_reader.header.point_count,
+                "x_scale": copc_reader.header.x_scale,
+                "y_scale": copc_reader.header.y_scale,
+                "z_scale": copc_reader.header.z_scale,
+                "x_offset": copc_reader.header.x_offset,
+                "y_offset": copc_reader.header.y_offset,
+                "z_offset": copc_reader.header.z_offset,
+                "x_max": copc_reader.header.x_max,
+                "y_max": copc_reader.header.y_max,
+                "z_max": copc_reader.header.z_max,
+                "x_min": copc_reader.header.x_min,
+                "y_min": copc_reader.header.y_min,
+                "z_min": copc_reader.header.z_min,
+                "root_offset": copc_reader.copc_info.hierarchy_root_offset,
+                "root_size": copc_reader.copc_info.hierarchy_root_size,
             }
         print(copc_attrs)
 
@@ -64,6 +64,7 @@ class CloudOptimizedPointCloud:
     """
     Cloud Data Type for the COPC file format
     """
+
     attribute1 = None
     attribute2: int = -2
     points: int

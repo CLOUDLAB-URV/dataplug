@@ -33,9 +33,9 @@ logger = logging.getLogger(__name__)
 
 class CloudDataType:
     def __init__(
-            self,
-            preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = None,
-            inherit_from: Type["CloudDataType"] = None,
+        self,
+        preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = None,
+        inherit_from: Type["CloudDataType"] = None,
     ):
         self.co_class: object = None
         self.__preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = preprocessor
@@ -44,7 +44,7 @@ class CloudDataType:
 
     @property
     def preprocessor(
-            self,
+        self,
     ) -> Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]]:
         if self.__preprocessor is not None:
             return self.__preprocessor
@@ -55,12 +55,12 @@ class CloudDataType:
 
     def __call__(self, cls):
         # Get attribute names, types and initial values from decorated class
-        if hasattr(cls, '__annotations__'):
+        if hasattr(cls, "__annotations__"):
             # Get annotated attributes
             for attr_key, _ in cls.__annotations__.items():
                 self.cls_attributes[attr_key] = None
         # Get attributes with value
-        for attr_key in filter(lambda attr: not attr.startswith('__') and not attr.endswith('__'), dir(cls)):
+        for attr_key in filter(lambda attr: not attr.startswith("__") and not attr.endswith("__"), dir(cls)):
             attr_val = getattr(cls, attr_key)
             self.cls_attributes[attr_key] = attr_val
 
@@ -77,10 +77,10 @@ class CloudDataType:
 
 class CloudObject:
     def __init__(
-            self,
-            data_type: CloudDataType,
-            s3_uri_path: str,
-            s3_config: dict = None,
+        self,
+        data_type: CloudDataType,
+        s3_uri_path: str,
+        s3_config: dict = None,
     ):
         """
         Create a reference to a Cloud Object
@@ -93,10 +93,12 @@ class CloudObject:
         self._attrs_headers: Optional[Dict[str, str]] = None  # Storage headers of the attributes object
 
         self._obj_path: PureS3Path = PureS3Path.from_uri(s3_uri_path)  # S3 Path for the data object
-        self._meta_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + ".meta",
-                                                                 self._obj_path.key)  # S3 Path for the metadata object. Located in bucket suffixed with .meta with the same key as original data object
-        self._attrs_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + ".meta",
-                                                                  self._obj_path.key + '.attrs')  # S3 Path for the attributes object. Located in bucket suffixed with .meta with key as original data object suffixed with .attrs
+        self._meta_path: PureS3Path = PureS3Path.from_bucket_key(
+            self._obj_path.bucket + ".meta", self._obj_path.key
+        )  # S3 Path for the metadata object. Located in bucket suffixed with .meta with the same key as original data object
+        self._attrs_path: PureS3Path = PureS3Path.from_bucket_key(
+            self._obj_path.bucket + ".meta", self._obj_path.key + ".attrs"
+        )  # S3 Path for the attributes object. Located in bucket suffixed with .meta with key as original data object suffixed with .attrs
 
         self._cls: CloudDataType = data_type  # cls reference for the CloudDataType of this object
 
@@ -148,9 +150,9 @@ class CloudObject:
         Returns the size of the metadata object of this Cloud Object
         :return: Size in bytes of the metadata object of this Cloud Object
         """
-        if self._meta_headers is None or 'ContentLength' not in self._meta_headers:
+        if self._meta_headers is None or "ContentLength" not in self._meta_headers:
             raise AttributeError()
-        return int(self._meta_headers['ContentLength'])
+        return int(self._meta_headers["ContentLength"])
 
     @property
     def s3(self) -> S3Client:
@@ -162,9 +164,9 @@ class CloudObject:
 
     @property
     def open(self) -> smart_open.smart_open:
-        logger.debug('Creating new smart_open client for uri %s', self.path.as_uri())
+        logger.debug("Creating new smart_open client for uri %s", self.path.as_uri())
         client = self.s3._new_client()
-        return partial(smart_open.open, self.path.as_uri(), transport_params={'client': client})
+        return partial(smart_open.open, self.path.as_uri(), transport_params={"client": client})
 
     @classmethod
     def from_s3(cls, cloud_object_class, s3_path, s3_config=None, fetch=True) -> "CloudObject":
@@ -198,7 +200,7 @@ class CloudObject:
             return False
 
     def fetch(
-            self, enforce_obj: bool = True, enforce_meta: bool = False
+        self, enforce_obj: bool = True, enforce_meta: bool = False
     ) -> Tuple[Optional[Dict[str, str]], Optional[Dict[str, str]], Optional[Dict[str, str]]]:
         """
         Get object metadata from storage with HEAD object request
@@ -234,14 +236,14 @@ class CloudObject:
                 self._attrs_headers = res
                 get_res = self.s3.get_object(Bucket=self._attrs_path.bucket, Key=self._attrs_path.key)
                 try:
-                    attrs_dict = pickle.load(get_res['Body'])
+                    attrs_dict = pickle.load(get_res["Body"])
                     # Get default attributes from the class,
                     # so we can have default attributes different from None set in the Class
                     base_attrs = deepcopy(self._cls.cls_attributes)
                     # Replace attributes that have been set in the preprocessing stage
                     base_attrs.update(attrs_dict)
                     # Create namedtuple so that the attributes object is immutable
-                    co_named_tuple = namedtuple(self._cls.co_class.__name__+'Attributes', base_attrs.keys())
+                    co_named_tuple = namedtuple(self._cls.co_class.__name__ + "Attributes", base_attrs.keys())
                     self._attrs = co_named_tuple(**base_attrs)
                 except Exception as e:
                     logger.error(e)
@@ -253,7 +255,9 @@ class CloudObject:
 
         return self._obj_headers, self._meta_headers, self._attrs_headers
 
-    def preprocess(self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args, **kwargs):
+    def preprocess(
+        self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args, **kwargs
+    ):
         """
         Manually launch the preprocessing job for this cloud object on the specified preprocessing backend
         :param preprocessor_backend: Preprocessor backend instance on to execute the preprocessing job
@@ -262,7 +266,7 @@ class CloudObject:
         :param kwargs:Optional keyword arguments to pass to the preprocessing job
         """
         if not self.is_preprocessed() and not force:
-            raise Exception('Object is already preprocessed')
+            raise Exception("Object is already preprocessed")
         if self.is_preprocessed() and ignore:
             return
 
@@ -274,7 +278,7 @@ class CloudObject:
             mapreduce_preprocessor: MapReducePreprocessor = self._cls.preprocessor(*args, **kwargs)
             preprocessor_backend.preprocess_map_reduce(mapreduce_preprocessor, self)
         else:
-            raise Exception('This object cannot be preprocessed')
+            raise Exception("This object cannot be preprocessed")
         self.fetch()
 
     def get_attribute(self, key: str) -> Any:

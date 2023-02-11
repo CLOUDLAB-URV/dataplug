@@ -52,8 +52,8 @@ class GZipTextPreprocessor(BatchPreprocessor):
         tmp_index_file_name = tempfile.mktemp()
         try:
             obj_res = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
-            assert obj_res.get('ResponseMetadata', {}).get('HTTPStatusCode', 400) == 200
-            data_stream = obj_res['Body']
+            assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode", 400) == 200
+            data_stream = obj_res["Body"]
 
             force_delete_path(tmp_index_file_name)
             t0 = time.perf_counter()
@@ -85,8 +85,8 @@ class GZipTextPreprocessor(BatchPreprocessor):
                     raise e
 
             stdout, stderr = index_proc.communicate()
-            logger.debug(stdout.decode('utf-8'))
-            logger.debug(stderr.decode('utf-8'))
+            logger.debug(stdout.decode("utf-8"))
+            logger.debug(stderr.decode("utf-8"))
             if index_proc.returncode > 0:
                 logger.debug(stdout.decode("utf-8"))
                 logger.debug(stderr.decode("utf-8"))
@@ -149,7 +149,8 @@ class GZipTextPreprocessor(BatchPreprocessor):
                 attributes={
                     "total_lines": total_lines,
                     "index_key": gzip_index_key,
-                })
+                },
+            )
         finally:
             force_delete_path(tmp_index_file_name)
 

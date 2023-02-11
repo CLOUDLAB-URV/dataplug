@@ -40,7 +40,7 @@ class LiDARPreprocessor(BatchPreprocessor):
             force_delete_path(input_file_path)
             force_delete_path(output_file_path)
 
-            with cloud_object.open('rb') as input_stream:
+            with cloud_object.open("rb") as input_stream:
                 with open(input_file_path, "wb") as input_file:
                     shutil.copyfileobj(input_stream, input_file)
 
@@ -52,30 +52,27 @@ class LiDARPreprocessor(BatchPreprocessor):
             pipeline = pdal.Pipeline(json.dumps(pipeline_json), loglevel=logging.INFO)
             pipeline.execute()
 
-            with open(output_file_path, 'rb') as copc_file:
+            with open(output_file_path, "rb") as copc_file:
                 copc_reader = laspy.copc.CopcReader(copc_file)
                 copc_meta = {
-                    'points': copc_reader.header.point_count,
-                    'x_scale': copc_reader.header.x_scale,
-                    'y_scale': copc_reader.header.y_scale,
-                    'z_scale': copc_reader.header.z_scale,
-                    'x_offset': copc_reader.header.x_offset,
-                    'y_offset': copc_reader.header.y_offset,
-                    'z_offset': copc_reader.header.z_offset,
-                    'x_max': copc_reader.header.x_max,
-                    'y_max': copc_reader.header.y_max,
-                    'z_max': copc_reader.header.z_max,
-                    'x_min': copc_reader.header.x_min,
-                    'y_min': copc_reader.header.y_min,
-                    'z_min': copc_reader.header.z_min,
-                    'root_offset': copc_reader.copc_info.hierarchy_root_offset,
-                    'root_size': copc_reader.copc_info.hierarchy_root_size
+                    "points": copc_reader.header.point_count,
+                    "x_scale": copc_reader.header.x_scale,
+                    "y_scale": copc_reader.header.y_scale,
+                    "z_scale": copc_reader.header.z_scale,
+                    "x_offset": copc_reader.header.x_offset,
+                    "y_offset": copc_reader.header.y_offset,
+                    "z_offset": copc_reader.header.z_offset,
+                    "x_max": copc_reader.header.x_max,
+                    "y_max": copc_reader.header.y_max,
+                    "z_max": copc_reader.header.z_max,
+                    "x_min": copc_reader.header.x_min,
+                    "y_min": copc_reader.header.y_min,
+                    "z_min": copc_reader.header.z_min,
+                    "root_offset": copc_reader.copc_info.hierarchy_root_offset,
+                    "root_size": copc_reader.copc_info.hierarchy_root_size,
                 }
 
-            return PreprocessingMetadata(
-                object_file_path=output_file_path,
-                attributes=copc_meta
-            )
+            return PreprocessingMetadata(object_file_path=output_file_path, attributes=copc_meta)
         finally:
             force_delete_path(input_file_path)
 

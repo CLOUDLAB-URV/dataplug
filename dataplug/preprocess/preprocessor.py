@@ -29,11 +29,11 @@ class MapReducePreprocessor:
         pass
 
     def map(
-            self,
-            cloud_object: CloudObject,
-            mapper: int,
-            chunk_size: int,
-            n_mappers: int,
+        self,
+        cloud_object: CloudObject,
+        mapper: int,
+        chunk_size: int,
+        n_mappers: int,
     ) -> PreprocessingMetadata:
         """
         Map function for Map-Reduce preprocessor
@@ -45,7 +45,9 @@ class MapReducePreprocessor:
         """
         raise NotImplementedError()
 
-    def reduce(self, map_results: List[PreprocessingMetadata], cloud_object: CloudObject, n_mappers: int) -> PreprocessingMetadata:
+    def reduce(
+        self, map_results: List[PreprocessingMetadata], cloud_object: CloudObject, n_mappers: int
+    ) -> PreprocessingMetadata:
         """
         Reduce function for Map-Reduce preprocessor
         :param cloud_object: CloudObject instance to be preprocessed

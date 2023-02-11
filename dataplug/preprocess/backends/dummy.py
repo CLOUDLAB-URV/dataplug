@@ -26,7 +26,7 @@ class DummyPreprocessor(PreprocessorBackendBase):
         preprocess_result = preprocessor.preprocess(cloud_object)
 
         if all((preprocess_result.object_body, preprocess_result.object_file_path)):
-            raise Exception('Choose one for object preprocessing result: object_body or object_file_path')
+            raise Exception("Choose one for object preprocessing result: object_body or object_file_path")
 
         # Upload object body to meta bucket with the same key as original (prevent to overwrite)
         if preprocess_result.object_body is not None:
@@ -35,7 +35,7 @@ class DummyPreprocessor(PreprocessorBackendBase):
                     Fileobj=preprocess_result.object_body,
                     Bucket=cloud_object.meta_path.bucket,
                     Key=cloud_object.path.key,
-                    ExtraArgs={"Metadata": {'dataplug': __version__}},
+                    ExtraArgs={"Metadata": {"dataplug": __version__}},
                     Config=TransferConfig(use_threads=True, max_concurrency=256),
                 )
             else:
@@ -43,14 +43,14 @@ class DummyPreprocessor(PreprocessorBackendBase):
                     Body=preprocess_result.object_body,
                     Bucket=cloud_object.meta_path.bucket,
                     Key=cloud_object.path.key,
-                    Metadata={'dataplug': __version__}
+                    Metadata={"dataplug": __version__},
                 )
         if preprocess_result.object_file_path is not None:
             cloud_object.s3.upload_file(
                 Filename=preprocess_result.object_file_path,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.path.key,
-                ExtraArgs={"Metadata": {'dataplug': __version__}},
+                ExtraArgs={"Metadata": {"dataplug": __version__}},
                 Config=TransferConfig(use_threads=True, max_concurrency=256),
             )
             force_delete_path(preprocess_result.object_file_path)
@@ -62,7 +62,7 @@ class DummyPreprocessor(PreprocessorBackendBase):
                 Body=attrs_bin,
                 Bucket=cloud_object._attrs_path.bucket,
                 Key=cloud_object._attrs_path.key,
-                Metadata={'dataplug': __version__}
+                Metadata={"dataplug": __version__},
             )
 
         # Upload metadata object to meta bucket
@@ -72,7 +72,7 @@ class DummyPreprocessor(PreprocessorBackendBase):
                     Fileobj=preprocess_result.metadata,
                     Bucket=cloud_object.meta_path.bucket,
                     Key=cloud_object.meta_path.key,
-                    ExtraArgs={"Metadata": {'dataplug': __version__}},
+                    ExtraArgs={"Metadata": {"dataplug": __version__}},
                     Config=TransferConfig(use_threads=True, max_concurrency=256),
                 )
             else:
@@ -80,15 +80,11 @@ class DummyPreprocessor(PreprocessorBackendBase):
                     Body=preprocess_result.metadata,
                     Bucket=cloud_object.meta_path.bucket,
                     Key=cloud_object.meta_path.key,
-                    Metadata={'dataplug': __version__}
+                    Metadata={"dataplug": __version__},
                 )
 
             if hasattr(preprocess_result.metadata, "close"):
                 preprocess_result.metadata.close()
-
-
-
-
 
     def preprocess_map_reduce(self, preprocessor: MapReducePreprocessor, cloud_object: CloudObject):
         raise NotImplementedError()
