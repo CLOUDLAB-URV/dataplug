@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 import threading
 import time
+import tqdm
 from math import ceil
 from typing import BinaryIO, Tuple, Dict, ByteString
 
@@ -13,7 +14,8 @@ import pandas as pd
 import numpy as np
 
 from dataplug.cloudobject import CloudDataType, CloudObject, CloudObjectSlice
-from dataplug.preprocess.preprocessor import BatchPreprocessor
+from dataplug.preprocess import PreprocessingMetadata
+from dataplug.preprocess.preprocessor import BatchPreprocessor, PreprocessingMetadata
 from dataplug.util import force_delete_path
 
 logger = logging.getLogger(__name__)
@@ -42,13 +44,17 @@ class GZipTextPreprocessor(BatchPreprocessor):
     def __init__(self):
         super().__init__()
 
-    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject) -> Tuple[ByteString, Dict[str, str]]:
+    def preprocess(self, cloud_object: CloudObject) -> PreprocessingMetadata:
         """
         Create index file from gzip archive using gztool (https://github.com/circulosmeos/gztool)
         """
         gztool = _get_gztool_path()
         tmp_index_file_name = tempfile.mktemp()
         try:
+            obj_res = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
+            assert obj_res.get('ResponseMetadata', {}).get('HTTPStatusCode', 400) == 200
+            data_stream = obj_res['Body']
+
             force_delete_path(tmp_index_file_name)
             t0 = time.perf_counter()
 
@@ -62,22 +68,25 @@ class GZipTextPreprocessor(BatchPreprocessor):
             )
 
             # TODO program might get stuck if subprocess fails, blocking io should be done in a backgroun thread or using async/await
-            try:
-                chunk = data_stream.read(CHUNK_SIZE)
-                while chunk != b"":
-                    index_proc.stdin.write(chunk)
+            with tqdm.tqdm(total=cloud_object.size) as pb:
+                try:
                     chunk = data_stream.read(CHUNK_SIZE)
-                if hasattr(data_stream, "close"):
-                    data_stream.close()
-            except BrokenPipeError as e:
-                stdout, stderr = index_proc.communicate()
-                logger.error(stdout.decode("utf-8"))
-                logger.error(stderr.decode("utf-8"))
-                raise e
+                    while chunk != b"":
+                        # logger.debug('Writing %d bytes to Pipe STDIN', len(chunk))
+                        index_proc.stdin.write(chunk)
+                        pb.update(len(chunk))
+                        chunk = data_stream.read(CHUNK_SIZE)
+                    if hasattr(data_stream, "close"):
+                        data_stream.close()
+                except BrokenPipeError as e:
+                    stdout, stderr = index_proc.communicate()
+                    logger.error(stdout.decode("utf-8"))
+                    logger.error(stderr.decode("utf-8"))
+                    raise e
 
             stdout, stderr = index_proc.communicate()
-            # logger.debug(stdout.decode('utf-8'))
-            # logger.debug(stderr.decode('utf-8'))
+            logger.debug(stdout.decode('utf-8'))
+            logger.debug(stderr.decode('utf-8'))
             if index_proc.returncode > 0:
                 logger.debug(stdout.decode("utf-8"))
                 logger.debug(stderr.decode("utf-8"))
@@ -134,10 +143,13 @@ class GZipTextPreprocessor(BatchPreprocessor):
 
             os.remove(tmp_index_file_name)
 
-            return out_stream.getvalue(), {
-                "total_lines": total_lines,
-                "index_key": gzip_index_key,
-            }
+            out_stream.seek(0)
+            return PreprocessingMetadata(
+                metadata=out_stream,
+                attributes={
+                    "total_lines": total_lines,
+                    "index_key": gzip_index_key,
+                })
         finally:
             force_delete_path(tmp_index_file_name)
 
@@ -239,16 +251,16 @@ class GZipTextSlice(CloudObjectSlice):
         try:
             t0 = time.perf_counter()
             # Get index and store it to temp file
-            self.s3.download_file(
-                Bucket=self.meta_path.bucket,
-                Key=self.attributes["index_key"],
+            self.cloud_object.s3.download_file(
+                Bucket=self.cloud_object.meta_path.bucket,
+                Key=self.cloud_object["index_key"],
                 Filename=tmp_index_file,
             )
 
             # Get compressed byte range
-            res = self.s3.get_object(
-                Bucket=self.obj_path.bucket,
-                Key=self.obj_path.key,
+            res = self.cloud_object.s3.get_object(
+                Bucket=self.cloud_object.path.bucket,
+                Key=self.cloud_object.path.key,
                 Range=f"bytes={self.range_0 - 1}-{self.range_1 - 1}",
             )
             body = res["Body"]
@@ -287,32 +299,34 @@ class GZipTextSlice(CloudObjectSlice):
 
             output_chunk = proc.stdout.read(CHUNK_SIZE)
             last_line = None
-            while output_chunk != b"":
-                # logger.debug('Read %d bytes from pipe', len(chunk))
-                text = output_chunk.decode("utf-8")
-                chunk_lines = text.splitlines()
+            with tqdm.tqdm(total=lines_to_read) as pb:
+                while output_chunk != b"":
+                    # logger.debug('Read %d bytes from pipe', len(chunk))
+                    text = output_chunk.decode("utf-8")
+                    chunk_lines = text.splitlines()
 
-                if last_line is not None:
-                    last_line = last_line + chunk_lines.pop(0)
-                    lines.append(last_line)
-                    last_line = None
+                    if last_line is not None:
+                        last_line = last_line + chunk_lines.pop(0)
+                        lines.append(last_line)
+                        last_line = None
 
-                if text[-1] != "\n":
-                    last_line = chunk_lines.pop()
+                    if text[-1] != "\n":
+                        last_line = chunk_lines.pop()
 
-                lines.extend(chunk_lines)
+                    lines.extend(chunk_lines)
+                    pb.update(len(chunk_lines))
 
-                # Stop decompressing lines if number of lines to read in this chunk is reached
-                if len(lines) > lines_to_read:
-                    proc.stdout.close()
-                    break
+                    # Stop decompressing lines if number of lines to read in this chunk is reached
+                    if len(lines) > lines_to_read:
+                        proc.stdout.close()
+                        break
 
-                # Try to read next decompressed chunk
-                # a ValueError is raised if the pipe is closed, meaning the writer or the subprocess closed it
-                try:
-                    output_chunk = proc.stdout.read(CHUNK_SIZE)
-                except ValueError:
-                    output_chunk = b""
+                    # Try to read next decompressed chunk
+                    # a ValueError is raised if the pipe is closed, meaning the writer or the subprocess closed it
+                    try:
+                        output_chunk = proc.stdout.read(CHUNK_SIZE)
+                    except ValueError:
+                        output_chunk = b""
 
             try:
                 proc.wait()

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import pickle
 
 import msgpack
 import traceback
@@ -160,10 +161,10 @@ class CloudObject:
         return self._attrs
 
     @property
-    def open(self):
+    def open(self) -> smart_open.smart_open:
         logger.debug('Creating new smart_open client for uri %s', self.path.as_uri())
         client = self.s3._new_client()
-        return partial(smart_open.open, uri=self.path.as_uri(), transport_params={'client': client})
+        return partial(smart_open.open, self.path.as_uri(), transport_params={'client': client})
 
     @classmethod
     def from_s3(cls, cloud_object_class, s3_path, s3_config=None, fetch=True) -> "CloudObject":
@@ -198,12 +199,12 @@ class CloudObject:
 
     def fetch(
             self, enforce_obj: bool = True, enforce_meta: bool = False
-    ) -> Tuple[Optional[Dict[str, str]], Optional[Dict[str, str]]]:
+    ) -> Tuple[Optional[Dict[str, str]], Optional[Dict[str, str]], Optional[Dict[str, str]]]:
         """
         Get object metadata from storage with HEAD object request
         :param enforce_obj: True to raise KeyError exception if object key is not found in storage
         :param enforce_meta: True to raise KeyError exception if metadata key is not found in storage
-        :return: Tuple for object metadata and objectmeta metadata
+        :return: Tuple of (data_object metadata, meta_object metadata, attrs_objet metadata)
         """
         logger.info("Fetching object from S3")
 
@@ -233,9 +234,13 @@ class CloudObject:
                 self._attrs_headers = res
                 get_res = self.s3.get_object(Bucket=self._attrs_path.bucket, Key=self._attrs_path.key)
                 try:
-                    attrs_dict = msgpack.load(get_res['Body'])
+                    attrs_dict = pickle.load(get_res['Body'])
+                    # Get default attributes from the class,
+                    # so we can have default attributes different from None set in the Class
                     base_attrs = deepcopy(self._cls.cls_attributes)
+                    # Replace attributes that have been set in the preprocessing stage
                     base_attrs.update(attrs_dict)
+                    # Create namedtuple so that the attributes object is immutable
                     co_named_tuple = namedtuple(self._cls.co_class.__name__+'Attributes', base_attrs.keys())
                     self._attrs = co_named_tuple(**base_attrs)
                 except Exception as e:
@@ -248,7 +253,7 @@ class CloudObject:
 
         return self._obj_headers, self._meta_headers, self._attrs_headers
 
-    def preprocess(self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, *args, **kwargs):
+    def preprocess(self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args, **kwargs):
         """
         Manually launch the preprocessing job for this cloud object on the specified preprocessing backend
         :param preprocessor_backend: Preprocessor backend instance on to execute the preprocessing job
@@ -258,6 +263,8 @@ class CloudObject:
         """
         if not self.is_preprocessed() and not force:
             raise Exception('Object is already preprocessed')
+        if self.is_preprocessed() and ignore:
+            return
 
         # FIXME implement this properly
         if issubclass(self._cls.preprocessor, BatchPreprocessor):
@@ -287,7 +294,9 @@ class CloudObject:
         :param kwargs: Optional key-words arguments to pass to the partitioning strategy
         """
         slices = strategy(self, *args, **kwargs)
-        [s._contextualize(self) for s in slices]
+        # Store a reference to this CloudObject instance in the slice
+        for s in slices:
+            s.cloud_object = self
         return slices
 
     def __getitem__(self, item):

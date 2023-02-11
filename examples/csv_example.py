@@ -12,9 +12,8 @@ import unittest
 import os
 import filecmp
 
-# logging.basicConfig(level=logging.DEBUG)
-# logging.getLogger("botocore").setLevel(logging.WARNING)
-# logging.getLogger('dataplug').setLevel(logging.DEBUG)
+from dataplug.util import setup_logging
+setup_logging('DEBUG')
 
 
 # class TestCSVPartition(unittest.TestCase):
@@ -67,8 +66,8 @@ if __name__ == '__main__':
     # Create Cloud Object reference
     co = CloudObject.from_s3(CSV, 's3://testdata/cities.csv', s3_config=config)
 
-    # backend = LithopsPreprocessor()
-    # co.preprocess(backend)
+    backend = DummyPreprocessor()
+    co.preprocess(backend, force=True)
 
     # co.fetch()
     # print(co.attributes.columns)

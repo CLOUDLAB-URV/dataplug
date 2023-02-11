@@ -22,15 +22,21 @@ def main():
     }
 
     co = CloudObject.from_s3(LiDARPointCloud,
-                             's3://geospatial/laz/cnig/PNOA_2016_CAT_324-4570_ORT-CLA-COL.laz',
+                             's3://geospatial/laz/PNOA_2016_CAT_324-4570_ORT-CLA-COL.laz',
                              s3_config=local_minio)
 
-    preprocessed = co.is_preprocessed()
-    print(preprocessed)
-    if not preprocessed:
-        # backend = LithopsPreprocessor()
-        backend = DummyPreprocessor()
-        co.preprocess(backend)
+    # backend = LithopsPreprocessor()
+    backend = DummyPreprocessor()
+    co.preprocess(backend, force=True)
+
+    # preprocessed = co.is_preprocessed()
+    # print(preprocessed)
+    # if not preprocessed:
+    #     backend = LithopsPreprocessor()
+        # backend = DummyPreprocessor()
+        # co.preprocess(backend)
+
+    print(f"No. of points: {co['points']}")
 
 
 if __name__ == '__main__':

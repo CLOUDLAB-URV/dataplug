@@ -95,9 +95,9 @@ class COPCSlice(CloudObjectSlice):
         from laspy.copc import CopcReader, Bounds
         import laspy
 
-        file_url = self.s3.generate_presigned_url(
+        file_url = self.cloud_object.s3.generate_presigned_url(
             "get_object",
-            Params={"Bucket": self.obj_path.bucket, "Key": self.obj_path.key},
+            Params={"Bucket": self.cloud_object.path.bucket, "Key": self.cloud_object.path.key},
             ExpiresIn=300,
         )
 

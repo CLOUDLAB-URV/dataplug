@@ -20,15 +20,11 @@ def main():
     }
 
     co = CloudObject.from_s3(FASTQGZip,
-                             's3://genomics/SRR21394969.fastq.gz',
+                             's3://genomics/test.fastq.gz',
                              s3_config=local_minio)
 
-    if not co.is_preprocessed():
-        backend = DummyPreprocessor()
-        co.preprocess(backend)
-
-    backend = DummyPreprocessor()
-    co.preprocess(backend)
+    # backend = DummyPreprocessor()
+    # co.preprocess(backend)
 
     data_slices = co.partition(partition_reads_batches, num_batches=256)
 

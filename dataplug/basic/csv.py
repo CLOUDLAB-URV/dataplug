@@ -11,14 +11,19 @@ logger = logging.getLogger(__name__)
 
 
 class CSVPreprocessor(BatchPreprocessor):
-    def preprocess(self, data_stream: BinaryIO, cloud_object: CloudObject, separator=","):
-        head = "".join(data_stream.readline().decode("utf-8") for _ in range(25))
-        df = pd.read_csv(io.StringIO(head), sep=separator)
+    def preprocess(self, cloud_object: CloudObject, separator=","):
+        with cloud_object.open('r', encoding='utf-8') as csv_file:
+            head = "".join(csv_file.readline() for _ in range(25))
+            head_buff = io.StringIO(head)
+            head_buff.seek(0)
+            df = pd.read_csv(head_buff, sep=separator)
+
         attrs = {
             "columns": df.columns.values.tolist(),
             "dtypes": df.dtypes.tolist(),
             "separator": separator,
         }
+
         return PreprocessingMetadata(attributes=attrs)
 
 
@@ -44,7 +49,7 @@ class CSVSlice(CloudObjectSlice):
         """Return the slice as a string"""
         r0 = self.range_0 - 1 if not self.first else self.range_0
         r1 = self.range_1 + self.threshold if not self.last else self.range_1
-        res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key, Range=f"bytes={r0}-{r1}")
+        res = self.cloud_object.s3.get_object(Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=f"bytes={r0}-{r1}")
         retval = res["Body"].read().decode("utf-8")
 
         first_row_start_pos = 0
@@ -118,8 +123,8 @@ class CSVSlice(CloudObjectSlice):
                 yield buffer
 
     def as_pandas_dataframe(self):
-        columns = self.attributes.columns
-        dtypes = dict(zip(columns, self.attributes.dtypes))
+        columns = self.cloud_object.attributes.columns
+        dtypes = dict(zip(columns, self.cloud_object.attributes.dtypes))
         dataframe = pd.read_csv(
             io.StringIO(self.get_rows_as_string()),
             sep=",",

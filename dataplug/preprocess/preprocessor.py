@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import BinaryIO, Dict, List, Any
+    from typing import BinaryIO, Dict, List, Any, Optional
     from dataplug.cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
@@ -58,6 +58,7 @@ class MapReducePreprocessor:
 
 @dataclass
 class PreprocessingMetadata:
-    metadata: BinaryIO = None
-    object_body: BinaryIO = None
-    attributes: Dict[str, Any] = None
+    metadata: Optional[BinaryIO] = None
+    object_body: Optional[BinaryIO] = None
+    object_file_path: Optional[str] = None
+    attributes: Optional[Dict[str, Any]] = None
