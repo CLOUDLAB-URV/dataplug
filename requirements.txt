@@ -1,6 +1,0 @@
-boto3
-botocore
-numpy
-pandas
-pyarrow
-smart_open
