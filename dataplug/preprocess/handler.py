@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import math
 import pickle
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from boto3.s3.transfer import TransferConfig
 
-from .preprocessor import BatchPreprocessor
+from .preprocessor import BatchPreprocessor, MapReducePreprocessor, PreprocessingMetadata
 from ..util import force_delete_path
 from ..version import __version__
 
@@ -77,3 +78,16 @@ def batch_job_handler(preprocessor: BatchPreprocessor, cloud_object: CloudObject
 
         if hasattr(preprocess_result.metadata, "close"):
             preprocess_result.metadata.close()
+
+
+def map_job_handler(preprocessor: MapReducePreprocessor, cloud_object: CloudObject, mapper_id: int):
+    # Call map process code
+    result = preprocessor.map(cloud_object, mapper_id, preprocessor.map_chunk_size, preprocessor.num_mappers)
+    return result
+
+
+def reduce_job_handler(
+    preprocessor: MapReducePreprocessor, cloud_object: CloudObject, map_results: List[PreprocessingMetadata]
+):
+    # Call reduce process code
+    preprocessor.reduce(map_results, cloud_object, n_mappers=len(map_results))

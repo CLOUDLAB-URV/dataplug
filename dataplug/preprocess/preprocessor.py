@@ -25,22 +25,23 @@ class BatchPreprocessor:
 
 
 class MapReducePreprocessor:
-    def __init__(self, *args, **kwargs):
-        pass
+    def __init__(self, num_mappers: Optional[int] = None, map_chunk_size: Optional[int] = None, *args, **kwargs):
+        self.num_mappers = num_mappers
+        self.map_chunk_size = map_chunk_size
 
     def map(
         self,
         cloud_object: CloudObject,
-        mapper: int,
-        chunk_size: int,
-        n_mappers: int,
+        mapper_id: int,
+        map_chunk_size: int,
+        num_mappers: int,
     ) -> PreprocessingMetadata:
         """
         Map function for Map-Reduce preprocessor
         :param cloud_object: CloudObject instance to be preprocessed
-        :param mapper: indicates the mapper ID in the map-reduce workflow
-        :param chunk_size: chunk size in bytes preprocessed in this mapper function
-        :param n_mappers: total number of mappers in the map-reduce workflow
+        :param mapper_id: indicates the mapper ID in the map-reduce workflow
+        :param map_chunk_size: chunk size in bytes preprocessed in this mapper function
+        :param num_mappers: total number of mappers in the map-reduce workflow
         :return: mapper result as a bytearray
         """
         raise NotImplementedError()
@@ -60,7 +61,7 @@ class MapReducePreprocessor:
 
 @dataclass
 class PreprocessingMetadata:
-    metadata: Optional[BinaryIO] = None
+    metadata: Optional[BinaryIO | bytes] = None
     object_body: Optional[BinaryIO] = None
     object_file_path: Optional[str] = None
     attributes: Optional[Dict[str, Any]] = None
