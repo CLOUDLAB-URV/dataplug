@@ -117,6 +117,7 @@ class CloudObject:
         self._attrs: Optional[SimpleNamespace] = None
 
         logger.debug(f"{self._obj_path=},{self._meta_path=}")
+        logger.info(f'Created reference for %s', self)
 
     @property
     def path(self) -> PureS3Path:
@@ -273,10 +274,10 @@ class CloudObject:
         # FIXME implement this properly
         if issubclass(self._cls.preprocessor, BatchPreprocessor):
             batch_preprocessor: BatchPreprocessor = self._cls.preprocessor(*args, **kwargs)
-            preprocessor_backend.preprocess_batch(batch_preprocessor, self)
+            preprocessor_backend.submit_batch_job(batch_preprocessor, self)
         elif issubclass(self._cls.preprocessor, MapReducePreprocessor):
             mapreduce_preprocessor: MapReducePreprocessor = self._cls.preprocessor(*args, **kwargs)
-            preprocessor_backend.preprocess_map_reduce(mapreduce_preprocessor, self)
+            preprocessor_backend.submit_mapreduce_job(mapreduce_preprocessor, self)
         else:
             raise Exception("This object cannot be preprocessed")
         self.fetch()
@@ -305,3 +306,6 @@ class CloudObject:
 
     def __getitem__(self, item):
         return self._attrs.__getattribute__(item)
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}<{self._cls.co_class.__name__}>({self.path.as_uri()})'

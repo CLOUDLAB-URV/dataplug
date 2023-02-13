@@ -59,7 +59,8 @@ if __name__ == '__main__':
         'aws_access_key_id': 'minioadmin',
         'aws_secret_access_key': 'minioadmin',
         'region_name': 'us-east-1',
-        'endpoint_url': 'http://192.168.1.110:9000',
+        # 'endpoint_url': 'http://192.168.1.110:9000',
+        'endpoint_url': 'http://127.0.0.1:9000',
         'botocore_config_kwargs': {'signature_version': 's3v4'},
         'role_arn': 'arn:aws:iam::123456789012:role/S3Access'
     }
@@ -69,8 +70,8 @@ if __name__ == '__main__':
     backend = DummyPreprocessor()
     co.preprocess(backend, force=True)
 
-    # co.fetch()
-    # print(co.attributes.columns)
+    co.fetch()
+    print(co.attributes.columns)
 
     data_slices = co.partition(batches_partition_strategy, num_batches=10)
 
