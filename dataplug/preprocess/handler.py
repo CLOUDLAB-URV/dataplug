@@ -14,18 +14,15 @@ if TYPE_CHECKING:
     from ..cloudobject import CloudObject
 
 
-def batch_job_handler(preprocessor: BatchPreprocessor, cloud_object: CloudObject):
-    # Call preprocess code
-    preprocess_result = preprocessor.preprocess(cloud_object)
-
-    if all((preprocess_result.object_body, preprocess_result.object_file_path)):
+def check_preprocessing_output(preprocess_meta: PreprocessingMetadata, cloud_object: CloudObject):
+    if all((preprocess_meta.object_body, preprocess_meta.object_file_path)):
         raise Exception("Choose one for object preprocessing result: object_body or object_file_path")
 
     # Upload object body to meta bucket with the same key as original (prevent to overwrite)
-    if preprocess_result.object_body is not None:
-        if hasattr(preprocess_result.object_body, "read"):
+    if preprocess_meta.object_body is not None:
+        if hasattr(preprocess_meta.object_body, "read"):
             cloud_object.s3.upload_fileobj(
-                Fileobj=preprocess_result.object_body,
+                Fileobj=preprocess_meta.object_body,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.path.key,
                 ExtraArgs={"Metadata": {"dataplug": __version__}},
@@ -33,24 +30,24 @@ def batch_job_handler(preprocessor: BatchPreprocessor, cloud_object: CloudObject
             )
         else:
             cloud_object.s3.put_object(
-                Body=preprocess_result.object_body,
+                Body=preprocess_meta.object_body,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.path.key,
                 Metadata={"dataplug": __version__},
             )
-    if preprocess_result.object_file_path is not None:
+    if preprocess_meta.object_file_path is not None:
         cloud_object.s3.upload_file(
-            Filename=preprocess_result.object_file_path,
+            Filename=preprocess_meta.object_file_path,
             Bucket=cloud_object.meta_path.bucket,
             Key=cloud_object.path.key,
             ExtraArgs={"Metadata": {"dataplug": __version__}},
             Config=TransferConfig(use_threads=True, max_concurrency=256),
         )
-        force_delete_path(preprocess_result.object_file_path)
+        force_delete_path(preprocess_meta.object_file_path)
 
     # Upload attributes to meta bucket
-    if preprocess_result.attributes is not None:
-        attrs_bin = pickle.dumps(preprocess_result.attributes)
+    if preprocess_meta.attributes is not None:
+        attrs_bin = pickle.dumps(preprocess_meta.attributes)
         cloud_object.s3.put_object(
             Body=attrs_bin,
             Bucket=cloud_object._attrs_path.bucket,
@@ -59,10 +56,10 @@ def batch_job_handler(preprocessor: BatchPreprocessor, cloud_object: CloudObject
         )
 
     # Upload metadata object to meta bucket
-    if preprocess_result.metadata is not None:
-        if hasattr(preprocess_result.metadata, "read"):
+    if preprocess_meta.metadata is not None:
+        if hasattr(preprocess_meta.metadata, "read"):
             cloud_object.s3.upload_fileobj(
-                Fileobj=preprocess_result.metadata,
+                Fileobj=preprocess_meta.metadata,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.meta_path.key,
                 ExtraArgs={"Metadata": {"dataplug": __version__}},
@@ -70,14 +67,20 @@ def batch_job_handler(preprocessor: BatchPreprocessor, cloud_object: CloudObject
             )
         else:
             cloud_object.s3.put_object(
-                Body=preprocess_result.metadata,
+                Body=preprocess_meta.metadata,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.meta_path.key,
                 Metadata={"dataplug": __version__},
             )
 
-        if hasattr(preprocess_result.metadata, "close"):
-            preprocess_result.metadata.close()
+        if hasattr(preprocess_meta.metadata, "close"):
+            preprocess_meta.metadata.close()
+
+
+def batch_job_handler(preprocessor: BatchPreprocessor, cloud_object: CloudObject):
+    # Call preprocess code
+    preprocess_result = preprocessor.preprocess(cloud_object)
+    check_preprocessing_output(preprocess_result, cloud_object)
 
 
 def map_job_handler(preprocessor: MapReducePreprocessor, cloud_object: CloudObject, mapper_id: int):
@@ -90,4 +93,5 @@ def reduce_job_handler(
     preprocessor: MapReducePreprocessor, cloud_object: CloudObject, map_results: List[PreprocessingMetadata]
 ):
     # Call reduce process code
-    preprocessor.reduce(map_results, cloud_object, n_mappers=len(map_results))
+    preprocess_result = preprocessor.reduce(map_results, cloud_object, n_mappers=len(map_results))
+    check_preprocessing_output(preprocess_result, cloud_object)
