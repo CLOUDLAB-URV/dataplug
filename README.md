@@ -30,7 +30,8 @@ def word_count(data_slice):
         words[word] += 1
     return dict(words)
 
-# Use Lithops for deploying a parallel serverless job, which will scatter generated data slices, one to each worker 
+# Use Lithops for deploying a parallel serverless job
+# which will scatter generated data slices, one to each worker 
 fexec = lithops.FunctionExecutor()
 fexec.map(word_count, data_slices)
 result = fexec.get_result()
