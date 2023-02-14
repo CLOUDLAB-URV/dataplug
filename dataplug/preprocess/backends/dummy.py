@@ -2,14 +2,17 @@ from __future__ import annotations
 
 import io
 import logging
+import math
 from typing import TYPE_CHECKING, Union, Optional
+from uuid import uuid4
 
 import pickle
 from boto3.s3.transfer import TransferConfig
 import smart_open
 
-from dataplug.preprocess.backendbase import PreprocessorBackendBase
+from dataplug.preprocess.backendbase import PreprocessorBackendBase, PreprocessingJobFuture
 from dataplug.preprocess.preprocessor import BatchPreprocessor, MapReducePreprocessor
+from dataplug.preprocess.handler import batch_job_handler, map_job_handler, reduce_job_handler
 from dataplug.util import force_delete_path
 from dataplug.version import __version__
 
@@ -21,106 +24,29 @@ else:
 logger = logging.getLogger(__name__)
 
 
+class DummyPreprocessingJobFuture(PreprocessingJobFuture):
+    def check_result(self):
+        # Do nothing, if preprocessing did not raise Exception, assume preprocessing job succeeded
+        return True
+
+
 class DummyPreprocessor(PreprocessorBackendBase):
-    def preprocess_batch(self, preprocessor: BatchPreprocessor, cloud_object: CloudObject):
-        preprocess_result = preprocessor.preprocess(cloud_object)
+    def setup(self, *args, **kwargs):
+        logger.info("Initializing DummyPreprocessor")
 
-        if all((preprocess_result.object_body, preprocess_result.object_file_path)):
-            raise Exception("Choose one for object preprocessing result: object_body or object_file_path")
+    def submit_batch_job(self, preprocessor: BatchPreprocessor, cloud_object: CloudObject) -> PreprocessingJobFuture:
+        logger.info("Submit batch job on DummyPreprocessor for object %s", cloud_object)
+        # Call batch job handler directly, it will block here and perform the preprocessing synchronously
+        batch_job_handler(preprocessor, cloud_object)
+        return DummyPreprocessingJobFuture(job_id="")
 
-        # Upload object body to meta bucket with the same key as original (prevent to overwrite)
-        if preprocess_result.object_body is not None:
-            if hasattr(preprocess_result.object_body, "read"):
-                cloud_object.s3.upload_fileobj(
-                    Fileobj=preprocess_result.object_body,
-                    Bucket=cloud_object.meta_path.bucket,
-                    Key=cloud_object.path.key,
-                    ExtraArgs={"Metadata": {"dataplug": __version__}},
-                    Config=TransferConfig(use_threads=True, max_concurrency=256),
-                )
-            else:
-                cloud_object.s3.put_object(
-                    Body=preprocess_result.object_body,
-                    Bucket=cloud_object.meta_path.bucket,
-                    Key=cloud_object.path.key,
-                    Metadata={"dataplug": __version__},
-                )
-        if preprocess_result.object_file_path is not None:
-            cloud_object.s3.upload_file(
-                Filename=preprocess_result.object_file_path,
-                Bucket=cloud_object.meta_path.bucket,
-                Key=cloud_object.path.key,
-                ExtraArgs={"Metadata": {"dataplug": __version__}},
-                Config=TransferConfig(use_threads=True, max_concurrency=256),
-            )
-            force_delete_path(preprocess_result.object_file_path)
+    def submit_mapreduce_job(self, preprocessor: MapReducePreprocessor, cloud_object: CloudObject):
+        map_results = []
+        for mapper_id in range(preprocessor.num_mappers):
+            # Same as batch job
+            map_result = map_job_handler(preprocessor, cloud_object, mapper_id)
+            map_results.append(map_result)
 
-        # Upload attributes to meta bucket
-        if preprocess_result.attributes is not None:
-            attrs_bin = pickle.dumps(preprocess_result.attributes)
-            cloud_object.s3.put_object(
-                Body=attrs_bin,
-                Bucket=cloud_object._attrs_path.bucket,
-                Key=cloud_object._attrs_path.key,
-                Metadata={"dataplug": __version__},
-            )
+        reduce_job_handler(preprocessor, cloud_object, map_results)
+        return DummyPreprocessingJobFuture(job_id="")
 
-        # Upload metadata object to meta bucket
-        if preprocess_result.metadata is not None:
-            if hasattr(preprocess_result.metadata, "read"):
-                cloud_object.s3.upload_fileobj(
-                    Fileobj=preprocess_result.metadata,
-                    Bucket=cloud_object.meta_path.bucket,
-                    Key=cloud_object.meta_path.key,
-                    ExtraArgs={"Metadata": {"dataplug": __version__}},
-                    Config=TransferConfig(use_threads=True, max_concurrency=256),
-                )
-            else:
-                cloud_object.s3.put_object(
-                    Body=preprocess_result.metadata,
-                    Bucket=cloud_object.meta_path.bucket,
-                    Key=cloud_object.meta_path.key,
-                    Metadata={"dataplug": __version__},
-                )
-
-            if hasattr(preprocess_result.metadata, "close"):
-                preprocess_result.metadata.close()
-
-    def preprocess_map_reduce(self, preprocessor: MapReducePreprocessor, cloud_object: CloudObject):
-        raise NotImplementedError()
-        # head_res = cloud_object.s3.head_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
-        # print(head_res)
-        # obj_size = head_res['ContentLength']
-        #
-        # if chunk_size is not None and num_workers is not None:
-        #     raise Exception('Both chunk_size and num_workers is not allowed')
-        # elif chunk_size is not None and num_workers is None:
-        #     iterations = math.ceil(obj_size / chunk_size)
-        # elif chunk_size is None and num_workers is not None:
-        #     iterations = num_workers
-        #     chunk_size = round(obj_size / num_workers)
-        # else:
-        #     raise Exception('At least chunk_size or num_workers parameter is required')
-        #
-        # map_results = []
-        # for i in range(iterations):
-        #     r0 = i * chunk_size
-        #     r1 = ((i * chunk_size) + chunk_size)
-        #     r1 = r1 if r1 <= obj_size else obj_size
-        #     get_res = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key,
-        #                                          Range=f'bytes={r0}-{r1}')
-        #
-        #     meta = PreprocessorMetadata(
-        #         s3=cloud_object.s3,
-        #         obj_path=cloud_object.path,
-        #         meta_path=cloud_object.meta_path,
-        #         worker_id=i,
-        #         chunk_size=chunk_size,
-        #         obj_size=obj_size,
-        #         partitions=iterations
-        #     )
-        #
-        #     result = preprocessor.map(data_stream=get_res['Body'], meta=meta)
-        #     map_results.append(result)
-        #
-        #     reduce_result, meta = preprocessor.__preprocesser.reduce(map_results, cloud_object.s3)

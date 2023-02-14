@@ -1,18 +1,26 @@
-import json
+import bz2
+import itertools
+import pickle
 import re
-from typing import BinaryIO, ByteString, List, Tuple, Dict
-
-import diskcache
-import tempfile
+from functools import reduce
+from typing import BinaryIO, List
 
 from ..cloudobject import CloudDataType, CloudObject
 
-from dataplug.preprocess.preprocessor import MapReducePreprocessor
+from dataplug.preprocess.preprocessor import MapReducePreprocessor, PreprocessingMetadata
 
 
-class FASTAPreprocesser(MapReducePreprocessor):
-    def __init__(self):
-        super().__init__()
+def rename_sequence(sequence, param, name_id, offset_head, offset_base):
+    sequence = sequence.replace(f" {param[3]}", "")  # Remove 3rt param
+    sequence = sequence.replace(f" {param[2]} ", f" {offset_base} ")  # offset_base -> offset_base
+    sequence = sequence.replace(" <Y> ", f" {offset_head} ")  # Y --> offset_head
+    sequence = sequence.replace(">> ", f"{name_id} ")  # '>>' -> name_id
+    return sequence
+
+
+class FASTAPreprocessor(MapReducePreprocessor):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     @staticmethod
     def __get_length(min_range, content, data, start_base, end_base):
@@ -25,144 +33,150 @@ class FASTAPreprocesser(MapReducePreprocessor):
 
     def map(
         self,
-        data_stream: BinaryIO,
         cloud_object: CloudObject,
-        mapper: int,
-        chunk_size: int,
-        n_mappers: int,
-    ) -> ByteString:
-        min_range = mapper * chunk_size
-        max_range = int(cloud_object.size) if mapper == n_mappers - 1 else (mapper + 1) * chunk_size
-        # data = self.storage.get_object(bucket=self.bucket, key=key,
-        #                                extra_get_args={'Range': f'bytes={min_range}-{max_range - 1}'}).decode('utf-8')
-        data = data_stream.read().decode("utf-8")
+        mapper_id: int,
+        map_chunk_size: int,
+        num_mappers: int,
+    ) -> PreprocessingMetadata:
+        range_0 = mapper_id * map_chunk_size
+        range_1 = cloud_object.size if mapper_id == num_mappers - 1 else (mapper_id + 1) * map_chunk_size
+        get_res = cloud_object.s3.get_object(
+            Bucket=cloud_object.path.bucket, Key=cloud_object.path.key, Range=f"bytes={range_0}-{range_1 - 1}"
+        )
+        assert get_res["ResponseMetadata"]["HTTPStatusCode"] == 206
+        data = get_res["Body"].read().decode("utf-8")
 
-        sequences = []
+        content = []
         # If it were '>' it would also find the ones inside the head information
         ini_heads = list(re.finditer(r"\n>", data))
         heads = list(re.finditer(r">.+\n", data))
 
-        # If the list is not empty or there is > in the first byte (if is empty it will return an empty list)
-        if ini_heads or data[0] == ">":
+        if ini_heads or data[0] == ">":  # If the list is not empty or there is > in the first byte
             first_sequence = True
             prev = -1
             for m in heads:
-                start = min_range + m.start()
-                end = min_range + m.end()
+                start = range_0 + m.start()
+                end = range_0 + m.end()
                 if first_sequence:
                     first_sequence = False
-                    if mapper > 0 and start - 1 > min_range:
+                    if mapper_id > 0 and start - 1 > range_0:
                         # If it is not the worker of the first part of the file and in addition it
                         # turns out that the partition begins in the middle of the base of a sequence.
-                        # (start-1): avoid having a split sequence in the index that only has '\n'
+                        # (start-1): avoid having a split sequence in the index that only has '\n'.
                         match_text = list(re.finditer(".*\n", data[0 : m.start()]))
-                        if match_text:
-                            text = match_text[0].group().split(" ")[0]
-                            length_0 = len(data[match_text[0].start() : m.start()].replace("\n", ""))
-                            offset_0 = match_text[0].start() + min_range
-                            if len(match_text) > 1:
-                                offset_1 = match_text[1].start() + min_range
-                                length_1 = len(data[match_text[1].start() : m.start()].replace("\n", ""))
-                                length_base = f"{length_0}-{length_1}"
-                                offset = f"{offset_0}-{offset_1}"
-                            else:
-                                length_base = f"{length_0}"
-                                offset = f"{offset_0}"
-                            # >> num_chunks_has_divided offset_head offset_bases_split length/s
-                            # first_line_before_space_or_\n
-                            sequences.append(f">> <X> <Y> {str(offset)} {length_base} ^{text}^")  # Split sequences
+                        if match_text and len(match_text) > 1:
+                            text = match_text[0].group().split(" ")[0].replace("\n", "")
+                            offset = match_text[1].start() + range_0
+                            # >> offset_head offset_bases_split ^first_line_before_space_or_\n^
+                            content.append(f">> <Y> {str(offset)} ^{text}^")  # Split sequences
                         else:
                             # When the first header found is false, when in a split stream there is a split header
                             # that has a '>' inside (ex: >tr|...o-alpha-(1->5)-L-e...\n)
                             first_sequence = True
-                            start = end = -1  # Avoid entering the following condition
-                if prev != start:
-                    # When if the current sequence base is not empty
-                    if prev != -1:
-                        FASTAPreprocesser.__get_length(min_range, sequences, data, prev, start)
-                    # name_id num_chunks_has_divided offset_head offset_bases
-                    sequences.append(f"{m.group().split(' ')[0].replace('>', '')} 1 {str(start)} {str(end)}")
+                if prev != start:  # When if the current sequence base is not empty
+                    # name_id offset_head offset_bases
+                    id_name = m.group().replace("\n", "").split(" ")[0].replace(">", "")
+                    content.append(f"{id_name} {str(start)} {str(end)}")
                 prev = end
 
-            len_head = len(heads)
-            if ini_heads[-1].start() + 1 > heads[-1].start():
-                # Check if the last head of the current one is cut. (ini_heads[-1].start() + 1): ignore '\n'
-                last_seq_start = ini_heads[-1].start() + min_range + 1  # (... + 1): ignore '\n'
-                if len_head != 0:
-                    # Add length of bases to last sequence
-                    FASTAPreprocesser.__get_length(min_range, sequences, data, prev, last_seq_start)
-                text = data[last_seq_start - min_range : :]
+            # Check if the last head of the current one is cut. (ini_heads[-1].start() + 1): ignore '\n'
+            if len(heads) != 0 and len(ini_heads) != 0 and ini_heads[-1].start() + 1 > heads[-1].start():
+                last_seq_start = ini_heads[-1].start() + range_0 + 1  # (... + 1): ignore '\n'
+                text = data[last_seq_start - range_0 : :]
                 # [<->|<_>]name_id_split offset_head
-                sequences.append(f"{'<-' if ' ' in text else '<_'}{text.split(' ')[0]} {str(last_seq_start)}")
                 # if '<->' there is all id
-            elif len_head != 0:
-                # Add length of bases to last sequence
-                FASTAPreprocesser.__get_length(min_range, sequences, data, prev, max_range)
+                content.append(f"{'<-' if ' ' in text else '<_'}{text.split(' ')[0]} {str(last_seq_start)}")
 
-        return json.dumps(sequences).encode("utf-8")
+        return PreprocessingMetadata(metadata=pickle.dumps(content))
 
-    def reduce(
-        self, map_results: List[BinaryIO], cloud_object: CloudObject, n_mappers: int
-    ) -> Tuple[ByteString, Dict[str, str]]:
-        if len(map_results) == 1:
-            sequences = json.loads(map_results.pop().read().decode("utf-8"))
-            output = "\n".join(sequences)
-            return output.encode("utf-8"), {}
+    def reduce(self, map_results: List[BinaryIO], cloud_object: CloudObject, n_mappers: int) -> PreprocessingMetadata:
+        if len(map_results) > 1:
+            results = list(filter(None, map_results))
+            for i, list_seq in enumerate(results):
+                if i > 0:
+                    list_prev = results[i - 1]
+                    # If it is not empty the current and previous dictionary
+                    if list_prev and list_seq:
+                        param = list_seq[0].split(" ")
+                        seq_prev = list_prev[-1]
+                        param_seq_prev = seq_prev.split(" ")
 
-        cache = diskcache.Cache(tempfile.mktemp())
-        for i, result in enumerate(map_results):
-            sequences = json.loads(result.read())
-            # dict_prev = results[i - 1]
-            # seq_range_prev = dict_prev['sequences']
-            if i > 0 and ">>" in sequences[0]:
-                param_seq = sequences[0].split(" ")
-                prev_sequences = cache[i - 1]
-                last_prev_seq = prev_sequences[-1]
-                param_seq_prev = last_prev_seq.split(" ")
-                if "<->" in last_prev_seq or "<_>" in last_prev_seq:
-                    if "<->" in last_prev_seq[-1]:  # If the split was after a space, then there is all id
-                        name_id = param_seq_prev[0].replace("<->", "")
-                    else:
-                        name_id = param_seq_prev[0].replace("<_>", "") + param_seq[5].replace("^", "")
-                    length = param_seq[4].split("-")[1]
-                    offset_head = param_seq_prev[1]
-                    offset_base = param_seq[3].split("-")[1]
-                    prev_sequences.pop()  # Remove previous sequence
-                    cache[i - 1] = prev_sequences
-                    split = 0
-                else:
-                    length = param_seq[4].split("-")[0]
-                    name_id = param_seq_prev[0]
-                    offset_head = param_seq_prev[2]
-                    offset_base = param_seq[3].split("-")[0]
-                    split = int(param_seq_prev[1])
-                    # Update number of partitions of the sequence
-                    for x in range(i - split, i):  # Update previous sequences
-                        # num_chunks_has_divided + 1 (i+1: total of current partitions of sequence)
-                        s = cache[x]
-                        s[-1] = s[-1].replace(f" {split} ", f" {split + 1} ")
-                        cache[x] = s
-                sequences[0] = sequences[0].replace(f" {param_seq[5]}", "")  # Remove 4rt param
-                sequences[0] = sequences[0].replace(
-                    f" {param_seq[3]} ", f" {offset_base} "
-                )  # [offset_base_0-offset_base_1|offset_base] -> offset_base
-                sequences[0] = sequences[0].replace(
-                    f" {param_seq[4]}", f" {length}"
-                )  # [length_0-length_1|length] -> length
-                sequences[0] = sequences[0].replace(" <X> ", f" {str(split + 1)} ")  # X --> num_chunks_has_divided
-                sequences[0] = sequences[0].replace(" <Y> ", f" {offset_head} ")  # Y --> offset_head
-                sequences[0] = sequences[0].replace(">> ", f"{name_id} ")  # '>>' -> name_id
-            cache[i] = sequences
+                        # If the first sequence is split
+                        if ">>" in list_seq[0]:
+                            if "<->" in seq_prev or "<_>" in seq_prev:
+                                # If the split was after a space, then there is all id
+                                if "<->" in seq_prev:
+                                    name_id = param_seq_prev[0].replace("<->", "")
+                                else:
+                                    name_id = param_seq_prev[0].replace("<_>", "") + param[3].replace("^", "")
+                                list_seq[0] = rename_sequence(list_seq[0], param, name_id, param_seq_prev[1], param[2])
+                            else:
+                                list_seq[0] = seq_prev
+                            # Remove previous sequence
+                            list_prev.pop()
 
-        output = ""
-        for i in range(len(map_results)):
-            output += "\n".join(cache[i])
-            output += "\n"
+        num_sequences = reduce(lambda x, y: x + y, map(lambda r: len(r), results))
+        index_result = bz2.compress(b"\n".join(s.encode("utf-8") for s in itertools.chain(*results)))
 
-        return output.encode("utf-8"), {}
+        return PreprocessingMetadata(metadata=index_result, attributes={"num_sequences": num_sequences})
 
 
-@CloudDataType(preprocessor=FASTAPreprocesser)
+@CloudDataType(preprocessor=FASTAPreprocessor)
 class FASTA:
     def __init__(self, cloud_object):
         self.cloud_object = cloud_object
+
+
+def partition_chunks_strategy(cloud_object: CloudObject, num_chunks: int):
+    fasta_chunks = []
+    fasta_file_sz = cloud_object.size
+    fa_chunk_size = int(fasta_file_sz / num_chunks)
+    num_sequences = cloud_object["num_sequences"]
+
+    get_res = cloud_object.s3.get_object(Bucket=cloud_object.meta_path.bucket, Key=cloud_object.meta_path.key)
+    assert get_res["ResponseMetadata"]["HTTPStatusCode"] == 200
+    compressed_faidx = get_res["Body"].read()
+    faidx = bz2.decompress(compressed_faidx).decode("utf-8").split("\n")
+
+    i = j = 0
+    min_offset = fa_chunk_size * j
+    max_offset = fa_chunk_size * (j + 1)
+    while max_offset <= fasta_file_sz:
+        # Find first full/half sequence of the chunk
+        if int(faidx[i].split(" ")[1]) <= min_offset < int(faidx[i].split(" ")[2]):  # In the head
+            fa_chunk = {"offset_head": int(faidx[i].split(" ")[1]), "offset_base": int(faidx[i].split(" ")[2])}
+        elif i == num_sequences - 1 or min_offset < int(faidx[i + 1].split(" ")[1]):  # In the base
+            fa_chunk = {"offset_head": int(faidx[i].split(" ")[1]), "offset_base": min_offset}
+        elif i < num_sequences:
+            i += 1
+            while i + 1 < num_sequences and min_offset > int(faidx[i + 1].split(" ")[1]):
+                i += 1
+            if min_offset < int(faidx[i].split(" ")[2]):
+                fa_chunk = {"offset_head": int(faidx[i].split(" ")[1]), "offset_base": int(faidx[i].split(" ")[2])}
+            else:
+                fa_chunk = {"offset_head": int(faidx[i].split(" ")[1]), "offset_base": min_offset}
+        else:
+            raise Exception("ERROR: there was a problem getting the first byte of a fasta chunk.")
+
+        # Find last full/half sequence of the chunk
+        if i == num_sequences - 1 or max_offset < int(faidx[i + 1].split(" ")[1]):
+            fa_chunk["last_byte"] = max_offset - 1 if fa_chunk_size * (j + 2) <= fasta_file_sz else fasta_file_sz - 1
+        else:
+            if max_offset < int(faidx[i + 1].split(" ")[2]):  # Split in the middle of head
+                fa_chunk["last_byte"] = int(faidx[i + 1].split(" ")[1]) - 1
+                i += 1
+            elif i < num_sequences:
+                i += 1
+                while i + 1 < num_sequences and max_offset > int(faidx[i + 1].split(" ")[1]):
+                    i += 1
+                fa_chunk["last_byte"] = max_offset - 1
+            else:
+                raise Exception("ERROR: there was a problem getting the last byte of a fasta chunk.")
+
+        fa_chunk["chunk_id"] = j
+        fasta_chunks.append(fa_chunk)
+        j += 1
+        min_offset = fa_chunk_size * j
+        max_offset = fa_chunk_size * (j + 1)
+
+    return fasta_chunks
