@@ -133,3 +133,5 @@ dmypy.json
 
 # Data tests
 *.laz
+
+docs/build
