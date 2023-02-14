@@ -49,4 +49,3 @@ class DummyPreprocessor(PreprocessorBackendBase):
 
         reduce_job_handler(preprocessor, cloud_object, map_results)
         return DummyPreprocessingJobFuture(job_id="")
-

@@ -35,11 +35,11 @@ class FASTAPreprocessor(MapReducePreprocessor):
         content[-1] = f"{content[-1]} {len_base}"
 
     def map(
-            self,
-            cloud_object: CloudObject,
-            mapper_id: int,
-            map_chunk_size: int,
-            num_mappers: int,
+        self,
+        cloud_object: CloudObject,
+        mapper_id: int,
+        map_chunk_size: int,
+        num_mappers: int,
     ) -> PreprocessingMetadata:
         range_0 = mapper_id * map_chunk_size
         range_1 = cloud_object.size if mapper_id == num_mappers - 1 else (mapper_id + 1) * map_chunk_size
@@ -60,19 +60,19 @@ class FASTAPreprocessor(MapReducePreprocessor):
         for match in matches:
             start = range_0 + match.start()
             end = range_0 + match.end()
-            seq_id = match.group().decode('utf-8').split(' ')[0].replace('>', '')
+            seq_id = match.group().decode("utf-8").split(" ")[0].replace(">", "")
             content.append((seq_id, start, end))
 
-        if matches and b'\n' not in matches[-1].group():
+        if matches and b"\n" not in matches[-1].group():
             # last match corresponds to a cut sequence identifier, as newline was not read
             offset = range_0 + match.start()
             # read split sequence id line
-            with cloud_object.open('rb') as fasta_file:
+            with cloud_object.open("rb") as fasta_file:
                 fasta_file.seek(offset)
                 seq_id_line = fasta_file.readline()
                 # get the current offset after reading line, it will be offset for the start of the sequence
                 end = fasta_file.tell()
-            seq_id = seq_id_line.decode('utf-8').split(' ')[0].replace('>', '')
+            seq_id = seq_id_line.decode("utf-8").split(" ")[0].replace(">", "")
             content.pop()  # remove last split sequence id added previously
             content.append((seq_id, offset, end))
 
@@ -80,12 +80,13 @@ class FASTAPreprocessor(MapReducePreprocessor):
         map_result = pickle.dumps(content)
         return PreprocessingMetadata(metadata=map_result)
 
-    def reduce(self, map_results: List[PreprocessingMetadata], cloud_object: CloudObject,
-               n_mappers: int) -> PreprocessingMetadata:
+    def reduce(
+        self, map_results: List[PreprocessingMetadata], cloud_object: CloudObject, n_mappers: int
+    ) -> PreprocessingMetadata:
         results = (pickle.loads(meta.metadata) for meta in map_results)
         flat_results = itertools.chain(*results)  # flatten list
 
-        df = pd.DataFrame(data=flat_results, columns=['sequence', 'id_offset', 'seq_offset'])
+        df = pd.DataFrame(data=flat_results, columns=["sequence", "id_offset", "seq_offset"])
         num_sequences = df.shape[0]
 
         # Export to parquet to an in-memory buffer
