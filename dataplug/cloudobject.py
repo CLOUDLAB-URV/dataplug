@@ -5,8 +5,6 @@ import logging
 import math
 import pickle
 
-import msgpack
-import traceback
 import smart_open
 from types import SimpleNamespace
 from collections import namedtuple
