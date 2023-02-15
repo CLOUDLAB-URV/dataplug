@@ -51,7 +51,7 @@ class FASTAPreprocessor(MapReducePreprocessor):
             Bucket=cloud_object.path.bucket, Key=cloud_object.path.key, Range=f"bytes={range_0}-{range_1 - 1}"
         )
         logger.debug(get_res)
-        assert (200, 206) in get_res["ResponseMetadata"]["HTTPStatusCode"]
+        assert get_res["ResponseMetadata"]["HTTPStatusCode"] in (200, 206)
         data = get_res["Body"].read()
 
         # print('---')
