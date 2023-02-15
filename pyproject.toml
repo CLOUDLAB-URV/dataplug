@@ -22,7 +22,8 @@ dependencies = [
     "pandas",
     "smart_open",
     "boto3",
-    "tqdm"
+    "tqdm",
+    "lithops>=2.8.0"
 ]
 
 [project.optional-dependencies]
