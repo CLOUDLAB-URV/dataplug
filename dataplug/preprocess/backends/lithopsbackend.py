@@ -53,5 +53,11 @@ class LithopsPreprocessor(PreprocessorBackendBase):
         return LithopsPreprocessingJobFuture(job_id="", lithops_fexec=self.fexec, lithops_futures=fut)
 
     def submit_mapreduce_job(self, preprocessor: MapReducePreprocessor, cloud_object: CloudObject):
-        fut = self.fexec.map_reduce(lithops_map_wrapper, range(preprocessor.num_mappers), lithops_reduce_wrapper, extra_args=(preprocessor, cloud_object), extra_args_reduce=(preprocessor, cloud_object))
+        fut = self.fexec.map_reduce(
+            lithops_map_wrapper,
+            range(preprocessor.num_mappers),
+            lithops_reduce_wrapper,
+            extra_args=(preprocessor, cloud_object),
+            extra_args_reduce=(preprocessor, cloud_object),
+        )
         return LithopsPreprocessingJobFuture(job_id="", lithops_fexec=self.fexec, lithops_futures=fut)
