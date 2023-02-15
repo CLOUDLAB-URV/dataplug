@@ -51,11 +51,11 @@ class FASTAPreprocessor(MapReducePreprocessor):
             Bucket=cloud_object.path.bucket, Key=cloud_object.path.key, Range=f"bytes={range_0}-{range_1 - 1}"
         )
         assert get_res["ResponseMetadata"]["HTTPStatusCode"] in (200, 206)
+        t0 = time.perf_counter()
         data = get_res["Body"].read()
+        t1 = time.perf_counter()
 
-        # print('---')
-        # print(data.decode('utf-8'))
-        # print('---')
+        logger.info("Got partition data in %f s", t1 - t0)
 
         # we use greedy regex so that match offsets takes into account the \n character
         t0 = time.perf_counter()
@@ -83,7 +83,19 @@ class FASTAPreprocessor(MapReducePreprocessor):
 
         t1 = time.perf_counter()
         logger.info("Found %d sequences in %f s", len(content), t1 - t0)
-        map_result = pickle.dumps(content)
+
+        df = pd.DataFrame(data=content, columns=["sequence", "id_offset", "seq_offset"])
+        num_sequences = df.shape[0]
+
+        # Export to parquet to an in-memory buffer
+        buff = io.BytesIO()
+        df.to_parquet(buff)
+        buff.seek(0)
+
+        faidx_key = cloud_object.path.key + '.faidx.' + str(mapper_id).zfill(3)
+        cloud_object.s3.put_object(Bucket=cloud_object.meta_path.bucket, Key=faidx_key, Body=buff)
+
+        map_result = pickle.dumps((range_0, range_1, num_sequences, mapper_id))
         return PreprocessingMetadata(metadata=map_result)
 
     def reduce(
@@ -92,8 +104,8 @@ class FASTAPreprocessor(MapReducePreprocessor):
         results = (pickle.loads(meta.metadata) for meta in map_results)
         flat_results = itertools.chain(*results)  # flatten list
 
-        df = pd.DataFrame(data=flat_results, columns=["sequence", "id_offset", "seq_offset"])
-        num_sequences = df.shape[0]
+        df = pd.DataFrame(data=flat_results, columns=["range_0", "range_1", "num_sequences", "faidx_key"])
+        total_num_sequences = sum((t[2] for t in flat_results))
 
         # Export to parquet to an in-memory buffer
         buff = io.BytesIO()
@@ -101,7 +113,7 @@ class FASTAPreprocessor(MapReducePreprocessor):
         buff.seek(0)
         del df
 
-        return PreprocessingMetadata(metadata=buff, attributes={"num_sequences": num_sequences})
+        return PreprocessingMetadata(metadata=buff, attributes={"num_sequences": total_num_sequences})
 
 
 @CloudDataType(preprocessor=FASTAPreprocessor)
