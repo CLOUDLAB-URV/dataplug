@@ -12,9 +12,11 @@ from typing import TYPE_CHECKING
 from functools import partial
 from copy import deepcopy
 
+
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
     from typing import Union, List, Tuple, Dict, Optional, Type, Any
+    from dataplug.preprocess.backendbase import PreprocessingJobFuture
 else:
     S3Client = object
 
@@ -258,6 +260,11 @@ class CloudObject:
     def preprocess(
         self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args, **kwargs
     ):
+        future = self.async_preprocess(preprocessor_backend, force, ignore, *args, **kwargs)
+        future.check_result()
+        self.fetch()
+
+    def async_preprocess(self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args, **kwargs) -> PreprocessingJobFuture:
         """
         Manually launch the preprocessing job for this cloud object on the specified preprocessing backend
         :param preprocessor_backend: Preprocessor backend instance on to execute the preprocessing job
@@ -275,7 +282,7 @@ class CloudObject:
             batch_preprocessor: BatchPreprocessor = self._cls.preprocessor(*args, **kwargs)
             preprocessor_backend.setup()
             future = preprocessor_backend.submit_batch_job(batch_preprocessor, self)
-            future.check_result()
+            return future
         elif issubclass(self._cls.preprocessor, MapReducePreprocessor):
             mapreduce_preprocessor: MapReducePreprocessor = self._cls.preprocessor(*args, **kwargs)
 
@@ -296,10 +303,9 @@ class CloudObject:
 
             preprocessor_backend.setup()
             future = preprocessor_backend.submit_mapreduce_job(mapreduce_preprocessor, self)
-            future.check_result()
+            return future
         else:
             raise Exception("This object cannot be preprocessed")
-        self.fetch()
 
     def get_attribute(self, key: str) -> Any:
         """
