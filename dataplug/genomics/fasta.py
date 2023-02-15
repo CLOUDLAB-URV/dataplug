@@ -102,10 +102,9 @@ class FASTAPreprocessor(MapReducePreprocessor):
         self, map_results: List[PreprocessingMetadata], cloud_object: CloudObject, n_mappers: int
     ) -> PreprocessingMetadata:
         results = (pickle.loads(meta.metadata) for meta in map_results)
-        flat_results = itertools.chain(*results)  # flatten list
 
-        df = pd.DataFrame(data=flat_results, columns=["range_0", "range_1", "num_sequences", "faidx_key"])
-        total_num_sequences = sum((t[2] for t in flat_results))
+        df = pd.DataFrame(data=results, columns=["range_0", "range_1", "num_sequences", "faidx_key"])
+        total_num_sequences = sum((t[2] for t in results))
 
         # Export to parquet to an in-memory buffer
         buff = io.BytesIO()
