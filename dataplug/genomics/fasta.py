@@ -1,8 +1,10 @@
 import bz2
 import io
 import itertools
+import logging
 import pickle
 import re
+import time
 from functools import reduce
 from typing import BinaryIO, List
 
@@ -11,6 +13,8 @@ import pandas as pd
 from ..cloudobject import CloudDataType, CloudObject
 
 from dataplug.preprocess.preprocessor import MapReducePreprocessor, PreprocessingMetadata
+
+logger = logging.getLogger(__name__)
 
 
 def rename_sequence(sequence, param, name_id, offset_head, offset_base):
@@ -46,8 +50,8 @@ class FASTAPreprocessor(MapReducePreprocessor):
         get_res = cloud_object.s3.get_object(
             Bucket=cloud_object.path.bucket, Key=cloud_object.path.key, Range=f"bytes={range_0}-{range_1 - 1}"
         )
-        print(get_res)
-        # assert get_res["ResponseMetadata"]["HTTPStatusCode"] == 206
+        logger.debug(get_res)
+        assert (200, 206) in get_res["ResponseMetadata"]["HTTPStatusCode"]
         data = get_res["Body"].read()
 
         # print('---')
@@ -55,6 +59,7 @@ class FASTAPreprocessor(MapReducePreprocessor):
         # print('---')
 
         # we use greedy regex so that match offsets takes into account the \n character
+        t0 = time.perf_counter()
         matches = list(re.finditer(rb">.+(\n)?", data))
 
         content = []
@@ -77,7 +82,8 @@ class FASTAPreprocessor(MapReducePreprocessor):
             content.pop()  # remove last split sequence id added previously
             content.append((seq_id, offset, end))
 
-        # print(content)
+        t1 = time.perf_counter()
+        logger.info("Found %d sequences in %d s", len(content), round(t1 - t0, 2))
         map_result = pickle.dumps(content)
         return PreprocessingMetadata(metadata=map_result)
 
