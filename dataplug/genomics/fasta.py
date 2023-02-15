@@ -50,7 +50,6 @@ class FASTAPreprocessor(MapReducePreprocessor):
         get_res = cloud_object.s3.get_object(
             Bucket=cloud_object.path.bucket, Key=cloud_object.path.key, Range=f"bytes={range_0}-{range_1 - 1}"
         )
-        logger.debug(get_res)
         assert get_res["ResponseMetadata"]["HTTPStatusCode"] in (200, 206)
         data = get_res["Body"].read()
 
@@ -83,7 +82,7 @@ class FASTAPreprocessor(MapReducePreprocessor):
             content.append((seq_id, offset, end))
 
         t1 = time.perf_counter()
-        logger.info("Found %d sequences in %d s", len(content), round(t1 - t0, 2))
+        logger.info("Found %d sequences in %f s", len(content), t1 - t0)
         map_result = pickle.dumps(content)
         return PreprocessingMetadata(metadata=map_result)
 
