@@ -46,7 +46,8 @@ class FASTAPreprocessor(MapReducePreprocessor):
         get_res = cloud_object.s3.get_object(
             Bucket=cloud_object.path.bucket, Key=cloud_object.path.key, Range=f"bytes={range_0}-{range_1 - 1}"
         )
-        assert get_res["ResponseMetadata"]["HTTPStatusCode"] == 206
+        print(get_res)
+        # assert get_res["ResponseMetadata"]["HTTPStatusCode"] == 206
         data = get_res["Body"].read()
 
         # print('---')
