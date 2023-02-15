@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Union, Optional, Any
     from dataplug.cloudobject import CloudObject
     from dataplug.preprocess.preprocessor import (
         BatchPreprocessor,

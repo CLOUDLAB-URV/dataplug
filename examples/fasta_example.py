@@ -2,7 +2,7 @@ import logging
 
 from dataplug import CloudObject
 from dataplug.genomics.fasta import FASTA, partition_chunks_strategy
-from dataplug.preprocess import DummyPreprocessor
+from dataplug.preprocess import DummyPreprocessor, LithopsPreprocessor
 from dataplug.util import setup_logging
 
 
@@ -24,7 +24,8 @@ def main():
                              's3://genomics/fasta_sample.fasta',
                              s3_config=local_minio)
 
-    backend = DummyPreprocessor()
+    # backend = DummyPreprocessor()
+    backend = LithopsPreprocessor()
     co.preprocess(backend, force=True, num_mappers=3)
 
     data_slices = co.partition(partition_chunks_strategy, num_chunks=8)

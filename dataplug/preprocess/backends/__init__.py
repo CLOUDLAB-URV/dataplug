@@ -1,2 +1,2 @@
-from dataplug.preprocess.backends.dummy import DummyPreprocessor
-from dataplug.preprocess.backends.lithops import LithopsPreprocessor
+from dataplug.preprocess.backends.dummybackend import DummyPreprocessor
+from dataplug.preprocess.backends.lithopsbackend import LithopsPreprocessor

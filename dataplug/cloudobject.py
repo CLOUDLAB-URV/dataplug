@@ -275,7 +275,9 @@ class CloudObject:
         # FIXME implement this properly
         if issubclass(self._cls.preprocessor, BatchPreprocessor):
             batch_preprocessor: BatchPreprocessor = self._cls.preprocessor(*args, **kwargs)
-            preprocessor_backend.submit_batch_job(batch_preprocessor, self)
+            preprocessor_backend.setup()
+            future = preprocessor_backend.submit_batch_job(batch_preprocessor, self)
+            future.check_result()
         elif issubclass(self._cls.preprocessor, MapReducePreprocessor):
             mapreduce_preprocessor: MapReducePreprocessor = self._cls.preprocessor(*args, **kwargs)
 
@@ -294,7 +296,9 @@ class CloudObject:
                     f'At least "map_chunk_size" or "num_mappers" parameter is required for {MapReducePreprocessor.__class__.__name__}'
                 )
 
-            preprocessor_backend.submit_mapreduce_job(mapreduce_preprocessor, self)
+            preprocessor_backend.setup()
+            future = preprocessor_backend.submit_mapreduce_job(mapreduce_preprocessor, self)
+            future.check_result()
         else:
             raise Exception("This object cannot be preprocessed")
         self.fetch()

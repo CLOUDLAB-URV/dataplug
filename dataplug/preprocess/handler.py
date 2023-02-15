@@ -83,7 +83,9 @@ def batch_job_handler(preprocessor: BatchPreprocessor, cloud_object: CloudObject
     check_preprocessing_output(preprocess_result, cloud_object)
 
 
-def map_job_handler(preprocessor: MapReducePreprocessor, cloud_object: CloudObject, mapper_id: int):
+def map_job_handler(
+    preprocessor: MapReducePreprocessor, cloud_object: CloudObject, mapper_id: int
+) -> PreprocessingMetadata:
     # Call map process code
     result = preprocessor.map(cloud_object, mapper_id, preprocessor.map_chunk_size, preprocessor.num_mappers)
     return result

@@ -1,20 +1,11 @@
 from __future__ import annotations
 
-import io
 import logging
-import math
-from typing import TYPE_CHECKING, Union, Optional
-from uuid import uuid4
-
-import pickle
-from boto3.s3.transfer import TransferConfig
-import smart_open
+from typing import TYPE_CHECKING
 
 from dataplug.preprocess.backendbase import PreprocessorBackendBase, PreprocessingJobFuture
 from dataplug.preprocess.preprocessor import BatchPreprocessor, MapReducePreprocessor
 from dataplug.preprocess.handler import batch_job_handler, map_job_handler, reduce_job_handler
-from dataplug.util import force_delete_path
-from dataplug.version import __version__
 
 if TYPE_CHECKING:
     from dataplug.cloudobject import CloudObject
