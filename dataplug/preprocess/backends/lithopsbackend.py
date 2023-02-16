@@ -28,8 +28,10 @@ class LithopsPreprocessingJobFuture(PreprocessingJobFuture):
     def check_result(self) -> bool:
         self.lithops_fexec.get_result(self.lithops_futures)
         if self.export_stats:
-            with open(self.lithops_fexec.executor_id + "_stats.json", "w") as output_file:
-                json.dump([f.stats for f in self.lithops_futures], output_file)
+            filename = self.lithops_fexec.executor_id + "_stats.json"
+            with open(filename, "w") as output_file:
+                logger.info("Saving Lithops execution stats to %s", filename)
+                json.dump([f.stats for f in self.lithops_futures], output_file, indent=4)
         return True
 
 
