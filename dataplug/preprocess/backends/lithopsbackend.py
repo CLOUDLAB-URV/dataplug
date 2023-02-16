@@ -45,13 +45,14 @@ def lithops_reduce_wrapper(results, preprocessor, cloud_object):
 class LithopsPreprocessor(PreprocessorBackendBase):
     fexec: lithops.FunctionExecutor
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, export_stats=False, lithops_kwargs=None, *args, **kwargs):
+        self.export_stats = export_stats
+        self.lithops_kwargs = lithops_kwargs or {}
         super().__init__(*args, **kwargs)
 
-    def setup(self, export_stats=False, *args, **kwargs):
+    def setup(self):
         logger.info("Initializing LithopsPreprocessor")
-        self.fexec = lithops.FunctionExecutor(*args, **kwargs)
-        self.export_stats = export_stats
+        self.fexec = lithops.FunctionExecutor(**self.lithops_kwargs)
 
     def submit_batch_job(self, preprocessor: BatchPreprocessor, cloud_object: CloudObject) -> PreprocessingJobFuture:
         logger.info("Submit batch job on LithopsPreprocessor for object %s", cloud_object)
