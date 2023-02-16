@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import json
 from typing import TYPE_CHECKING, Union, Optional
 
 import lithops
@@ -18,13 +19,17 @@ logger = logging.getLogger(__name__)
 
 
 class LithopsPreprocessingJobFuture(PreprocessingJobFuture):
-    def __init__(self, lithops_fexec, lithops_futures, *args, **kwargs):
+    def __init__(self, lithops_fexec, lithops_futures, export_stats=False, *args, **kwargs):
         self.lithops_fexec = lithops_fexec
         self.lithops_futures = lithops_futures
+        self.export_stats = export_stats
         super().__init__(*args, **kwargs)
 
     def check_result(self) -> bool:
         self.lithops_fexec.get_result(self.lithops_futures)
+        if self.export_stats:
+            with open(self.lithops_fexec.executor_id + "_stats.json", "w") as output_file:
+                json.dump([f.stats for f in self.lithops_futures], output_file)
         return True
 
 
@@ -43,14 +48,20 @@ class LithopsPreprocessor(PreprocessorBackendBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def setup(self, *args, **kwargs):
+    def setup(self, export_stats=False, *args, **kwargs):
         logger.info("Initializing LithopsPreprocessor")
         self.fexec = lithops.FunctionExecutor(*args, **kwargs)
+        self.export_stats = export_stats
 
     def submit_batch_job(self, preprocessor: BatchPreprocessor, cloud_object: CloudObject) -> PreprocessingJobFuture:
         logger.info("Submit batch job on LithopsPreprocessor for object %s", cloud_object)
         fut = self.fexec.call_async(batch_job_handler, (preprocessor, cloud_object))
-        return LithopsPreprocessingJobFuture(job_id="", lithops_fexec=self.fexec, lithops_futures=fut)
+        return LithopsPreprocessingJobFuture(
+            job_id=self.fexec.executor_id,
+            lithops_fexec=self.fexec,
+            lithops_futures=fut,
+            export_stats=self.export_stats,
+        )
 
     def submit_mapreduce_job(self, preprocessor: MapReducePreprocessor, cloud_object: CloudObject):
         fut = self.fexec.map_reduce(
@@ -60,4 +71,9 @@ class LithopsPreprocessor(PreprocessorBackendBase):
             extra_args=(preprocessor, cloud_object),
             extra_args_reduce=(preprocessor, cloud_object),
         )
-        return LithopsPreprocessingJobFuture(job_id="", lithops_fexec=self.fexec, lithops_futures=fut)
+        return LithopsPreprocessingJobFuture(
+            job_id=self.fexec.executor_id,
+            lithops_fexec=self.fexec,
+            lithops_futures=fut,
+            export_stats=self.export_stats,
+        )

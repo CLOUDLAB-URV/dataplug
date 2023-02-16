@@ -264,7 +264,9 @@ class CloudObject:
         future.check_result()
         self.fetch()
 
-    def async_preprocess(self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args, **kwargs) -> PreprocessingJobFuture:
+    def async_preprocess(
+        self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args, **kwargs
+    ) -> PreprocessingJobFuture:
         """
         Manually launch the preprocessing job for this cloud object on the specified preprocessing backend
         :param preprocessor_backend: Preprocessor backend instance on to execute the preprocessing job
