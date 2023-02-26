@@ -52,7 +52,7 @@ class GZipTextPreprocessor(BatchPreprocessor):
         tmp_index_file_name = tempfile.mktemp()
         try:
             obj_res = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
-            assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode", 400) == 200
+            assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200
             data_stream = obj_res["Body"]
 
             force_delete_path(tmp_index_file_name)

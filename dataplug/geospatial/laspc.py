@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import tempfile
-import shutil
+import subprocess
 import logging
 from typing import TYPE_CHECKING
+
+import tqdm
 
 from dataplug.cloudobject import CloudDataType, CloudObject
 from dataplug.preprocess import BatchPreprocessor, PreprocessingMetadata
@@ -21,6 +23,15 @@ except ModuleNotFoundError:
 
 logger = logging.getLogger(__name__)
 
+CHUNK_SIZE = 65536
+
+
+def _get_lasindex_path():
+    proc = subprocess.run(["which", "lasindex"], check=True, capture_output=True, text=True)
+    path = proc.stdout.rstrip("\n")
+    logger.debug("Using lasindex located in %s", path)
+    return path
+
 
 class LiDARPreprocessor(BatchPreprocessor):
     def __init__(self):
@@ -33,48 +44,63 @@ class LiDARPreprocessor(BatchPreprocessor):
         super().__init__()
 
     def preprocess(self, cloud_object: CloudObject) -> PreprocessingMetadata:
-        input_file_path = tempfile.mktemp()
-        output_file_path = tempfile.mktemp()
+        lasindex = _get_lasindex_path()
+
+        # lasindex tool requires index terminated with .lax
+        tmp_index_file_path = tempfile.mktemp() + '.lax'
 
         try:
-            force_delete_path(input_file_path)
-            force_delete_path(output_file_path)
+            force_delete_path(tmp_index_file_path)
 
-            with cloud_object.open("rb") as input_stream:
-                with open(input_file_path, "wb") as input_file:
-                    shutil.copyfileobj(input_stream, input_file)
+            obj_res = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
+            assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200
+            data_stream = obj_res["Body"]
 
-            pipeline_json = [
-                {"type": "readers.las", "filename": input_file_path},
-                {"type": "writers.copc", "filename": output_file_path},
-            ]
+            cmd = [lasindex, "-stdin", "-o", tmp_index_file_path]
+            logger.debug(' '.join(cmd))
+            index_proc = subprocess.Popen(
+                cmd,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
 
-            pipeline = pdal.Pipeline(json.dumps(pipeline_json), loglevel=logging.INFO)
-            pipeline.execute()
+            with tqdm.tqdm(total=cloud_object.size) as pb:
+                try:
+                    chunk = data_stream.read(CHUNK_SIZE)
+                    while chunk != b"":
+                        # logger.debug('Writing %d bytes to Pipe STDIN', len(chunk))
+                        index_proc.stdin.write(chunk)
+                        pb.update(len(chunk))
+                        chunk = data_stream.read(CHUNK_SIZE)
+                    if hasattr(data_stream, "close"):
+                        data_stream.close()
+                    # index_proc.stdin.close()
+                except BrokenPipeError as e:
+                    stdout, stderr = index_proc.communicate()
+                    logger.error(stdout.decode("utf-8"))
+                    logger.error(stderr.decode("utf-8"))
+                    raise e
 
-            with open(output_file_path, "rb") as copc_file:
-                copc_reader = laspy.copc.CopcReader(copc_file)
-                copc_meta = {
-                    "points": copc_reader.header.point_count,
-                    "x_scale": copc_reader.header.x_scale,
-                    "y_scale": copc_reader.header.y_scale,
-                    "z_scale": copc_reader.header.z_scale,
-                    "x_offset": copc_reader.header.x_offset,
-                    "y_offset": copc_reader.header.y_offset,
-                    "z_offset": copc_reader.header.z_offset,
-                    "x_max": copc_reader.header.x_max,
-                    "y_max": copc_reader.header.y_max,
-                    "z_max": copc_reader.header.z_max,
-                    "x_min": copc_reader.header.x_min,
-                    "y_min": copc_reader.header.y_min,
-                    "z_min": copc_reader.header.z_min,
-                    "root_offset": copc_reader.copc_info.hierarchy_root_offset,
-                    "root_size": copc_reader.copc_info.hierarchy_root_size,
+            stdout, stderr = index_proc.communicate()
+            logger.debug(stdout.decode("utf-8"))
+            logger.debug(stderr.decode("utf-8"))
+
+            # Get attributes
+            with cloud_object.open("rb") as input_file:
+                las_file = laspy.open(source=input_file, closefd=False)
+                las_meta = {
+                    'mins': las_file.header.mins,
+                    'maxs': las_file.header.maxs,
+                    'point_count': las_file.header.point_count
                 }
 
-            return PreprocessingMetadata(object_file_path=output_file_path, attributes=copc_meta)
+            with open(tmp_index_file_path, 'rb') as index_file:
+                lax_data = index_file.read()
+
+            return PreprocessingMetadata(metadata=lax_data, attributes=las_meta)
         finally:
-            force_delete_path(input_file_path)
+            force_delete_path(tmp_index_file_path)
 
 
 @CloudDataType(preprocessor=LiDARPreprocessor)

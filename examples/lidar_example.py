@@ -22,7 +22,7 @@ def main():
     }
 
     co = CloudObject.from_s3(LiDARPointCloud,
-                             's3://geospatial/laz/PNOA_2016_CAT_324-4570_ORT-CLA-COL.laz',
+                             's3://geospatial/laz/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz',
                              s3_config=local_minio)
 
     # backend = LithopsPreprocessor()
@@ -36,7 +36,7 @@ def main():
         # backend = DummyPreprocessor()
         # co.preprocess(backend)
 
-    print(f"No. of points: {co['points']}")
+    print(f"No. of points: {co['point_count']}")
 
 
 if __name__ == '__main__':
