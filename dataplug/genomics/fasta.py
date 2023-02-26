@@ -92,7 +92,7 @@ class FASTAPreprocessor(MapReducePreprocessor):
         df.to_parquet(buff)
         buff.seek(0)
 
-        faidx_key = cloud_object.path.key + '.faidx.' + str(mapper_id).zfill(3)
+        faidx_key = cloud_object.path.key + ".faidx." + str(mapper_id).zfill(3)
         cloud_object.s3.put_object(Bucket=cloud_object.meta_path.bucket, Key=faidx_key, Body=buff)
 
         map_result = pickle.dumps((range_0, range_1, num_sequences, mapper_id))

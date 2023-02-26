@@ -19,7 +19,7 @@ class PreprocessingJobFuture:
 
 
 class PreprocessorBackendBase:
-    def setup(self, *args, **kwargs):
+    def setup(self):
         raise NotImplementedError()
 
     def submit_batch_job(self, preprocessor: BatchPreprocessor, cloud_object: CloudObject) -> PreprocessingJobFuture:
