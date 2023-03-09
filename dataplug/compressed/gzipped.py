@@ -111,7 +111,7 @@ class GZipTextPreprocessor(BatchPreprocessor):
             )
 
             # Get the total number of lines
-            total_lines: str = RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop()
+            total_lines = int(RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop())
             logger.debug("Indexed gzipped text file with %s total lines", total_lines)
             t1 = time.perf_counter()
             logger.debug("Index generated in %.3f seconds", t1 - t0)
@@ -247,7 +247,7 @@ class GZipTextSlice(CloudObjectSlice):
         tmp_index_file = tempfile.mktemp()
         gztool = _get_gztool_path()
         lines = []
-        lines_to_read = self.line_1 - self.line_0 - 1
+        lines_to_read = self.line_1 - self.line_0 + 1
 
         try:
             t0 = time.perf_counter()
@@ -339,6 +339,6 @@ class GZipTextSlice(CloudObjectSlice):
             t1 = time.perf_counter()
             logger.debug("Got partition in %.3f seconds", t1 - t0)
 
-            return lines[: self.line_1 - self.line_0 - 1]
+            return lines[: self.line_1 - self.line_0]
         finally:
             force_delete_path(tmp_index_file)
