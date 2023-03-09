@@ -1,7 +1,7 @@
 .. _futures-api:
 
-Futures API Reference
----------------------
+CloudObject
+-----------
 
 .. automodule:: dataplug.cloudobject
    :members:

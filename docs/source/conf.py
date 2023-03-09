@@ -37,11 +37,28 @@ source_suffix = {
 
 autodoc_typehints = 'description'
 
+# -- nbsphinx options --------------------------------------------------------
+
+jupyter_execute_notebooks = 'never'
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'karma_sphinx_theme'
+html_theme = 'furo'
 html_static_path = ['_static']
 
 html_logo = "_static/lithops_logo_readme.png"
 html_favicon = '_static/favicon.png'
+
+html_theme_options = {
+    "source_repository": "https://github.com/pradyunsg/furo/",
+    "source_branch": "main",
+    "source_directory": "docs/",
+    "light_css_variables": {
+        "color-brand-primary": "#7C4DFF",
+        "color-brand-content": "#7C4DFF",
+        "font-stack": "Tahoma, sans-serif",
+        "font-stack--monospace": "Consolas, monospace",
+    },
+
+}

@@ -1,24 +1,12 @@
-Welcome to dataplug's documentation!
-====================================
+dataplug
+========
 
-Test
+Hello
 
 .. toctree::
    :hidden:
 
    self
-
-
-.. toctree::
-   :hidden:
-   :maxdepth: 0
-   :caption: Overview of Lithops
-
-   source/design.rst
-   source/comparing_lithops.rst
-   source/supported_clouds.rst
-   source/execution_modes.rst
-   source/cli.rst
 
 .. toctree::
    :hidden:
@@ -26,3 +14,20 @@ Test
    :caption: API Reference
 
    cloud_object.rst
+
+.. toctree::
+   :hidden:
+   :maxdepth: 0
+   :caption: Built-in types
+
+   types/text.rst
+   types/columnar.rst
+   types/genomics.rst
+   types/geospatial.rst
+
+.. toctree::
+   :hidden:
+   :maxdepth: 0
+   :caption: Example
+
+   preproc-backends.rst
