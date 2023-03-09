@@ -5,23 +5,15 @@ import logging
 import time
 import uuid
 
-from typing import (
-    TYPE_CHECKING,
-    Optional,
-    Union,
-    IO,
-    Any,
-    Literal,
-    Dict,
-    Callable,
-    Mapping,
-    List,
-)
+from typing import TYPE_CHECKING
 from contextlib import suppress
 from pathlib import _PosixFlavour, PurePath
 
 import boto3
 import botocore.client
+
+if TYPE_CHECKING:
+    from typing import Optional
 
 logger = logging.getLogger(__name__)
 

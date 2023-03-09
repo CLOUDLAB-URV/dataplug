@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from dataplug.cloudobject import CloudObject
-    from dataplug.preprocess.preprocessor import (
+    from ..cloudobject import CloudObject
+    from .preprocessor import (
         BatchPreprocessor,
         MapReducePreprocessor,
     )

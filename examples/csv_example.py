@@ -6,14 +6,15 @@ from collections import defaultdict
 
 from dataplug import CloudObject
 from dataplug.basic.csv import CSV, batches_partition_strategy, partition_size_strategy
-from dataplug.preprocess import DummyPreprocessor
+from dataplug.preprocessing import DummyPreprocessor
 
 import unittest
 import os
 import filecmp
 
-from dataplug.util import setup_logging
+from dataplug.util import setup_logging, setup_rich_traceback
 setup_logging('DEBUG')
+setup_rich_traceback()
 
 
 # class TestCSVPartition(unittest.TestCase):
@@ -55,15 +56,16 @@ setup_logging('DEBUG')
 #         os.remove(f1)
 
 if __name__ == '__main__':
-    config = {
-        'aws_access_key_id': 'minioadmin',
-        'aws_secret_access_key': 'minioadmin',
-        'region_name': 'us-east-1',
-        # 'endpoint_url': 'http://192.168.1.110:9000',
-        'endpoint_url': 'http://127.0.0.1:9000',
-        'botocore_config_kwargs': {'signature_version': 's3v4'},
-        'role_arn': 'arn:aws:iam::123456789012:role/S3Access'
-    }
+    # config = {
+    #     'aws_access_key_id': 'minioadmin',
+    #     'aws_secret_access_key': 'minioadmin',
+    #     'region_name': 'us-east-1',
+    #     'endpoint_url': 'http://192.168.1.110:9000',
+        # 'endpoint_url': 'http://127.0.0.1:9000',
+        # 'botocore_config_kwargs': {'signature_version': 's3v4'},
+        # 'role_arn': 'arn:aws:iam::123456789012:role/S3Access'
+    # }
+    config = {'endpoint_url': 'http://127.0.0.1:9000', 'role_arn': 'arn:aws:iam::123456789012:role/S3Access'}
     # Create Cloud Object reference
     co = CloudObject.from_s3(CSV, 's3://testdata/cities.csv', s3_config=config)
 

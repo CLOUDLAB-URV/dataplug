@@ -1,10 +1,9 @@
-from copy import deepcopy
-from typing import TYPE_CHECKING, Optional, Dict
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from dataplug.cloudobject import CloudObject
-    from dataplug.storage import PureS3Path
-    from mypy_boto3_s3 import S3Client
+    from .cloudobject import CloudObject
 
 
 class CloudObjectSlice:

@@ -6,7 +6,7 @@ import laspy
 import sys
 
 import dataplug
-from dataplug.preprocess import DummyPreprocessor
+from dataplug.preprocessing import DummyPreprocessor
 from dataplug.util import setup_logging
 
 # setup_logging(logging.INFO)
@@ -39,7 +39,7 @@ if __name__ == '__main__':
                              's3://geospatial/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz',
                              s3_config=local_minio)
     # backend = DummyPreprocessor()
-    # co.preprocess(backend, force=True)
+    # co.preprocessing(backend, force=True)
 
     # print(co.get_attribute('points'))
     # print(co.attributes.points)

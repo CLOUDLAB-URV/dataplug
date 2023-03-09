@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from dataplug.cloudobject import CloudDataType, CloudObjectSlice
-from dataplug.preprocess import BatchPreprocessor, PreprocessingMetadata
+from ..cloudobject import CloudDataType, CloudObjectSlice
+from ..preprocessing import BatchPreprocessor, PreprocessingMetadata
 
 if TYPE_CHECKING:
-    from typing import List, Tuple, BinaryIO, Dict
+    from typing import List
     from ..cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)

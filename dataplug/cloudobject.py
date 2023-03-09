@@ -16,13 +16,13 @@ from copy import deepcopy
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
     from typing import Union, List, Tuple, Dict, Optional, Type, Any
-    from dataplug.preprocess.backendbase import PreprocessingJobFuture
+    from dataplug.preprocessing.backendbase import PreprocessingJobFuture
 else:
     S3Client = object
 
-from dataplug.util import split_s3_path, head_object
-from dataplug.storage import PureS3Path, PickleableS3ClientProxy
-from dataplug.preprocess import (
+from .util import split_s3_path, head_object
+from .storage import PureS3Path, PickleableS3ClientProxy
+from .preprocessing import (
     BatchPreprocessor,
     MapReducePreprocessor,
     PreprocessorBackendBase,

@@ -4,14 +4,17 @@ import logging
 import json
 from typing import TYPE_CHECKING, Union, Optional
 
-import lithops
+try:
+    import lithops
+except ModuleNotFoundError:
+    pass
 
-from dataplug.preprocess.backendbase import PreprocessorBackendBase, PreprocessingJobFuture
-from dataplug.preprocess.preprocessor import BatchPreprocessor, MapReducePreprocessor
-from dataplug.preprocess.handler import batch_job_handler, map_job_handler, reduce_job_handler
+from ..handler import batch_job_handler, map_job_handler, reduce_job_handler
+from ..backendbase import PreprocessorBackendBase, PreprocessingJobFuture
 
 if TYPE_CHECKING:
     from ...cloudobject import CloudObject
+    from ..preprocessor import BatchPreprocessor, MapReducePreprocessor
 else:
     CloudObject = object
 
@@ -48,6 +51,10 @@ class LithopsPreprocessor(PreprocessorBackendBase):
     fexec: lithops.FunctionExecutor
 
     def __init__(self, export_stats=False, lithops_kwargs=None, *args, **kwargs):
+        try:
+            import lithops
+        except ModuleNotFoundError:
+            logger.error("Module 'lithops' not installed!")
         self.export_stats = export_stats
         self.lithops_kwargs = lithops_kwargs or {}
         super().__init__(*args, **kwargs)

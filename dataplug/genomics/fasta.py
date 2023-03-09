@@ -12,7 +12,7 @@ import pandas as pd
 
 from ..cloudobject import CloudDataType, CloudObject
 
-from dataplug.preprocess.preprocessor import MapReducePreprocessor, PreprocessingMetadata
+from dataplug.preprocessing.preprocessor import MapReducePreprocessor, PreprocessingMetadata
 
 logger = logging.getLogger(__name__)
 

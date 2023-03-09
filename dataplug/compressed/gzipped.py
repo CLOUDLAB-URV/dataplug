@@ -14,8 +14,8 @@ import pandas as pd
 import numpy as np
 
 from dataplug.cloudobject import CloudDataType, CloudObject, CloudObjectSlice
-from dataplug.preprocess import PreprocessingMetadata
-from dataplug.preprocess.preprocessor import BatchPreprocessor, PreprocessingMetadata
+from dataplug.preprocessing import PreprocessingMetadata
+from dataplug.preprocessing.preprocessor import BatchPreprocessor, PreprocessingMetadata
 from dataplug.util import force_delete_path
 
 logger = logging.getLogger(__name__)

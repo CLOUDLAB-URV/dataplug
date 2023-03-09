@@ -4,7 +4,7 @@ import botocore
 
 from dataplug import CloudObject
 from dataplug.geospatial.laspc import LiDARPointCloud
-from dataplug.preprocess import LithopsPreprocessor, DummyPreprocessor
+from dataplug.preprocessing import LithopsPreprocessor, DummyPreprocessor
 from dataplug.util import setup_logging
 
 
@@ -34,7 +34,7 @@ def main():
     # if not preprocessed:
     #     backend = LithopsPreprocessor()
         # backend = DummyPreprocessor()
-        # co.preprocess(backend)
+        # co.preprocessing(backend)
 
     print(f"No. of points: {co['point_count']}")
 

@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "cloud-dataplug"
-version = "0.0.1"
+dynamic = ["version"]
 authors = [
     { name = "Aitor Arjona", email = "aitor.arjona@urv.cat" },
 ]
@@ -18,24 +18,31 @@ classifiers = [
     "Development Status :: 2 - Pre-Alpha"
 ]
 dependencies = [
+    "boto3",
+    "botocore",
     "numpy",
     "pandas",
+    "pyarrow",
     "smart_open",
-    "boto3",
     "tqdm",
-    "lithops>=2.8.0"
 ]
 
 [project.optional-dependencies]
 lithops = [
-    "lithops"
+    "lithops>=2.8.0"
 ]
 
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.dynamic]
+version = {attr = "dataplug.version.__version__"}
+
 [tool.setuptools.packages.find]
-include = ["dataplug"]
+include = ["dataplug*"]
 
 [tool.black]
 line-length = 119
 
 [project.urls]
-"Homepage" = "https://github.com/aitorarjona/cloud-native-datasets"
+"Homepage" = "https://github.com/CLOUDLAB-URV/dataplug"

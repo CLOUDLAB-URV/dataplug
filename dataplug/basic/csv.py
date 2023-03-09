@@ -4,7 +4,7 @@ from typing import BinaryIO, List, Tuple, Union, ByteString, Dict
 import pandas as pd
 import numpy as np
 from dataplug.cloudobject import CloudObject, CloudDataType, CloudObjectSlice
-from dataplug.preprocess import BatchPreprocessor, PreprocessingMetadata
+from dataplug.preprocessing import BatchPreprocessor, PreprocessingMetadata
 import io
 
 logger = logging.getLogger(__name__)

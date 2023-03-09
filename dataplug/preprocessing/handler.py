@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import math
 import pickle
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from boto3.s3.transfer import TransferConfig
 
@@ -12,6 +11,7 @@ from ..version import __version__
 
 if TYPE_CHECKING:
     from ..cloudobject import CloudObject
+    from typing import List
 
 
 def check_preprocessing_output(preprocess_meta: PreprocessingMetadata, cloud_object: CloudObject):
@@ -78,7 +78,7 @@ def check_preprocessing_output(preprocess_meta: PreprocessingMetadata, cloud_obj
 
 
 def batch_job_handler(preprocessor: BatchPreprocessor, cloud_object: CloudObject):
-    # Call preprocess code
+    # Call preprocessing code
     preprocess_result = preprocessor.preprocess(cloud_object)
     check_preprocessing_output(preprocess_result, cloud_object)
 

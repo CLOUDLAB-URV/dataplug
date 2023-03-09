@@ -8,12 +8,9 @@ from typing import TYPE_CHECKING
 
 import tqdm
 
-from dataplug.cloudobject import CloudDataType, CloudObject
-from dataplug.preprocess import BatchPreprocessor, PreprocessingMetadata
-from dataplug.util import force_delete_path
-
-if TYPE_CHECKING:
-    from typing import BinaryIO, Tuple, Dict
+from ..cloudobject import CloudDataType, CloudObject
+from ..preprocessing import BatchPreprocessor, PreprocessingMetadata
+from ..util import force_delete_path
 
 try:
     import pdal

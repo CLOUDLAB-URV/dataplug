@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import re
 import os
@@ -51,3 +53,8 @@ def head_object(s3client, bucket, key):
         else:
             raise e
     return response, metadata
+
+
+def setup_rich_traceback():
+    import rich.traceback
+    rich.traceback.install()
