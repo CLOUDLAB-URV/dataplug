@@ -70,7 +70,7 @@ class FASTAPreprocessor(MapReducePreprocessor):
 
         if matches and b"\n" not in matches[-1].group():
             # last match corresponds to a cut sequence identifier, as newline was not read
-            offset = range_0 + match.start()
+            offset = range_0 + matches[-1].start()
             # read split sequence id line
             with cloud_object.open("rb") as fasta_file:
                 fasta_file.seek(offset)

@@ -266,7 +266,7 @@ class CloudObject:
 
     def async_preprocess(
         self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args, **kwargs
-    ) -> PreprocessingJobFuture:
+    ) -> Optional[PreprocessingJobFuture]:
         """
         Manually launch the preprocessing job for this cloud object on the specified preprocessing backend
         :param preprocessor_backend: Preprocessor backend instance on to execute the preprocessing job
@@ -274,10 +274,11 @@ class CloudObject:
         :param args: Optional arguments to pass to the preprocessing job
         :param kwargs:Optional keyword arguments to pass to the preprocessing job
         """
-        if not self.is_preprocessed() and not force:
-            raise Exception("Object is already preprocessed")
+        if self.is_preprocessed() and not force:
+            raise Exception("Object is already pre-processed")
         if self.is_preprocessed() and ignore:
-            return
+            logging.info("Object %s is already pre-processed, ignoring pre-processing job...", self)
+            return None
 
         # FIXME implement this properly
         if issubclass(self._cls.preprocessor, BatchPreprocessor):
