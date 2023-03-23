@@ -3,7 +3,7 @@
 1. Install [Sphinx](https://www.sphinx-doc.org/en/master/usage/installation.html) and all plugins:
 
     ```bash
-    python3 -m pip install sphinx myst-parser sphinx_copybutton jupyter ipykernel nbsphinx sphinx_book_theme 
+    python3 -m pip install sphinx myst-parser sphinx_copybutton jupyter ipykernel nbsphinx furo 
     ```
 
 2. Install [Pandoc](https://pandoc.org/installing.html). For debian/ubuntu:

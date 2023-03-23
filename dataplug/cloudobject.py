@@ -77,29 +77,37 @@ class CloudDataType:
 
 
 class CloudObject:
+    """
+    Reference to a Cloud Object.
+
+    :param data_type: Cloud-Native data type for this object.
+    :param s3_uri_path: Full S3 URI (s3://bucket/key) for this object.
+    :param s3_config: Extra S3 config.
+    """
     def __init__(
         self,
         data_type: CloudDataType,
         s3_uri_path: str,
         s3_config: dict = None,
     ):
-        """
-        Create a reference to a Cloud Object
-        :param data_type: Specify the Cloud data type for this object
-        :param s3_uri_path: Full S3 uri in form s3://bucket/key for this object
-        :param s3_config: Extra S3 config
-        """
+
         self._obj_headers: Optional[Dict[str, str]] = None  # Storage headers of the data object
         self._meta_headers: Optional[Dict[str, str]] = None  # Storage headers of the metadata object
         self._attrs_headers: Optional[Dict[str, str]] = None  # Storage headers of the attributes object
 
         self._obj_path: PureS3Path = PureS3Path.from_uri(s3_uri_path)  # S3 Path for the data object
+
+        # S3 Path for the metadata object. Located in bucket suffixed
+        # with .meta with the same key as original data object
         self._meta_path: PureS3Path = PureS3Path.from_bucket_key(
             self._obj_path.bucket + ".meta", self._obj_path.key
-        )  # S3 Path for the metadata object. Located in bucket suffixed with .meta with the same key as original data object
+        )
+
+        # S3 Path for the attributes object. Located in bucket suffixed
+        # with .meta with key as original data object suffixed with .attrs
         self._attrs_path: PureS3Path = PureS3Path.from_bucket_key(
             self._obj_path.bucket + ".meta", self._obj_path.key + ".attrs"
-        )  # S3 Path for the attributes object. Located in bucket suffixed with .meta with key as original data object suffixed with .attrs
+        )
 
         self._cls: CloudDataType = data_type  # cls reference for the CloudDataType of this object
 
@@ -124,6 +132,7 @@ class CloudObject:
     def path(self) -> PureS3Path:
         """
         Get the S3Path of this Cloud Object
+
         :return: S3Path for this Cloud Object
         """
         return self._obj_path
@@ -132,6 +141,7 @@ class CloudObject:
     def meta_path(self) -> PureS3Path:
         """
         Get the S3Path of the metadata of this Cloud Object
+
         :return: S3Path of the metadata for this Cloud Object
         """
         return self._meta_path
@@ -140,6 +150,7 @@ class CloudObject:
     def size(self) -> int:
         """
         Returns the data size of this Cloud Object
+
         :return: Size in bytes of this Cloud Object
         """
         if not self._obj_headers:
@@ -150,6 +161,7 @@ class CloudObject:
     def meta_size(self) -> int:
         """
         Returns the size of the metadata object of this Cloud Object
+
         :return: Size in bytes of the metadata object of this Cloud Object
         """
         if self._meta_headers is None or "ContentLength" not in self._meta_headers:
@@ -206,8 +218,10 @@ class CloudObject:
     ) -> Tuple[Optional[Dict[str, str]], Optional[Dict[str, str]], Optional[Dict[str, str]]]:
         """
         Get object metadata from storage with HEAD object request
+
         :param enforce_obj: True to raise KeyError exception if object key is not found in storage
         :param enforce_meta: True to raise KeyError exception if metadata key is not found in storage
+
         :return: Tuple of (data_object metadata, meta_object metadata, attrs_objet metadata)
         """
         logger.info("Fetching object from S3")
@@ -269,8 +283,10 @@ class CloudObject:
     ) -> Optional[PreprocessingJobFuture]:
         """
         Manually launch the preprocessing job for this cloud object on the specified preprocessing backend
+
         :param preprocessor_backend: Preprocessor backend instance on to execute the preprocessing job
-        :param force: Forces preprocessing on this cloud object, even if it is already preprocessed
+        :param force: Forces pre-processing on this cloud object, even if it is already preprocessed
+        :param ignore: Ignore pre-processing if object is already pre-processed (does not raise Exception)
         :param args: Optional arguments to pass to the preprocessing job
         :param kwargs:Optional keyword arguments to pass to the preprocessing job
         """
@@ -314,14 +330,17 @@ class CloudObject:
         """
         Get an attribute of this cloud object. Must be preprocessed first. Raises AttributeError if the
         specified key does not exist.
+
         :param key: Attribute key
+
         :return: Attribute
         """
         return getattr(self._attrs, key)
 
     def partition(self, strategy, *args, **kwargs) -> List[CloudObjectSlice]:
         """
-        Apply partitioning strategy on this cloud object
+        Apply partitioning strategy on this cloud object.
+
         :param strategy: Partitioning strategy
         :param args: Optional arguments to pass to the partitioning strategy functions
         :param kwargs: Optional key-words arguments to pass to the partitioning strategy
