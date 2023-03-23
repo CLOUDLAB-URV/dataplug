@@ -16,9 +16,7 @@ author = 'Cloudlab URV'
 extensions = [
     'myst_parser',
     'sphinx.ext.autodoc',
-    'sphinx.ext.todo',
-    'sphinx_copybutton',
-    'nbsphinx'
+    'sphinxawesome_theme'
 ]
 
 todo_include_todos = True
@@ -44,21 +42,21 @@ jupyter_execute_notebooks = 'never'
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
-html_static_path = ['_static']
+html_theme = "sphinxawesome_theme"
+html_static_path = ['images']
 
-html_logo = "_static/lithops_logo_readme.png"
-html_favicon = '_static/favicon.png'
+html_logo = "images/lithops_logo_readme.png"
+html_favicon = 'images/favicon.png'
 
-html_theme_options = {
-    "source_repository": "https://github.com/pradyunsg/furo/",
-    "source_branch": "main",
-    "source_directory": "docs/",
-    "light_css_variables": {
-        "color-brand-primary": "#7C4DFF",
-        "color-brand-content": "#7C4DFF",
-        "font-stack": "Tahoma, sans-serif",
-        "font-stack--monospace": "Consolas, monospace",
-    },
-
-}
+# html_theme_options = {
+#     "source_repository": "https://github.com/CLOUDLAB-URV/dataplug",
+#     "source_branch": "main",
+#     "source_directory": "docs/",
+#     "light_css_variables": {
+#         "color-brand-primary": "#EA5455",
+#         "color-brand-content": "#EA5455",
+#         "font-stack": "Tahoma, sans-serif",
+#         "font-stack--monospace": "Consolas, monospace",
+#     },
+#
+# }
