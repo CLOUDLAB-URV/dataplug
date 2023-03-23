@@ -6,22 +6,23 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta charset="utf-8"/>
 <meta content="Docutils 0.19: https://docutils.sourceforge.io/" name="generator"/>
-<title>Dataplug | dataplug  documentation</title>
+<title>Concepts | dataplug  documentation</title>
 <link href="_static/pygments.css" rel="stylesheet"/>
 <link href="_static/theme.39dcd091ff2d4f33bf46.css" rel="stylesheet"/>
 <link href="search.html" rel="search" title="Search"/>
 <link href="genindex.html" rel="index" title="Index"/>
-<link href="install.html" rel="next" title="Install"/>
+<link href="architecture.html" rel="next" title="Architecture"/>
+<link href="index.html" rel="prev" title="dataplug"/>
 </head>
 <body class="antialiased text-gray scroll-smooth">
 <div class="min-h-screen xl:h-screen flex flex-col xl:grid xl:grid-layout print:block print:h-auto" data-action="keydown@window-&gt;search#focus " data-controller="sidebar search " id="page">
-<a class="block transition -translate-x-full focus:translate-x-0 opacity-0 focus:opacity-100 text-xl bg-white p-4 z-20 absolute top-0 left-0 h-14" href="#dataplug" title="Skip navigation links">Skip to content</a>
+<a class="block transition -translate-x-full focus:translate-x-0 opacity-0 focus:opacity-100 text-xl bg-white p-4 z-20 absolute top-0 left-0 h-14" href="#concepts" title="Skip navigation links">Skip to content</a>
 <header class="grid-area-header z-10 h-14 fixed w-full top-0 print:hidden">
 <div class="bg-gray-dark shadow-md flex items-center h-full xl:px-2 relative"><div class="flex items-center">
 <button class="xl:hidden h-14 w-14 leading-14 text-gray-100 hover:bg-gray-700 hover:text-brand focus:outline-none focus:bg-gray-700 focus:text-brand" data-action="sidebar#open" data-sidebar-target="hamburger">
 <span class="sr-only">Open navigation menu</span>
 <svg aria-hidden="true" class="fill-current h-8 w-8" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
-</button><a class="hover:bg-gray-700 focus:bg-gray-700 focus:outline-none" href="#" title="Back to homepage"><span class="hidden lg:inline-block shrink-0 font-medium text-gray-100 mx-5 leading-14 tracking-wider">dataplug  documentation</span>
+</button><a class="hover:bg-gray-700 focus:bg-gray-700 focus:outline-none" href="index.html" title="Back to homepage"><span class="hidden lg:inline-block shrink-0 font-medium text-gray-100 mx-5 leading-14 tracking-wider">dataplug  documentation</span>
 </a></div><div class="flex justify-end items-center flex-1"><form action="search.html" class="flex print:hidden justify-between items-center leading-14 md:ml-4 bg-gray-dark text-gray-300 focus-within:bg-gray-50 focus-within:text-gray-800 focus-within:absolute focus-within:inset-x-0 focus-within:top-0 md:focus-within:w-full md:focus-within:static z-10" data-action="click-&gt;search#focusSearchInput" id="searchbox" method="get">
 <button aria-label="Get search results" class="text-inherit h-14 w-14" tabindex="-1">
 <svg aria-hidden="true" class="fill-current stroke-current h-8 w-8" stroke-width="0.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
@@ -32,22 +33,19 @@
 </header>
 <aside class="grid-area-sidebar h-full fixed pt-14 xl:relative inset-y-0 left-0 z-20 xl:z-0 print:hidden overflow-y-auto transition-all transform transform-gpu -translate-x-full opacity-0 duration-300 xl:translate-x-0 xl:opacity-100" data-sidebar-target="sidebar">
 <nav class="h-full overflow-y-auto bg-white text-gray-600 pt-8 flex flex-col" role="navigation">
-<div class="nav-toc flex-1 pl-6"><p class="caption" role="heading"><span class="caption-text">Dataplug framework</span></p>
-<ul class="current">
-<li class="toctree-l1 current expanded"><div class="nav-link"><a class="current reference internal" data-action="click-&gt;sidebar#close" href="#">Dataplug</a></div></li>
-<li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="install.html">Install</a></div><ul>
-<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="install.html#quickstart">Quickstart</a></div></li>
+<div class="nav-toc flex-1 pl-6"><ul class="current">
+<li class="toctree-l1"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="index.html">dataplug</a></div></li>
+<li class="toctree-l1 current expanded"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="current reference internal" data-action="click-&gt;sidebar#close" href="#">Concepts</a></div><ul>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="#cloud-native-data-types">Cloud-native data types</a></div></li>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="#data-partitioning">Data partitioning</a></div></li>
 </ul>
 </li>
-<li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="concepts.html">Concepts</a></div><ul>
-<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="concepts.html#cloud-native-data-types">Cloud-native data types</a></div></li>
-<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="concepts.html#data-partitioning">Data partitioning</a></div></li>
+<li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="architecture.html">Architecture</a></div><ul>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="architecture.html#cloud-architecture-and-data-management-life-cycle">Cloud architecture and data management life-cycle</a></div></li>
 </ul>
 </li>
-<li class="toctree-l1"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="architecture.html">Architecture</a></div></li>
 <li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="workflow_sample.html">Example application: FASTQGZip partitioning</a></div><ul>
 <li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="workflow_sample.html#pre-processing">Pre-processing</a></div></li>
-<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="workflow_sample.html#partitioning">Partitioning</a></div></li>
 </ul>
 </li>
 </ul>
@@ -110,76 +108,74 @@
 </button>
 </nav>
 </aside>
-<main class="px-4 pt-14 xl:ml-fluid grid-area-main overflow-y-auto flex flex-col flex-1 h-full mx-0 md:mx-auto xl:mr-0"><article class="flex-1" role="main">
-<section id="dataplug">
-<h1>Dataplug<a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#dataplug">¶</a></h1>
-<section id="what-is-dataplug">
-<h2>What is <cite>dataplug</cite>?<a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#what-is-dataplug">¶</a></h2>
-<p class="lead"><cite>Dataplug</cite> is a Python library that enables to <strong>efficiently access partitions of unstructured data directly from S3 in parallel</strong>. Distributed parallel processing frameworks (like <a class="reference external" href="https://www.dask.org/" rel="nofollow noopener">Dask<svg aria-hidden="true" class="external-link-icon" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"></path></svg></a>, <a class="reference external" href="https://www.ray.io/" rel="nofollow noopener">Ray<svg aria-hidden="true" class="external-link-icon" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"></path></svg></a> or <a class="reference external" href="https://lithops-cloud.github.io/" rel="nofollow noopener">Lithops<svg aria-hidden="true" class="external-link-icon" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"></path></svg></a>) can leverage <cite>dataplug</cite> to benefit from efficient parallel partitioned data consumption for highly parallel workloads in the Cloud.</p>
-<p class="lead">Using <cite>dataplug</cite>, users can define <strong>Cloud-native data types for objects and files stored in Object Storage</strong>. Each Cloud-native data type implements format-specific pre-processing techniques to generate indexes and metadata, which are later used to partition one or more object on-the-fly using efficient Object Storage native APIs (HTTP PUT/GET).</p>
+<main class="px-4 pt-14 xl:ml-fluid grid-area-main overflow-y-auto flex flex-col flex-1 h-full mx-0 md:mx-auto xl:mr-0"><nav aria-label="breadcrumbs" class="print:hidden mt-12 text-sm text-gray-light" role="navigation">
+<a class="text-gray-light text-sm hover:text-gray-dark font-medium focus:text-gray-dark" href="index.html">dataplug  documentation</a>
+<span class="mr-1">/</span><span aria-current="page">Concepts</span>
+</nav>
+<article class="flex-1" role="main">
+<section id="concepts">
+<h1>Concepts<a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#concepts">¶</a></h1>
+<p>This page introduces the core concepts of the <strong>Cloud-native data types</strong> model.</p>
+<section id="cloud-native-data-types">
+<h2>Cloud-native data types<a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#cloud-native-data-types">¶</a></h2>
+<p>In the <strong>Cloud-native data types</strong> model model, each object in Cloud object has an associated <strong>Cloud-native data type.</strong></p>
+<hr/><p class="centered lead">A <strong>Cloud-native data type</strong> is a conceptual extension of an existing unstructured scientific data format, which enables
+to access its data content in parallel when the data is stored in object storage, with the objective to apply efficient
+partitioning of these data for distributed computing workloads in the Cloud.</p>
+<hr/><p>It is a <em>conceptual extension</em> because the structure of the data formats is not altered. Instead, we only
+require <strong>read-only pre-processing to generate metadata, indexes, and extract attributes</strong>, which are
+stored <em>outside</em> of the data file. This metadata is later used to obtain granular portions of the data,
+taking into account native object stores APIs (byte-range HTTP GET requests). The only catch is that metadata must be
+reusable and to enable parallel data access for any given granularity, so that data pre-processing has
+to be performed only once.</p>
+<p>A <strong>Cloud-native data type</strong> is composed of the following elements:</p>
 <ul class="simple">
-<li><p><strong>`Dataplug` avoids costly ETL preprocessing jobs, such as generating static partitions of a dataset.</strong> Static partitions are not ideal, as it imposes an arbitrary partition size that does not fit all workloads, or it may also involve potentially duplicated data.</p></li>
-<li><p><strong>`Dataplug` is extensible</strong>, new cloud-native data types, preprocessing techniques, and partitioning strategies can be defined, so that it always fits the needs of the workload at hand. In addition, users can publish and share implemented extensions publicly via plugins for other users to use them, promoting good practices such as reusable optimized code.</p></li>
-<li><p><strong>`Dataplug` is serverless and portable</strong> for use with your favourite distributed data analytics cluster or serverless framework (Dask, Ray, PySpark, Lithops, …) in any Cloud (AWS, Google Cloud, …) or on-premise, without the need to manage servers for preprocessing jobs.</p></li>
+<li><p>An arbitrary data blob <span class="math notranslate nohighlight">\(\delta\)</span> that complies to a well-known format.</p></li>
+<li><p>An arbitrary data structure <span class="math notranslate nohighlight">\(\delta_{m}\)</span> which describes and indexes the content of <span class="math notranslate nohighlight">\(\delta\)</span> (i.e. metadata from <span class="math notranslate nohighlight">\(\delta\)</span>).</p></li>
+<li><p>A set of key-value attributes <span class="math notranslate nohighlight">\(\mathcal{A}\)</span> related to <span class="math notranslate nohighlight">\(\delta\)</span> and <span class="math notranslate nohighlight">\(\delta_{m}\)</span>.</p></li>
+<li><p>A pre-processing function <span class="math notranslate nohighlight">\(PreProc(\delta) = (\delta_{m}, \mathcal{A})\)</span>, that when applied on <span class="math notranslate nohighlight">\(\delta\)</span> outputs metadata <span class="math notranslate nohighlight">\(\delta_{m}\)</span> and attributes <span class="math notranslate nohighlight">\(\mathcal{A}\)</span>.</p></li>
+<li><p>A set of partitioning strategies <span class="math notranslate nohighlight">\(\mathcal{P}\)</span>, so that <span class="math notranslate nohighlight">\(p(\delta, \delta_{m}) =\\ \{s_{0}, s_{1}, \ldots, s_{n}\}\)</span>, being $p$ a concrete partitioning strategy from <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> and <span class="math notranslate nohighlight">\(s\)</span> a <em>data slice</em>.</p></li>
 </ul>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Dataplug framework</span></p>
-<ul class="current">
-<li class="toctree-l1 current expanded"><a class="current reference internal" href="#">Dataplug</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install.html#quickstart">Quickstart</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="concepts.html">Concepts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="concepts.html#cloud-native-data-types">Cloud-native data types</a></li>
-<li class="toctree-l2"><a class="reference internal" href="concepts.html#data-partitioning">Data partitioning</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="workflow_sample.html">Example application: FASTQGZip partitioning</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="workflow_sample.html#pre-processing">Pre-processing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="workflow_sample.html#partitioning">Partitioning</a></li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="cloud_object.html">CloudObject</a></li>
-</ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Built-in types</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="types/text.html">Text</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="types/text.html#utf">UTF</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="types/columnar.html">Columnar</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="types/columnar.html#utf">UTF</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="types/genomics.html">Genomics</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="types/genomics.html#utf">UTF</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="types/geospatial.html">Geospatial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="types/geospatial.html#utf">UTF</a></li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Example</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="preproc-backends.html">Pre-processing backends</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="preprocessing_backends/dummy.html">Dummy Pre-processing backend</a></li>
-<li class="toctree-l2"><a class="reference internal" href="preprocessing_backends/lithops.html">Lithops Pre-processing backend</a></li>
-</ul>
-</li>
-</ul>
-</div>
+<p>To promote an existing unstructured data format to be a <strong>Cloud-native data type</strong>, the model requires implementing all elements described above specifically for that particular format.
+A <strong>Cloud-native object</strong> is a particular object (e.g. <code class="docutils literal notranslate">s3://my-bucket/imporant-data.csv</code>) which has an associated <strong>Cloud-native data type</strong> (<code class="docutils literal notranslate">Cloud-native CSV</code>).</p>
+<p>There are already some Cloud-native data types implemented for varous domains, which are documented here.</p>
+<p><strong>Data pre-processing:</strong> Before enabling parallel data access to a Cloud-native data type, this has to be first
+pre-processed. Each type has a defined pre-processing method, which extracts characteristics from the raw data blob
+content, such as metadata, internal structure, indices, and/or attributes specific to the data format. <cite>Dataplug</cite> is extensible,
+and does not impose any restriction on the metadata structure or on its generation process, so that new types can be implemented
+and adapted to each workload as needed.</p>
+<p>Extracted metadata is stored <em>outside</em> of the input data blob. This implies that read-only data access is required
+for use in <cite>dataplug</cite>, for example, for data stored in the <a class="reference external" href="https://registry.opendata.aws/" rel="nofollow noopener">AWS Registry of Open Data<svg aria-hidden="true" class="external-link-icon" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"></path></svg></a>.
+Nevertheless, <cite>dataplug</cite> provides unified access to data and metadata, so the end user does not have to manually
+manage metadata and data separately.</p>
+</section>
+<section id="data-partitioning">
+<h2>Data partitioning<a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#data-partitioning">¶</a></h2>
+<p>After applying pre-processing and extracting metadata, applications are enabled to access in parallel to <strong>Cloud-native type’s</strong> data contents.
+For it, a <strong>partitioning strategy</strong> has to be performed first.</p>
+<hr/><p class="centered lead">A <strong>partitioning strategy</strong> is a function associated to a <strong>Cloud-native data type</strong>, which based on the metadata and indexes
+generated at the pre-processing stage and some user-defined arguments, it calculates a set of <strong>data slices</strong> which
+represent a virtual partitioned view of a Cloud-native object.</p>
+<hr/><p>To generate partitions, the <strong>partitioning strategy</strong> function works on the metadata and
+indexes generated at the pre-processing stage and not directly with the actual data.
+The result of applying a <strong>partitioning strategy</strong> is a set of <strong>data slices</strong>.</p>
+<hr/><p class="centered lead">A <strong>data slice</strong> is an entity that represents a lazily-evaluated partitioned view of a Cloud-native data type.
+It encapsulates metadata and code. When evaluated, the slice code fetches and applies the necessary corrections
+to recover the actual data partition content.</p>
+<hr/><p>Evaluating a <strong>data slice</strong> to fetch the data partition content could imply performing one or more byte-range HTTP GET
+requests against object storage to obtain specific chunks of one or more objects,
+which can be assembled in the data analysis process local memory if necessary.
+The procedure and metadata needed to retrieve and assemble the partition contents are embedded within each <strong>data slice</strong>.</p>
+<p>Users can leverage different strategies with different parameters that generate many <strong>data slices</strong>, which can be
+adapted to each particular workload case, avoiding restrictions such as pre-set partition size.</p>
+<p><strong>Data partitioning:</strong> To partition a <strong>Cloud-native object</strong>, we first need to apply partitioning strategy on a
+specific object instance to generate a set of <em>data slices</em>. Each <em>data slice</em> is then scattered many
+distributed workers, which will evaluate the <em>data slice</em> code to load the contents of the data partition
+into memory. This process is done in parallel, exploiting the high synchronization-free parallel access and high
+bandwidth of object stores. <em>Data slices</em> must be serializable to be sent to remote worker processes.</p>
+<p>Contrary to static partitioning, which requires processing all the dataset and creating fixed-sized partitions,
+our partitioning method allows the generation of dynamic partitions on-the-fly to adapt to different workloads,
+enabling for more efficient workload balancing.</p>
 </section>
 </section>
 </article>
@@ -194,6 +190,7 @@
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
+<script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="_static/theme.b62e1ded0c8c099a2d47.js"></script>
 </body>
 </html>

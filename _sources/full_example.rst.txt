@@ -1,0 +1,11 @@
+Example application: FASTQGZip partitioning
+-------------------------------------------
+
+.. figure:: images/fastqgz-step1.png
+   :align: center
+   :width: 700
+   :alt: Dataplug Architecture
+
+   Dataplug Architecture
+
+

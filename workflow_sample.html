@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta charset="utf-8"/>
+<meta content="Docutils 0.19: https://docutils.sourceforge.io/" name="generator"/>
+<title>Example application: FASTQGZip partitioning | dataplug  documentation</title>
+<link href="_static/pygments.css" rel="stylesheet"/>
+<link href="_static/theme.39dcd091ff2d4f33bf46.css" rel="stylesheet"/>
+<link href="search.html" rel="search" title="Search"/>
+<link href="genindex.html" rel="index" title="Index"/>
+<link href="cloud_object.html" rel="next" title="CloudObject"/>
+<link href="architecture.html" rel="prev" title="Architecture"/>
+</head>
+<body class="antialiased text-gray scroll-smooth">
+<div class="min-h-screen xl:h-screen flex flex-col xl:grid xl:grid-layout print:block print:h-auto" data-action="keydown@window-&gt;search#focus " data-controller="sidebar search " id="page">
+<a class="block transition -translate-x-full focus:translate-x-0 opacity-0 focus:opacity-100 text-xl bg-white p-4 z-20 absolute top-0 left-0 h-14" href="#example-application-fastqgzip-partitioning" title="Skip navigation links">Skip to content</a>
+<header class="grid-area-header z-10 h-14 fixed w-full top-0 print:hidden">
+<div class="bg-gray-dark shadow-md flex items-center h-full xl:px-2 relative"><div class="flex items-center">
+<button class="xl:hidden h-14 w-14 leading-14 text-gray-100 hover:bg-gray-700 hover:text-brand focus:outline-none focus:bg-gray-700 focus:text-brand" data-action="sidebar#open" data-sidebar-target="hamburger">
+<span class="sr-only">Open navigation menu</span>
+<svg aria-hidden="true" class="fill-current h-8 w-8" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+</button><a class="hover:bg-gray-700 focus:bg-gray-700 focus:outline-none" href="index.html" title="Back to homepage"><span class="hidden lg:inline-block shrink-0 font-medium text-gray-100 mx-5 leading-14 tracking-wider">dataplug  documentation</span>
+</a></div><div class="flex justify-end items-center flex-1"><form action="search.html" class="flex print:hidden justify-between items-center leading-14 md:ml-4 bg-gray-dark text-gray-300 focus-within:bg-gray-50 focus-within:text-gray-800 focus-within:absolute focus-within:inset-x-0 focus-within:top-0 md:focus-within:w-full md:focus-within:static z-10" data-action="click-&gt;search#focusSearchInput" id="searchbox" method="get">
+<button aria-label="Get search results" class="text-inherit h-14 w-14" tabindex="-1">
+<svg aria-hidden="true" class="fill-current stroke-current h-8 w-8" stroke-width="0.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
+</button>
+<input aria-label="Search the docs" class="pr-2 bg-transparent text-inherit focus:outline-none w-0 md:w-auto focus:w-full transition-all duration-100" data-search-target="searchInput" id="search-input" name="q" placeholder="Search the docs" type="search"/>
+</form></div>
+</div>
+</header>
+<aside class="grid-area-sidebar h-full fixed pt-14 xl:relative inset-y-0 left-0 z-20 xl:z-0 print:hidden overflow-y-auto transition-all transform transform-gpu -translate-x-full opacity-0 duration-300 xl:translate-x-0 xl:opacity-100" data-sidebar-target="sidebar">
+<nav class="h-full overflow-y-auto bg-white text-gray-600 pt-8 flex flex-col" role="navigation">
+<div class="nav-toc flex-1 pl-6"><ul class="current">
+<li class="toctree-l1"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="index.html">dataplug</a></div></li>
+<li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="concepts.html">Concepts</a></div><ul>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="concepts.html#cloud-native-data-types">Cloud-native data types</a></div></li>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="concepts.html#data-partitioning">Data partitioning</a></div></li>
+</ul>
+</li>
+<li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="architecture.html">Architecture</a></div><ul>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="architecture.html#cloud-architecture-and-data-management-life-cycle">Cloud architecture and data management life-cycle</a></div></li>
+</ul>
+</li>
+<li class="toctree-l1 current expanded"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="current reference internal" data-action="click-&gt;sidebar#close" href="#">Example application: FASTQGZip partitioning</a></div><ul>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="#pre-processing">Pre-processing</a></div></li>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="#partitioning">Partitioning</a></div></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html">CloudObject</a></div><ul>
+<li class="toctree-l2"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject"><code class="docutils literal notranslate">CloudObject</code></a></div><ul>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.async_preprocess"><code class="docutils literal notranslate">CloudObject.async_preprocess()</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.attributes"><code class="docutils literal notranslate">CloudObject.attributes</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.exists"><code class="docutils literal notranslate">CloudObject.exists()</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.fetch"><code class="docutils literal notranslate">CloudObject.fetch()</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.from_s3"><code class="docutils literal notranslate">CloudObject.from_s3()</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.get_attribute"><code class="docutils literal notranslate">CloudObject.get_attribute()</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.is_preprocessed"><code class="docutils literal notranslate">CloudObject.is_preprocessed()</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.meta_path"><code class="docutils literal notranslate">CloudObject.meta_path</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.meta_size"><code class="docutils literal notranslate">CloudObject.meta_size</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.new_from_file"><code class="docutils literal notranslate">CloudObject.new_from_file()</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.open"><code class="docutils literal notranslate">CloudObject.open</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.partition"><code class="docutils literal notranslate">CloudObject.partition()</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.path"><code class="docutils literal notranslate">CloudObject.path</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.preprocess"><code class="docutils literal notranslate">CloudObject.preprocess()</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.s3"><code class="docutils literal notranslate">CloudObject.s3</code></a></div></li>
+<li class="toctree-l3"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="cloud_object.html#dataplug.cloudobject.CloudObject.size"><code class="docutils literal notranslate">CloudObject.size</code></a></div></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Built-in types</span></p>
+<ul>
+<li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="types/text.html">Text</a></div><ul>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="types/text.html#utf">UTF</a></div></li>
+</ul>
+</li>
+<li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="types/columnar.html">Columnar</a></div><ul>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="types/columnar.html#utf">UTF</a></div></li>
+</ul>
+</li>
+<li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="types/genomics.html">Genomics</a></div><ul>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="types/genomics.html#utf">UTF</a></div></li>
+</ul>
+</li>
+<li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="types/geospatial.html">Geospatial</a></div><ul>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="types/geospatial.html#utf">UTF</a></div></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example</span></p>
+<ul>
+<li class="toctree-l1"><div class="nav-link"><svg class="expand" data-action="click-&gt;sidebar#expand keydown-&gt;sidebar#expandKeyPressed" tabindex="0" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg><a class="reference internal" data-action="click-&gt;sidebar#close" href="preproc-backends.html">Pre-processing backends</a></div><ul>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="preprocessing_backends/dummy.html">Dummy Pre-processing backend</a></div></li>
+<li class="toctree-l2"><div class="nav-link"><a class="reference internal" data-action="click-&gt;sidebar#close" href="preprocessing_backends/lithops.html">Lithops Pre-processing backend</a></div></li>
+</ul>
+</li>
+</ul>
+</div>
+<button class="text-4xl text-gray-800 p-4 bottom-0 hover:text-brand xl:hidden focus:text-brand self-center" data-action="sidebar#close" title="Close navigation menu">
+<span class="sr-only">Close navigation menu</span>
+<svg aria-hidden="true" class="fill-current stroke-current h-6 w-6" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</aside>
+<main class="px-4 pt-14 xl:ml-fluid grid-area-main overflow-y-auto flex flex-col flex-1 h-full mx-0 md:mx-auto xl:mr-0"><nav aria-label="breadcrumbs" class="print:hidden mt-12 text-sm text-gray-light" role="navigation">
+<a class="text-gray-light text-sm hover:text-gray-dark font-medium focus:text-gray-dark" href="index.html">dataplug  documentation</a>
+<span class="mr-1">/</span><span aria-current="page">Example application: FASTQGZip partitioning</span>
+</nav>
+<article class="flex-1" role="main">
+<section id="example-application-fastqgzip-partitioning">
+<h1>Example application: FASTQGZip partitioning<a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#example-application-fastqgzip-partitioning">¶</a></h1>
+<p>This page describes a full example of <cite>Dataplug</cite> functionality for the <code class="docutils literal notranslate">FASTQGZip</code> Cloud-native data type.</p>
+<section id="pre-processing">
+<h2>Pre-processing<a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#pre-processing">¶</a></h2>
+<p>With <cite>Dataplug</cite>, users can define and implement <em>Cloud-Native data types</em> as Python classes decorated with
+<code class="docutils literal notranslate">CloudDataType</code>, where we define the associated pre-processor and the type hierarchy.</p>
+<figure class="align-center" id="id1">
+<img alt="Workflow step 1: Create a new Cloud-native data type" src="_images/fastqgz-step1.png"/>
+<figcaption><span class="caption-text">Workflow step 1: Create a new Cloud-native data type</span><a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#id1">¶</a>
+</figcaption>
+</figure>
+<div class="code-wrapper" data-controller="code">
+<div class="code-header">
+<span class="code-lang">python</span></div>
+<div class="highlight"><pre><code><span class="nd">@CloudDataType</span><span class="p">(</span><span class="n">preprocessor</span><span class="o">=</span><span class="n">GZipPreprocessor</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">FASTQGZip</span><span class="p">:</span>
+  <span class="n">number_of_sequences</span><span class="p">:</span> <span class="nb">int</span>
+  <span class="n">experiment_id</span><span class="p">:</span> <span class="nb">str</span>
+  <span class="o">...</span>  <span class="c1"># additional attributes</span>
+</code></pre></div></div>
+<p>In the code above we can see an example where we define a new <em>Cloud-native data type</em> for <code class="docutils literal notranslate">FASTQGZip</code> data. We can
+define multiple attributes, in this case, the number of genome sequences and experiment id.</p>
+<div class="code-wrapper" data-controller="code">
+<div class="code-header">
+<span class="code-lang">python</span></div>
+<div class="highlight"><pre><code><span class="k">class</span> <span class="nc">GZipPreprocessor</span><span class="p">(</span><span class="n">BatchPreprocessor</span><span class="p">):</span>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cloud_object</span><span class="p">:</span> <span class="n">CloudObject</span><span class="p">,</span>
+      <span class="n">experiment_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="n">cloud_object</span><span class="o">.</span><span class="n">s3</span><span class="o">.</span><span class="n">get_object</span><span class="p">()</span>
+    <span class="c1"># process 'stream' to generate index using gztool</span>
+    <span class="n">n_lines</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="n">generate_gzip_index</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+    <span class="n">n_sequences</span> <span class="o">=</span> <span class="n">no_lines</span> <span class="o">//</span> <span class="mi">4</span>
+    <span class="k">return</span> <span class="n">PreprocessingMetadata</span><span class="p">(</span>
+      <span class="n">attributes</span><span class="o">=</span><span class="p">{</span><span class="s1">'number_of_sequences'</span><span class="p">:</span> <span class="n">no_sequences</span><span class="p">,</span>
+                  <span class="s1">'experiment_id'</span><span class="p">:</span> <span class="n">experiment_id</span><span class="p">},</span>
+      <span class="n">metadata</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+</code></pre></div></div>
+<p>Following the example, in the code above we see the implementation of a <em>batch</em> type pre-processor for the <code class="docutils literal notranslate">FASTQGZip</code>
+<em>Cloud-native data type</em>. <a class="reference external" href="https://github.com/circulosmeos/gztool" rel="nofollow noopener">gztool<svg aria-hidden="true" class="external-link-icon" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"></path></svg></a> is used to generate a GZip index.</p>
+<p>We can now reference an object stored in S3 using its full URI location (<code class="docutils literal notranslate">s3://my_bucket/SRR123456.fastqgz</code>), assign
+it the <code class="docutils literal notranslate">FASTQGZip</code> <em>Cloud-native data type</em>, and apply the corresponding pre-processing using the
+<code class="docutils literal notranslate">AWSEC2Preprocesor</code> backend.</p>
+<div class="code-wrapper" data-controller="code">
+<div class="code-header">
+<span class="code-lang">python</span></div>
+<div class="highlight"><pre><code><span class="c1"># Create Cloud Object reference</span>
+<span class="n">co</span> <span class="o">=</span> <span class="n">CloudObject</span><span class="o">.</span><span class="n">from_s3</span><span class="p">(</span><span class="n">FASTQGZip</span><span class="p">,</span>
+                         <span class="s1">'s3://my_bucket/SRR123456.fastqgz'</span><span class="p">)</span>
+</code></pre></div></div>
+<figure class="align-center" id="id2">
+<img alt="Workflow step 2: Assign a Cloud-native data type to a object stored in S3" src="_images/fastqgz-step2.png"/>
+<figcaption><span class="caption-text">Workflow step 2: Assign a Cloud-native data type to a object stored in S3</span><a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#id2">¶</a>
+</figcaption>
+</figure>
+<div class="code-wrapper" data-controller="code">
+<div class="code-header">
+<span class="code-lang">python</span></div>
+<div class="highlight"><pre><code><span class="c1"># Preprocess object (this has to be done only once)</span>
+<span class="n">backend</span> <span class="o">=</span> <span class="n">AWSEC2Preprocessor</span><span class="p">()</span>
+<span class="n">co</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="n">sequence_identifier</span><span class="o">=</span><span class="s1">'SRR0000000'</span><span class="p">)</span>
+</code></pre></div></div>
+<figure class="align-center" id="id3">
+<img alt="Workflow step 3: Apply partitioning strategy and generate data slices" src="_images/fastqgz-step3.png"/>
+<figcaption><span class="caption-text">Workflow step 3: Apply partitioning strategy and generate data slices</span><a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#id3">¶</a>
+</figcaption>
+</figure>
+</section>
+<section id="partitioning">
+<h2>Partitioning<a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#partitioning">¶</a></h2>
+<p>Next, we need to implement a <em>partitioning strategy</em> for the <code class="docutils literal notranslate">FASTQGZip</code> Cloud-native data type.</p>
+<div class="code-wrapper" data-controller="code">
+<div class="code-header">
+<span class="code-lang">python</span></div>
+<div class="highlight"><pre><code><span class="k">def</span> <span class="nf">partition_num_reads</span><span class="p">(</span><span class="n">cloud_object</span><span class="p">:</span> <span class="n">FASTQGZip</span><span class="p">,</span>
+    <span class="n">num_seq_partition</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">FASTQGZipTextSlice</span><span class="p">]:</span>
+  <span class="c1"># Split by number of reads per worker</span>
+  <span class="c1"># (each read is composed of 4 lines)</span>
+  <span class="n">n_lines</span> <span class="o">=</span> <span class="n">cloud_object</span><span class="p">[</span><span class="s2">"number_of_sequences"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+  <span class="n">n_parts</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_seq_partition</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="n">n_lines</span>
+  <span class="n">lpp</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="n">n_lines</span> <span class="o">/</span> <span class="n">n_parts</span><span class="p">)</span> <span class="c1"># lines per partition</span>
+  <span class="n">linepairs</span> <span class="o">=</span> <span class="p">[((</span><span class="n">lpp</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">lpp</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">lpp</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+               <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_parts</span><span class="p">)]</span>
+  <span class="n">byteranges</span> <span class="o">=</span> <span class="n">get_byteranges</span><span class="p">(</span><span class="n">cloud_object</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span> <span class="n">linepairs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">FASTQGZipTextSlice</span><span class="p">(</span><span class="n">range_0</span><span class="p">,</span> <span class="n">range_1</span><span class="p">)</span>
+          <span class="k">for</span> <span class="p">(</span><span class="n">range_0</span><span class="p">,</span> <span class="n">range_1</span><span class="p">)</span> <span class="ow">in</span> <span class="n">byteranges</span><span class="p">]</span>
+</code></pre></div></div>
+<p>The code above implements partition strategy that calculates the offsets of the GZip file entry points for each
+partition, based on the number of lines per partition. Other strategies can be implemented, for example, to partition
+by total number of chunks, regardless of the chunk size. Pre-processing strategy functions can access attributes and
+metadata generated in the pre-processing phase. In this case, we utilize the GZip index generated earlier to calculate the necessary offsets.</p>
+<p>The result of this function is a list of <em>GZipTextSlice</em>, which embeds in each <em>data slice</em> the necessary metadata
+to later retrieve the data chunk:</p>
+<div class="code-wrapper" data-controller="code">
+<div class="code-header">
+<span class="code-lang">python</span></div>
+<div class="highlight"><pre><code><span class="k">class</span> <span class="nc">GZipTextSlice</span><span class="p">(</span><span class="n">CloudObjectSlice</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud_object</span><span class="o">.</span><span class="n">metadata</span>
+    <span class="n">byterange</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'bytes=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">range_0</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">range_1</span><span class="si">}</span><span class="s1">'</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="n">Range</span><span class="o">=</span><span class="n">byterange</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line_0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_1</span><span class="p">)</span>
+    <span class="n">chunk</span> <span class="o">=</span> <span class="n">decompress_gzip</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="n">lines</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">chunk</span>
+</code></pre></div></div>
+<p>Each worker of the distributed computing framework will receive an instance of the <code class="docutils literal notranslate">GZipTextSlice</code> classe, one for
+each slice generated in the partitioning strategy. The <cite>get()</cite> method will be called by the application user code,
+which evaluates the <em>data slice</em> to perform a byte-range GET request to object storage with the specified range,
+and, using the index, it finally returns the specified decompressed chunk of the <code class="docutils literal notranslate">FASTQGZip</code> file.</p>
+<p>We can now apply the partitioning strategy and create <em>data slices</em>:</p>
+<div class="code-wrapper" data-controller="code">
+<div class="code-header">
+<span class="code-lang">python</span></div>
+<div class="highlight"><pre><code><span class="c1"># Apply partition strategy and get slices</span>
+<span class="n">data_slices</span> <span class="o">=</span> <span class="n">co</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="n">partition_num_reads</span><span class="p">,</span>
+                           <span class="n">num_seq_partition</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">)</span>
+</code></pre></div></div>
+<figure class="align-center" id="id4">
+<img alt="Workflow step 4: Apply partitioning strategy and generate data slices" src="_images/fastqgz-step4.png"/>
+<figcaption><span class="caption-text">Workflow step 4: Apply partitioning strategy and generate data slices</span><a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#id4">¶</a>
+</figcaption>
+</figure>
+<div class="code-wrapper" data-controller="code">
+<div class="code-header">
+<span class="code-lang">python</span></div>
+<div class="highlight"><pre><code><span class="c1"># Define processing function</span>
+<span class="k">def</span> <span class="nf">process_sequences</span><span class="p">(</span><span class="n">data_slice</span><span class="p">:</span> <span class="n">GZipTextSlice</span><span class="p">):</span>
+  <span class="n">chunk</span> <span class="o">=</span> <span class="n">data_slice</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+  <span class="o">...</span>  <span class="c1"># process fastq chunk</span>
+  <span class="k">return</span> <span class="n">result</span>
+
+<span class="c1"># Submit parallel serverless job with ipyparallel</span>
+<span class="c1"># with data slices as input data</span>
+<span class="k">with</span> <span class="n">ipyparallel</span><span class="o">.</span><span class="n">Cluster</span><span class="p">()</span> <span class="k">as</span> <span class="n">cluster</span><span class="p">:</span>
+  <span class="n">view</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="n">load_balanced_view</span><span class="p">()</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">process_sequences</span><span class="p">,</span> <span class="n">data_slices</span><span class="p">)</span>
+</code></pre></div></div>
+<figure class="align-center" id="id5">
+<img alt="Workflow step 5: Scatter data slices and consume partitions in parallel from many distributed workers" src="_images/fastqgz-step5.png"/>
+<figcaption><span class="caption-text">Workflow step 5: Scatter data slices and consume partitions in parallel from many distributed workers</span><a aria-label="Click to copy this link" class="headerlink tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne tooltipped tooltipped-ne" data-action="click-&gt;clipboard#copyHeaderLink" data-controller="clipboard" href="#id5">¶</a>
+</figcaption>
+</figure>
+</section>
+</section>
+</article>
+<footer>
+<div class="mt-20 mb-4 text-sm text-gray-700 print:mt-4">© 2023, Cloudlab URV Made with <a href="https://www.sphinx-doc.org">Sphinx 6.1.3</a></div>
+</footer></main>
+<button class="fixed bottom-0 right-0 z-20 opacity-0 p-4 m-4 tracking-wide bg-gray-900 text-gray-100 transition transform transform-gpu duration-500 translate-y-full" data-action="search#hideSnackbar" data-search-target="snackbar">
+  Clear highlights
+</button><div class="fixed hidden inset-0 bg-black bg-opacity-50" data-action="click-&gt;sidebar#close" data-sidebar-target="screen">
+</div>
+</div>
+<script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+<script src="_static/doctools.js"></script>
+<script src="_static/sphinx_highlight.js"></script>
+<script src="_static/theme.b62e1ded0c8c099a2d47.js"></script>
+</body>
+</html>
