@@ -15,8 +15,7 @@ author = 'Cloudlab URV'
 
 extensions = [
     'myst_parser',
-    'sphinx.ext.autodoc',
-    'sphinxawesome_theme'
+    'sphinx.ext.autodoc'
 ]
 
 todo_include_todos = True
@@ -42,11 +41,11 @@ jupyter_execute_notebooks = 'never'
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinxawesome_theme"
+html_theme = "pydata_sphinx_theme"
 html_static_path = ['images']
 
-html_logo = "images/lithops_logo_readme.png"
-html_favicon = 'images/favicon.png'
+# html_logo = "images/lithops_logo_readme.png"
+# html_favicon = 'images/favicon.png'
 
 # html_theme_options = {
 #     "source_repository": "https://github.com/CLOUDLAB-URV/dataplug",

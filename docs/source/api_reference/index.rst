@@ -1,6 +1,7 @@
-.. _futures-api:
+API Reference
+=============
 
-CloudObject
+Cloud Object
 -----------
 
 The ``CloudObject`` class represents a programmatic reference to an object in S3 with an associated Cloud-Native data type.
@@ -9,3 +10,4 @@ The ``CloudObject`` class represents a programmatic reference to an object in S3
    :members:
    :undoc-members:
    :show-inheritance:
+

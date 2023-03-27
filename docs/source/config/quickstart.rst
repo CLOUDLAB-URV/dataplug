@@ -1,26 +1,5 @@
-Install
-=======
-
-
-You can install `Dataplug` using ``pip``:
-
-
-.. code-block:: bash
-
-    pip install cloud-dataplug
-
-
-or by cloning the ``master`` branch from Github:
-
-.. code-block:: bash
-
-    git clone https://github.com/CLOUDLAB-URV/dataplug
-    cd dataplug
-    pip install -e .
-
-
-Quickstart
-----------
+Quickstart (Local Docker deployment)
+====================================
 
 Here we provide a quickstart guide to test your ``dataplug`` installation is working.
 
@@ -58,6 +37,9 @@ And upload some test text file:
 We can now reference this object from ``dataplug`` API and apply some partitioning to the text file:
 
 .. code-block:: python
+
+    from dataplug import CloudObject
+    from dataplug.basic.text import UTF8Text, whole_words_strategy
 
     co = CloudObject.from_s3(UTF8Text, 's3://test-bucket/moby-dick.txt',
                              s3config={'endpoint_url': 'http://127.0.0.1:9000'})
