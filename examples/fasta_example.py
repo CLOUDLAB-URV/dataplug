@@ -21,9 +21,9 @@ def main():
 
     backend = DummyPreprocessor()
     # backend = LithopsPreprocessor()
-    co.preprocess(backend, force=True, num_mappers=3)
+    # co.preprocess(backend, force=True, num_mappers=3)
 
-    data_slices = co.partition(partition_chunks_strategy, num_chunks=4)
+    data_slices = co.partition(partition_chunks_strategy, num_chunks=8)
 
     for data_slice in data_slices:
         batch = data_slice.get().decode('utf-8')

@@ -3,13 +3,12 @@ from __future__ import annotations
 import io
 import logging
 import math
-import pickle
 import re
 import shutil
 import time
 from typing import TYPE_CHECKING
 
-import pandas as pd
+import numpy as np
 
 from ...cloudobject import CloudDataType
 from ...dataslice import CloudObjectSlice
@@ -28,7 +27,7 @@ class FASTAPreprocessor(MapReducePreprocessor):
         super().__init__(*args, **kwargs)
 
     @staticmethod
-    def _get_seq_as_dataframe(cloud_object: CloudObject, mapper_id: int, map_chunk_size: int, num_mappers: int):
+    def _get_seq_as_nparray(cloud_object: CloudObject, mapper_id: int, map_chunk_size: int, num_mappers: int):
         range_0 = mapper_id * map_chunk_size
         range_1 = cloud_object.size if mapper_id == num_mappers - 1 else (mapper_id + 1) * map_chunk_size
         get_res = cloud_object.s3.get_object(
@@ -68,36 +67,28 @@ class FASTAPreprocessor(MapReducePreprocessor):
         t1 = time.perf_counter()
         logger.info("Found %d sequences in %.2f s", len(sequences), t1 - t0)
 
-        df = pd.DataFrame(data=sequences, columns=["id_offset", "seq_offset"])
-        return df
+        arr = np.array(sequences, dtype=np.uint32)
+        return arr
 
     def map(
             self, cloud_object: CloudObject, mapper_id: int, map_chunk_size: int, num_mappers: int
     ) -> PreprocessingMetadata:
-        df = self._get_seq_as_dataframe(cloud_object, mapper_id, map_chunk_size, num_mappers)
+        arr = self._get_seq_as_nparray(cloud_object, mapper_id, map_chunk_size, num_mappers)
 
-        # Export to parquet to an in-memory buffer
-        buff = io.BytesIO()
-        df.to_parquet(buff, index=False)
-        buff.seek(0)
-
-        return PreprocessingMetadata(metadata=buff)
+        arr_bytes = arr.tobytes()
+        return PreprocessingMetadata(metadata=arr_bytes)
 
     def reduce(
             self, map_results: List[PreprocessingMetadata], cloud_object: CloudObject, n_mappers: int
     ) -> PreprocessingMetadata:
-        map_results = (pd.read_parquet(meta.metadata) for meta in map_results)
+        map_results = [np.frombuffer(meta.metadata, dtype=np.uint32) for meta in map_results]
+        num_sequences = int(sum((arr.shape[0] / 2) for arr in map_results))
 
-        idx = pd.concat(map_results, ignore_index=True)
-        num_sequences = idx.shape[0]
-
-        buff = io.BytesIO()
-        idx.to_parquet(buff, index=False)
-        buff.seek(0)
+        idx = np.concatenate(map_results)
 
         logger.info("Indexed %d sequences", num_sequences)
 
-        return PreprocessingMetadata(metadata=buff, attributes={"num_sequences": num_sequences})
+        return PreprocessingMetadata(metadata=idx.tobytes(), attributes={"num_sequences": num_sequences})
 
 
 @CloudDataType(preprocessor=FASTAPreprocessor)
@@ -143,42 +134,41 @@ class FASTASlice(CloudObjectSlice):
 
 def partition_chunks_strategy(cloud_object: CloudObject, num_chunks: int):
     res = cloud_object.s3.get_object(Bucket=cloud_object.meta_path.bucket, Key=cloud_object.meta_path.key)
-    buff = io.BytesIO(res['Body'].read())
-    buff.seek(0)
-    idx = pd.read_parquet(buff)
+    idx = np.frombuffer(res['Body'].read(), dtype=np.uint32).reshape((cloud_object.attributes.num_sequences, 2))
     chunk_sz = math.ceil(cloud_object.size / num_chunks)
     ranges = [(chunk_sz * i, (chunk_sz * i) + chunk_sz) for i in range(num_chunks)]
-    offsets_series = idx['seq_offset']
     slices = []
 
     for r0, r1 in ranges:
         # Search which is the first sequence of the chunk
-        seq0_i = offsets_series.searchsorted(r0)
-        # searchsorted returns which index would be inserted => get previous index value (seq0_i - 1)
-        seq0_i = seq0_i - 1 if seq0_i > 0 else 0
-        seq0 = idx.iloc[seq0_i]
+        seq_top_i = idx[:, 1].searchsorted(r0)
+        # searchsorted returns which index would be inserted => get previous index value (seq_top_i - 1)
+        seq_top_i = seq_top_i - 1 if seq_top_i > 0 else 0
+        seq_top = idx[seq_top_i]
+        top_id_offset, top_seq_offset = seq_top
 
-        if seq0['id_offset'] <= r0 < seq0['seq_offset']:
+        if top_id_offset <= r0 < top_seq_offset:
             # Chunk top splits a header line, adjust offset to include full header, offset will be 0
-            r0 = seq0['id_offset']
+            r0 = top_id_offset
             offset = 0
             header = None
         else:
             # Chunk top splits a sequence, set header offset and size
             # and calculate chunked sequence offset from the beginning of the sequence
-            offset = r0 - seq0['seq_offset']
-            header = (seq0['id_offset'], seq0['seq_offset'])
+            offset = r0 - top_seq_offset
+            header = (top_id_offset, top_seq_offset)
 
         # Search which is the last sequence of the chunk
-        seq1_i = offsets_series.searchsorted(r1)
-        if seq1_i == idx.shape[0]:
-            seq1_i = idx.shape[0] - 1
-        seq1 = idx.iloc[seq1_i]
+        seq_bot_i = idx[:, 1].searchsorted(r0)
+        if seq_bot_i == idx.shape[0]:
+            seq_bot_i = idx.shape[0] - 1
+        seq_bot = idx[seq_bot_i]
+        bot_id_offset, bot_seq_offset = seq_bot
 
-        if seq1['id_offset'] <= r1 < seq1['seq_offset']:
+        if bot_id_offset <= r1 < bot_seq_offset:
             # If the chunk splits a header line at the bottom,
             # remove that partial header line, next chunk will handle it...
-            r1 = seq1['id_offset']
+            r1 = bot_id_offset
 
         slices.append(FASTASlice(offset=offset, header=header, range_0=r0, range_1=r1))
 
