@@ -5,6 +5,7 @@ import logging
 import math
 import pickle
 
+import botocore.exceptions
 import smart_open
 from types import SimpleNamespace
 from collections import namedtuple
@@ -84,13 +85,13 @@ class CloudObject:
     :param s3_uri_path: Full S3 URI (s3://bucket/key) for this object.
     :param s3_config: Extra S3 config.
     """
+
     def __init__(
         self,
         data_type: CloudDataType,
         s3_uri_path: str,
         s3_config: dict = None,
     ):
-
         self._obj_headers: Optional[Dict[str, str]] = None  # Storage headers of the data object
         self._meta_headers: Optional[Dict[str, str]] = None  # Storage headers of the metadata object
         self._attrs_headers: Optional[Dict[str, str]] = None  # Storage headers of the attributes object
@@ -99,9 +100,7 @@ class CloudObject:
 
         # S3 Path for the metadata object. Located in bucket suffixed
         # with .meta with the same key as original data object
-        self._meta_path: PureS3Path = PureS3Path.from_bucket_key(
-            self._obj_path.bucket + ".meta", self._obj_path.key
-        )
+        self._meta_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + ".meta", self._obj_path.key)
 
         # S3 Path for the attributes object. Located in bucket suffixed
         # with .meta with key as original data object suffixed with .attrs
@@ -290,6 +289,22 @@ class CloudObject:
         :param args: Optional arguments to pass to the preprocessing job
         :param kwargs:Optional keyword arguments to pass to the preprocessing job
         """
+        # Check if meta bucket exists
+        try:
+            meta_bucket_head = self.s3.head_bucket(Bucket=self.meta_path.bucket)
+        except botocore.exceptions.ClientError as error:
+            if error.response['Error']['Code'] != '404':
+                raise error
+            meta_bucket_head = None
+
+        if not meta_bucket_head:
+            logger.info("Creating meta bucket... (%s)".format(self.meta_path.bucket))
+            try:
+                create_bucket_response = self.s3.create_bucket(Bucket=self.meta_path.bucket)
+            except botocore.exceptions.ClientError as error:
+                logger.error("Metadata bucket %s not found -- Also failed to create it", self.meta_path.bucket)
+                raise error
+
         if self.is_preprocessed() and not force:
             raise Exception("Object is already pre-processed")
         if self.is_preprocessed() and ignore:

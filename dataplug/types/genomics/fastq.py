@@ -2,7 +2,7 @@ from math import ceil
 from typing import List
 
 from dataplug.cloudobject import CloudDataType
-from dataplug.compressed.gzipped import (
+from dataplug.types.compressed.gzipped import (
     GZipText,
     _get_ranges_from_line_pairs,
     GZipTextSlice,

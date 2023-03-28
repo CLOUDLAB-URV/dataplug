@@ -57,4 +57,5 @@ def head_object(s3client, bucket, key):
 
 def setup_rich_traceback():
     import rich.traceback
+
     rich.traceback.install()

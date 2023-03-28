@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import re
@@ -8,17 +10,16 @@ import threading
 import time
 import tqdm
 from math import ceil
-from typing import BinaryIO, Tuple, Dict, ByteString
 
 import pandas as pd
 import numpy as np
 
-from dataplug.cloudobject import CloudDataType, CloudObject, CloudObjectSlice
-from dataplug.preprocessing import PreprocessingMetadata
-from dataplug.preprocessing.preprocessor import BatchPreprocessor, PreprocessingMetadata
-from dataplug.util import force_delete_path
+from ...cloudobject import CloudDataType, CloudObject, CloudObjectSlice
+from ...preprocessing.preprocessor import BatchPreprocessor, PreprocessingMetadata
+from ...util import force_delete_path
 
 logger = logging.getLogger(__name__)
+
 
 # GZTool version 1.4.3
 # https://github.com/circulosmeos/gztool
@@ -243,7 +244,7 @@ class GZipTextSlice(CloudObjectSlice):
         self.line_1 = line_1
         super().__init__(*args, **kwargs)
 
-    def get(self, stream=False):
+    def get(self):
         tmp_index_file = tempfile.mktemp()
         gztool = _get_gztool_path()
         lines = []

@@ -249,6 +249,11 @@ class PickleableS3ClientProxy:
         logger.debug("%s", response.get("ResponseMetadata", {}))
         return response
 
+    def create_bucket(self, *args, **kwargs):
+        response = self.__client.create_bucket(*args, **kwargs)
+        logger.debug("%s", response.get("ResponseMetadata", {}))
+        return response
+
 
 class _S3Flavour(_PosixFlavour):
     is_supported = True

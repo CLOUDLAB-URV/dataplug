@@ -6,43 +6,40 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'dataplug'
-copyright = '2023, Cloudlab URV'
-author = 'Cloudlab URV'
+project = "dataplug"
+copyright = "2023, Cloudlab URV"
+author = "Cloudlab URV"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = [
-    'myst_parser',
-    'sphinx.ext.autodoc'
-]
+extensions = ["myst_parser", "sphinx.ext.autodoc"]
 
 todo_include_todos = True
 nbsphinx_allow_errors = False
 
-templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'README.md', 'Dockerfile']
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.md", "Dockerfile"]
 
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.txt': 'markdown',
-    '.md': 'markdown',
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
 }
 
 # -- Autodoc options ---------------------------------------------------------
 
-autodoc_typehints = 'description'
+autodoc_typehints = "description"
 
 # -- nbsphinx options --------------------------------------------------------
 
-jupyter_execute_notebooks = 'never'
+jupyter_execute_notebooks = "never"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "pydata_sphinx_theme"
-html_static_path = ['images']
+html_static_path = ["images"]
 
 # html_logo = "images/lithops_logo_readme.png"
 # html_favicon = 'images/favicon.png'

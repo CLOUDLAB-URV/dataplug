@@ -93,7 +93,7 @@ def map_job_handler(
 
 def reduce_job_handler(
     preprocessor: MapReducePreprocessor, cloud_object: CloudObject, map_results: List[PreprocessingMetadata]
-):
+) -> PreprocessingMetadata:
     # Call reduce process code
     preprocess_result = preprocessor.reduce(map_results, cloud_object, n_mappers=len(map_results))
     check_preprocessing_output(preprocess_result, cloud_object)

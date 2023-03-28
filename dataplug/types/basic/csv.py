@@ -3,9 +3,10 @@ from math import ceil
 from typing import BinaryIO, List, Tuple, Union, ByteString, Dict
 import pandas as pd
 import numpy as np
-from dataplug.cloudobject import CloudObject, CloudDataType, CloudObjectSlice
-from dataplug.preprocessing import BatchPreprocessor, PreprocessingMetadata
 import io
+
+from ...cloudobject import CloudObject, CloudDataType, CloudObjectSlice
+from ...preprocessing import BatchPreprocessor, PreprocessingMetadata
 
 logger = logging.getLogger(__name__)
 

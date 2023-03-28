@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING
 
 import tqdm
 
-from ..cloudobject import CloudDataType, CloudObject
-from ..preprocessing import BatchPreprocessor, PreprocessingMetadata
-from ..util import force_delete_path
+from dataplug.cloudobject import CloudDataType, CloudObject
+from dataplug.preprocessing import BatchPreprocessor, PreprocessingMetadata
+from dataplug.util import force_delete_path
 
 try:
     import pdal
@@ -44,7 +44,7 @@ class LiDARPreprocessor(BatchPreprocessor):
         lasindex = _get_lasindex_path()
 
         # lasindex tool requires index terminated with .lax
-        tmp_index_file_path = tempfile.mktemp() + '.lax'
+        tmp_index_file_path = tempfile.mktemp() + ".lax"
 
         try:
             force_delete_path(tmp_index_file_path)
@@ -54,7 +54,7 @@ class LiDARPreprocessor(BatchPreprocessor):
             data_stream = obj_res["Body"]
 
             cmd = [lasindex, "-stdin", "-o", tmp_index_file_path]
-            logger.debug(' '.join(cmd))
+            logger.debug(" ".join(cmd))
             index_proc = subprocess.Popen(
                 cmd,
                 stdin=subprocess.PIPE,
@@ -87,12 +87,12 @@ class LiDARPreprocessor(BatchPreprocessor):
             with cloud_object.open("rb") as input_file:
                 las_file = laspy.open(source=input_file, closefd=False)
                 las_meta = {
-                    'mins': las_file.header.mins,
-                    'maxs': las_file.header.maxs,
-                    'point_count': las_file.header.point_count
+                    "mins": las_file.header.mins,
+                    "maxs": las_file.header.maxs,
+                    "point_count": las_file.header.point_count,
                 }
 
-            with open(tmp_index_file_path, 'rb') as index_file:
+            with open(tmp_index_file_path, "rb") as index_file:
                 lax_data = index_file.read()
 
             return PreprocessingMetadata(metadata=lax_data, attributes=las_meta)
