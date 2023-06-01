@@ -145,7 +145,6 @@ class LiDARSlice(CloudObjectSlice):
         def _fetch_interval(inverval_byte_range):
             range_offset_0, range_offset_1 = inverval_byte_range
             byte_range = f"bytes={range_offset_0}-{range_offset_1 - 1}"
-            # print(byte_range)
             res = self.cloud_object.s3.get_object(Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
                                                   Range=byte_range)
             assert res.get("ResponseMetadata", {}).get("HTTPStatusCode") in (200, 206)
@@ -167,7 +166,6 @@ class LiDARSlice(CloudObjectSlice):
             res = pool.map(_fetch_interval, self.byte_ranges)
             for chunk in res:
                 las_chunk.write_points(chunk)
-        print(las_chunk.header.mins, las_chunk.header.maxs, las_chunk.header.point_count)
 
         las_chunk.close()
 
@@ -227,7 +225,6 @@ def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[Li
         cmd.extend(bounds_str_fmt)
         logger.debug(" ".join(cmd))
         out = subprocess.check_output(cmd)
-        print(out.decode("utf-8"))
     finally:
         force_delete_path(tmp_index_file_path)
 
