@@ -1,20 +1,23 @@
 from __future__ import annotations
 
-import json
-import tempfile
-import subprocess
 import logging
-from typing import TYPE_CHECKING
+import math
+import subprocess
+import tempfile
+import typing
 
 import tqdm
 
 from dataplug.cloudobject import CloudDataType, CloudObject
+from dataplug.dataslice import CloudObjectSlice
 from dataplug.preprocessing import BatchPreprocessor, PreprocessingMetadata
 from dataplug.util import force_delete_path
 
+if typing.TYPE_CHECKING:
+    from typing import List, Tuple
+
 try:
-    import pdal
-    import laspy.copc
+    import laspy
 except ModuleNotFoundError:
     pass
 
@@ -30,11 +33,17 @@ def _get_lasindex_path():
     return path
 
 
+def _get_laxquery_path():
+    proc = subprocess.run(["which", "laxquery64"], check=True, capture_output=True, text=True)
+    path = proc.stdout.rstrip("\n")
+    logger.debug("Using lasindex located in %s", path)
+    return path
+
+
 class LiDARPreprocessor(BatchPreprocessor):
     def __init__(self):
         try:
-            import pdal
-            import laspy.copc
+            import laspy
         except ModuleNotFoundError as e:
             logger.error("Missing Geospatial packages!")
             raise e
@@ -89,7 +98,8 @@ class LiDARPreprocessor(BatchPreprocessor):
                 las_meta = {
                     "mins": las_file.header.mins,
                     "maxs": las_file.header.maxs,
-                    "point_count": las_file.header.point_count,
+                    "point_format_size": las_file.header.point_format.size,
+                    "offset_to_point_data": las_file.header.offset_to_point_data
                 }
 
             with open(tmp_index_file_path, "rb") as index_file:
@@ -104,3 +114,103 @@ class LiDARPreprocessor(BatchPreprocessor):
 class LiDARPointCloud:
     def __init__(self, cloud_object):
         self.cloud_object = cloud_object
+
+
+class LiDARSlice(CloudObjectSlice):
+    def __init__(self, min_x: float, min_y: float, max_x: float, max_y: float, byte_ranges: List[Tuple[int, int]]):
+        self.min_x = min_x
+        self.min_y = min_y
+        self.max_x = max_x
+        self.max_y = max_y
+        super().__init__()
+
+    def _get_points(self):
+        pass
+
+    def get(self):
+        points, header = self._get_points()
+
+        out_buff = io.BytesIO()
+        with laspy.open(out_buff, mode="w", header=header, closefd=False) as output:
+            output.write_points(points)
+
+        return_value = out_buff.getvalue()
+
+        return return_value
+
+    def to_file(self, file_name):
+        points, header = self._get_points()
+
+        out_buff = io.BytesIO()
+        with laspy.open(file_name, mode="w", header=header) as output:
+            output.write_points(points)
+
+
+def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[LiDARSlice]:
+    """
+    This partition strategy chunks a LAS file in equal spatial squared chunks.
+    'num_chunks' must be a perfect square, otherwise the number of chunks will be rounded to the closest perfect
+    square. E.g. for num_chunks=4, the tile will be split in 2*2 sub-tile, but for num_chunks=7, the tile will be split
+    in 3*3 tiles.
+    """
+    splits_x = round(math.sqrt(num_chunks))
+    splits_y = round(num_chunks / splits_x)
+    real_num_chunks = splits_x * splits_y
+
+    min_x, min_y = cloud_object.attributes.mins[0], cloud_object.attributes.mins[1]
+    max_x, max_y = cloud_object.attributes.maxs[0], cloud_object.attributes.maxs[1]
+    offset_to_point_data = cloud_object.attributes.offset_to_point_data
+    point_size = cloud_object.attributes.point_size
+
+    x_size = (max_x - min_x) / splits_x
+    y_size = (max_y - min_y) / splits_y
+
+    bounds = []
+    for i in range(splits_x):
+        for j in range(splits_y):
+            x_min_bound = (x_size * i) + min_x
+            y_min_bound = (y_size * j) + min_y
+            x_max_bound = x_min_bound + x_size
+            y_max_bound = y_min_bound + y_size
+            bounds.append((x_min_bound, y_min_bound, x_max_bound, y_max_bound))
+
+    bounds_str_fmt = [",".join(bound) for bound in bounds]
+    print(bounds_str_fmt)
+
+    tmp_index_file_path = tempfile.mktemp() + ".lax"
+    try:
+        cloud_object.s3.download_file(cloud_object.meta_path.bucket, cloud_object.meta_path.key, tmp_index_file_path)
+
+        cmd = [_get_laxquery_path(), tmp_index_file_path]
+        cmd.extend(bounds_str_fmt)
+        logger.debug(" ".join(cmd))
+        out = subprocess.check_output(cmd)
+        print(out)
+    finally:
+        force_delete_path(tmp_index_file_path)
+
+    lines = out.splitlines()
+    point_chunks = []
+    for line in lines:
+        intervals = []
+        for interval in line.split(";"):
+            start, end = interval.split(",")
+            start, end = int(start), int(end)
+            intervals.append((start, end))
+        point_chunks.append(intervals)
+
+    chunks_byte_ranges = []
+    for point_chunk in point_chunks:
+        byte_intervals = []
+        for start, end in point_chunk:
+            byte_0, byte_1 = (start * point_size) + offset_to_point_data, (end * point_size) + offset_to_point_data
+            byte_intervals.append((byte_0, byte_1))
+        chunks_byte_ranges.append(byte_intervals)
+
+    slices = []
+    for bound, byte_ranges in zip(bounds, chunks_byte_ranges):
+        x_min_bound, y_min_bound, x_max_bound, y_max_bound = bound
+        data_slice = LiDARSlice(x_min_bound, y_min_bound, x_max_bound, y_max_bound, byte_ranges)
+        slices.append(data_slice)
+
+    return slices

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import io
 import logging
 import math
-import io
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -155,10 +155,10 @@ class COPCSlice(CloudObjectSlice):
             output.write_points(points)
 
 
-def copc_square_split_strategy(cloud_object: CloudOptimizedPointCloud, num_chunks: int) -> List[COPCSlice]:
+def square_split_strategy(cloud_object: CloudOptimizedPointCloud, num_chunks: int) -> List[COPCSlice]:
     """
     This partition strategy chunks a COPC file in equal spatial squared chunks.
-    'num_chunks' must be a perfect square, otherwise the number of chunks will be rounded to the closes perfect
+    'num_chunks' must be a perfect square, otherwise the number of chunks will be rounded to the closest perfect
     square. E.g. for num_chunks=4, the tile will be split in 2*2 sub-tile, but for num_chunks=7, the tile will be split
     in 3*2 tiles.
     """
