@@ -1,8 +1,5 @@
-import io
 import logging
 import time
-
-import laspy
 
 from dataplug import CloudObject
 from dataplug.types.geospatial.laspc import LiDARPointCloud, square_split_strategy
@@ -40,18 +37,17 @@ def main():
     print(f"No. of points: {co['point_count']}")
     print(f"Point size: {co.attributes.point_format_size}")
 
-    data_slices = co.partition(square_split_strategy, num_chunks=9)
+    data_slices = co.partition(square_split_strategy, num_chunks=4)
 
     # data_slices[0].get()
 
     total_point_count = 0
     for data_slice in data_slices:
         t0 = time.perf_counter()
-        buff = data_slice.get()
+        las_chunk = data_slice.get()
         t1 = time.perf_counter()
         print(f"Took {t1 - t0:.2f} seconds to get partition")
 
-        las_chunk = laspy.open(io.BytesIO(buff), "r", closefd=False)
         print("Min XYZ: ", las_chunk.header.mins)
         print("Max XYZ: ", las_chunk.header.maxs)
         print("Chunk point count: ", las_chunk.header.point_count)

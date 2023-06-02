@@ -120,15 +120,17 @@ class LiDARPointCloud:
 
 
 class LiDARSlice(CloudObjectSlice):
-    def __init__(self, min_x: float, min_y: float, max_x: float, max_y: float, byte_ranges: List[Tuple[int, int]]):
+    def __init__(self, min_x: float, min_y: float, max_x: float, max_y: float,
+                 las_file_byte_ranges: List[Tuple[int, int]], buffer_size: int):
         self.min_x = min_x
         self.min_y = min_y
         self.max_x = max_x
         self.max_y = max_y
-        self.byte_ranges = byte_ranges
+        self.las_file_byte_ranges = las_file_byte_ranges
+        self.buffer_size = buffer_size
         super().__init__()
 
-    def _get_points(self, buffer):
+    def _get_lasdata(self):
         # Download original file header
         byte_range = f"bytes=0-{self.cloud_object.attributes.offset_to_point_data}"
         res = self.cloud_object.s3.get_object(Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
@@ -140,43 +142,56 @@ class LiDARSlice(CloudObjectSlice):
         with laspy.open(header_buff, "r") as lasf:
             header = lasf.header
 
-        las_chunk = laspy.open(buffer, "w", header=header, closefd=False)
+        buffer = bytearray(self.buffer_size)
 
-        def _fetch_interval(inverval_byte_range):
-            range_offset_0, range_offset_1 = inverval_byte_range
-            byte_range = f"bytes={range_offset_0}-{range_offset_1 - 1}"
+        # Calculate offsets for local buffer
+        buffer_offsets = []
+        previous = 0
+        for byte_range in self.las_file_byte_ranges:
+            r0, r1 = byte_range
+            size = r1 - r0
+            offset_0, offset_1 = previous, previous + size
+            buffer_offsets.append((offset_0, offset_1))
+            previous = offset_1
+
+        def _fetch_interval(args):
+            interval_byte_range, buffer_offsets = args
+            range_0, range_1 = interval_byte_range
+            # print(range_1 - range_0)
+            byte_range = f"bytes={range_0}-{range_1 - 1}"
+            # print(byte_range)
             res = self.cloud_object.s3.get_object(Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
                                                   Range=byte_range)
             assert res.get("ResponseMetadata", {}).get("HTTPStatusCode") in (200, 206)
             body = res["Body"].read()
 
-            # Read point interval into a mini-las container
-            points = laspy.PackedPointRecord.from_buffer(buffer=body, point_format=header.point_format)
-            las_interval = laspy.LasData(header=lasf.header, points=points)
-            las_interval.update_header()
+            offset_0, offset_1 = buffer_offsets
+            # print(offset_1, offset_1, offset_1 - offset_0)
+            mem_buff = memoryview(buffer)
+            # print(range_1 - range_0, len(body))
+            mem_buff[offset_0:offset_1] = body
+            return True
 
-            # Filter out points not pertaining to this partition
-            mask = (las_interval.x >= self.min_x) & (las_interval.x <= self.max_x) \
-                   & (las_interval.y >= self.min_y) & (las_interval.y <= self.max_y)
-            points_filtered = las_interval.points[mask]
-            return points_filtered
+        with ThreadPoolExecutor(max_workers=32) as pool:
+            res = pool.map(_fetch_interval, zip(self.las_file_byte_ranges, buffer_offsets))
+            all(res)
 
-        # with ThreadPoolExecutor(max_workers=len(self.byte_ranges)) as pool:
-        with ThreadPoolExecutor(max_workers=len(self.byte_ranges)) as pool:
-            res = pool.map(_fetch_interval, self.byte_ranges)
-            for chunk in res:
-                las_chunk.write_points(chunk)
+        # Read point interval into a mini-las container
+        points = laspy.PackedPointRecord.from_buffer(buffer=memoryview(buffer), point_format=header.point_format)
+        las_chunk = laspy.LasData(header=lasf.header, points=points)
+        las_chunk.update_header()
 
-        las_chunk.close()
+        # Filter out points not pertaining to this partition
+        mask = (las_chunk.x >= self.min_x) & (las_chunk.x <= self.max_x) \
+               & (las_chunk.y >= self.min_y) & (las_chunk.y <= self.max_y)
+        las_chunk.points = las_chunk.points[mask]
+        return las_chunk
 
     def get(self):
-        buffer = io.BytesIO()
-        self._get_points(buffer)
-        return buffer.getvalue()
+        return self._get_lasdata()
 
     def to_file(self, file_name):
-        with open(file_name, "wb") as buffer:
-            self._get_points(buffer)
+        self._get_lasdata().write(file_name)
 
 
 def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[LiDARSlice]:
@@ -238,6 +253,8 @@ def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[Li
         for interval in line.split(";"):
             start, end = interval.split(",")
             start, end = int(start), int(end)
+            if (end - start) < 100:  # Skip intervals that are too small, yes we're losing points but nobody has to know
+                continue
             intervals.append((start, end))
         point_chunks.append(intervals)
 
@@ -254,7 +271,8 @@ def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[Li
     slices = []
     for bound, byte_ranges in zip(bounds, chunks_byte_ranges):
         x_min_bound, y_min_bound, x_max_bound, y_max_bound = bound
-        data_slice = LiDARSlice(x_min_bound, y_min_bound, x_max_bound, y_max_bound, byte_ranges)
+        buffer_size = sum((range_1 - range_0) for range_0, range_1 in byte_ranges)
+        data_slice = LiDARSlice(x_min_bound, y_min_bound, x_max_bound, y_max_bound, byte_ranges, buffer_size)
         slices.append(data_slice)
 
     return slices
