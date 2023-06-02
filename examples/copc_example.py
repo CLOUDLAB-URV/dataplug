@@ -1,7 +1,7 @@
-from dataplug import CloudObject
-from dataplug.types.geospatial import CloudOptimizedPointCloud, copc_square_split_strategy
-
 import laspy
+
+from dataplug import CloudObject
+from dataplug.types.geospatial.copc import CloudOptimizedPointCloud, square_split_strategy
 
 # setup_logging(logging.INFO)
 
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # print(co.attributes.points)
     # print(co['points'])
 
-    slices = co.partition(copc_square_split_strategy, num_chunks=9)
+    slices = co.partition(square_split_strategy, num_chunks=9)
 
     for i, data_slice in enumerate(slices):
         las_data = data_slice.get()

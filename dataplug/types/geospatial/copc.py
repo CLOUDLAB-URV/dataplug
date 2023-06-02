@@ -7,6 +7,13 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+try:
+    import laspy
+    import laspy.copc
+    import pdal
+except ModuleNotFoundError:
+    pass
+
 from dataplug.cloudobject import CloudDataType, CloudObjectSlice
 from dataplug.preprocessing import BatchPreprocessor, PreprocessingMetadata
 
@@ -33,8 +40,6 @@ class COPCPreprocessor(BatchPreprocessor):
         :param cloud_object:
         :return:
         """
-        import laspy.copc
-
         with cloud_object.open(mode="rb") as copc_file:
             copc_reader = laspy.copc.CopcReader(copc_file)
             copc_attrs = {
@@ -64,7 +69,6 @@ class CloudOptimizedPointCloud:
     """
     Cloud Data Type for the COPC file format
     """
-
     attribute1 = None
     attribute2: int = -2
     points: int
@@ -93,16 +97,13 @@ class COPCSlice(CloudObjectSlice):
         super().__init__()
 
     def _get_points(self):
-        from laspy.copc import CopcReader, Bounds
-        import laspy
-
         file_url = self.cloud_object.s3.generate_presigned_url(
             "get_object",
             Params={"Bucket": self.cloud_object.path.bucket, "Key": self.cloud_object.path.key},
             ExpiresIn=300,
         )
 
-        with CopcReader.open(file_url) as copc_file:
+        with laspy.copc.CopcReader.open(file_url) as copc_file:
             min_x, min_y = copc_file.header.mins[0], copc_file.header.mins[1]
             max_x, max_y = copc_file.header.maxs[0], copc_file.header.maxs[1]
 
@@ -114,7 +115,7 @@ class COPCSlice(CloudObjectSlice):
             x_max_bound = x_min_bound + x_size
             y_max_bound = y_min_bound + y_size
 
-            query_bounds = Bounds(
+            query_bounds = laspy.copc.Bounds(
                 mins=np.asarray([x_min_bound, y_min_bound]),
                 maxs=np.asarray([x_max_bound, y_max_bound]),
             )
@@ -133,8 +134,6 @@ class COPCSlice(CloudObjectSlice):
             return points, new_header
 
     def get(self):
-        import laspy
-
         points, header = self._get_points()
 
         out_buff = io.BytesIO()
@@ -142,15 +141,10 @@ class COPCSlice(CloudObjectSlice):
             output.write_points(points)
 
         return_value = out_buff.getvalue()
-
         return return_value
 
     def to_file(self, file_name):
-        import laspy
-
         points, header = self._get_points()
-
-        out_buff = io.BytesIO()
         with laspy.open(file_name, mode="w", header=header) as output:
             output.write_points(points)
 
