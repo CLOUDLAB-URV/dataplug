@@ -1,15 +1,15 @@
 from math import ceil
 from typing import List
 
-from dataplug.cloudobject import CloudDataType
-from dataplug.types.compressed.gzipped import (
+from dataplug.core.cloudobject import CloudDataFormatTemplate
+from dataplug.formats.compressed.gzipped import (
     GZipText,
     _get_ranges_from_line_pairs,
     GZipTextSlice,
 )
 
 
-@CloudDataType(inherit_from=GZipText)
+@CloudDataFormatTemplate(inherit_from=GZipText)
 class FASTQGZip:
     def __init__(self, *args, **kwargs):
         super().__init__()

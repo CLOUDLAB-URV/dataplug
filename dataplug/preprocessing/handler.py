@@ -10,7 +10,7 @@ from ..util import force_delete_path
 from ..version import __version__
 
 if TYPE_CHECKING:
-    from ..cloudobject import CloudObject
+    from dataplug.core.cloudobject import CloudObject
     from typing import List
 
 
@@ -21,7 +21,7 @@ def check_preprocessing_output(preprocess_meta: PreprocessingMetadata, cloud_obj
     # Upload object body to meta bucket with the same key as original (prevent to overwrite)
     if preprocess_meta.object_body is not None:
         if hasattr(preprocess_meta.object_body, "read"):
-            cloud_object.s3.upload_fileobj(
+            cloud_object.storage.upload_fileobj(
                 Fileobj=preprocess_meta.object_body,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.path.key,
@@ -29,14 +29,14 @@ def check_preprocessing_output(preprocess_meta: PreprocessingMetadata, cloud_obj
                 Config=TransferConfig(use_threads=True, max_concurrency=256),
             )
         else:
-            cloud_object.s3.put_object(
+            cloud_object.storage.put_object(
                 Body=preprocess_meta.object_body,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.path.key,
                 Metadata={"dataplug": __version__},
             )
     if preprocess_meta.object_file_path is not None:
-        cloud_object.s3.upload_file(
+        cloud_object.storage.upload_file(
             Filename=preprocess_meta.object_file_path,
             Bucket=cloud_object.meta_path.bucket,
             Key=cloud_object.path.key,
@@ -48,7 +48,7 @@ def check_preprocessing_output(preprocess_meta: PreprocessingMetadata, cloud_obj
     # Upload attributes to meta bucket
     if preprocess_meta.attributes is not None:
         attrs_bin = pickle.dumps(preprocess_meta.attributes)
-        cloud_object.s3.put_object(
+        cloud_object.storage.put_object(
             Body=attrs_bin,
             Bucket=cloud_object._attrs_path.bucket,
             Key=cloud_object._attrs_path.key,
@@ -58,7 +58,7 @@ def check_preprocessing_output(preprocess_meta: PreprocessingMetadata, cloud_obj
     # Upload metadata object to meta bucket
     if preprocess_meta.metadata is not None:
         if hasattr(preprocess_meta.metadata, "read"):
-            cloud_object.s3.upload_fileobj(
+            cloud_object.storage.upload_fileobj(
                 Fileobj=preprocess_meta.metadata,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.meta_path.key,
@@ -66,7 +66,7 @@ def check_preprocessing_output(preprocess_meta: PreprocessingMetadata, cloud_obj
                 Config=TransferConfig(use_threads=True, max_concurrency=256),
             )
         else:
-            cloud_object.s3.put_object(
+            cloud_object.storage.put_object(
                 Body=preprocess_meta.metadata,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=cloud_object.meta_path.key,
@@ -84,7 +84,7 @@ def batch_job_handler(preprocessor: BatchPreprocessor, cloud_object: CloudObject
 
 
 def map_job_handler(
-    preprocessor: MapReducePreprocessor, cloud_object: CloudObject, mapper_id: int
+        preprocessor: MapReducePreprocessor, cloud_object: CloudObject, mapper_id: int
 ) -> PreprocessingMetadata:
     # Call map process code
     result = preprocessor.map(cloud_object, mapper_id, preprocessor.map_chunk_size, preprocessor.num_mappers)
@@ -92,7 +92,7 @@ def map_job_handler(
 
 
 def reduce_job_handler(
-    preprocessor: MapReducePreprocessor, cloud_object: CloudObject, map_results: List[PreprocessingMetadata]
+        preprocessor: MapReducePreprocessor, cloud_object: CloudObject, map_results: List[PreprocessingMetadata]
 ) -> PreprocessingMetadata:
     # Call reduce process code
     preprocess_result = preprocessor.reduce(map_results, cloud_object, n_mappers=len(map_results))

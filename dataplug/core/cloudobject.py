@@ -1,126 +1,82 @@
 from __future__ import annotations
 
-import inspect
 import logging
 import math
 import pickle
+from collections import namedtuple
+from copy import deepcopy
+from functools import partial
+from types import SimpleNamespace
+from typing import TYPE_CHECKING
 
 import botocore.exceptions
 import smart_open
-from types import SimpleNamespace
-from collections import namedtuple
-from typing import TYPE_CHECKING
-from functools import partial
-from copy import deepcopy
 
-
-if TYPE_CHECKING:
-    from mypy_boto3_s3 import S3Client
-    from typing import Union, List, Tuple, Dict, Optional, Type, Any
-    from dataplug.preprocessing.backendbase import PreprocessingJobFuture
-else:
-    S3Client = object
-
-from .util import split_s3_path, head_object
-from .storage import PureS3Path, PickleableS3ClientProxy
-from .preprocessing import (
+from dataplug.core.dataslice import CloudObjectSlice
+from dataplug.core.formattemplate import CloudDataFormatTemplate
+from dataplug.preprocessing import (
     BatchPreprocessor,
     MapReducePreprocessor,
     PreprocessorBackendBase,
 )
-from dataplug.dataslice import CloudObjectSlice
+from dataplug.storage.storage import StoragePath, PickleableS3ClientProxy
+from dataplug.util import split_s3_path, head_object
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3 import S3Client
+    from typing import List, Tuple, Dict, Optional, Any
+    from dataplug.preprocessing.backendbase import PreprocessingJobFuture
+else:
+    S3Client = object
 
 logger = logging.getLogger(__name__)
-
-
-class CloudDataType:
-    def __init__(
-        self,
-        preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = None,
-        inherit_from: Type["CloudDataType"] = None,
-    ):
-        self.co_class: object = None
-        self.__preprocessor: Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]] = preprocessor
-        self.__parent: "CloudDataType" = inherit_from
-        self.cls_attributes = {}
-
-    @property
-    def preprocessor(
-        self,
-    ) -> Union[Type[BatchPreprocessor], Type[MapReducePreprocessor]]:
-        if self.__preprocessor is not None:
-            return self.__preprocessor
-        elif self.__parent is not None:
-            return self.__parent.preprocessor
-        else:
-            raise Exception("There is not preprocessor")
-
-    def __call__(self, cls):
-        # Get attribute names, types and initial values from decorated class
-        if hasattr(cls, "__annotations__"):
-            # Get annotated attributes
-            for attr_key, _ in cls.__annotations__.items():
-                self.cls_attributes[attr_key] = None
-        # Get attributes with value
-        for attr_key in filter(lambda attr: not attr.startswith("__") and not attr.endswith("__"), dir(cls)):
-            attr_val = getattr(cls, attr_key)
-            self.cls_attributes[attr_key] = attr_val
-
-        if not inspect.isclass(cls):
-            raise TypeError(f"CloudObject expected to use with class type, not {type(cls)}")
-
-        if self.co_class is None:
-            self.co_class = cls
-        else:
-            raise Exception(f"Can't overwrite decorator, now is {self.co_class}")
-
-        return self
 
 
 class CloudObject:
     """
     Reference to a Cloud Object.
 
-    :param data_type: Cloud-Native data type for this object.
-    :param s3_uri_path: Full S3 URI (s3://bucket/key) for this object.
-    :param s3_config: Extra S3 config.
+    :param data_format_template: Cloud-Native data type for this object.
+    :param storage_path: Full S3 URI (s3://bucket/key) for this object.
+    :param storage_config: Extra S3 config.
     """
 
     def __init__(
-        self,
-        data_type: CloudDataType,
-        s3_uri_path: str,
-        s3_config: dict = None,
+            self,
+            data_format_template: CloudDataFormatTemplate,
+            object_path: StoragePath,
+            meta_path: StoragePath,
+            storage_backend: str,
+            storage_config: Optional[dict] = None
     ):
         self._obj_headers: Optional[Dict[str, str]] = None  # Storage headers of the data object
         self._meta_headers: Optional[Dict[str, str]] = None  # Storage headers of the metadata object
         self._attrs_headers: Optional[Dict[str, str]] = None  # Storage headers of the attributes object
 
-        self._obj_path: PureS3Path = PureS3Path.from_uri(s3_uri_path)  # S3 Path for the data object
-
+        self._obj_path = object_path
         # S3 Path for the metadata object. Located in bucket suffixed
         # with .meta with the same key as original data object
-        self._meta_path: PureS3Path = PureS3Path.from_bucket_key(self._obj_path.bucket + ".meta", self._obj_path.key)
 
+        self._meta_path = meta_path
         # S3 Path for the attributes object. Located in bucket suffixed
         # with .meta with key as original data object suffixed with .attrs
-        self._attrs_path: PureS3Path = PureS3Path.from_bucket_key(
-            self._obj_path.bucket + ".meta", self._obj_path.key + ".attrs"
-        )
 
-        self._cls: CloudDataType = data_type  # cls reference for the CloudDataType of this object
+        self._cls: CloudDataFormatTemplate = data_format_template  # cls reference for the CloudDataType of this object
 
-        s3_config = s3_config or {}
-        self._s3: PickleableS3ClientProxy = PickleableS3ClientProxy(
-            aws_access_key_id=s3_config.get("aws_access_key_id"),
-            aws_secret_access_key=s3_config.get("aws_secret_access_key"),
-            region_name=s3_config.get("region_name"),
-            endpoint_url=s3_config.get("endpoint_url"),
-            botocore_config_kwargs=s3_config.get("s3_config_kwargs"),
-            use_token=s3_config.get("use_token"),
-            role_arn=s3_config.get("role_arn"),
-            token_duration_seconds=s3_config.get("token_duration_seconds"),
-        )
+        if s3_client is None:
+            storage_config = storage_config or {}
+            self._s3: PickleableS3ClientProxy = PickleableS3ClientProxy(
+                aws_access_key_id=storage_config.get("aws_access_key_id"),
+                aws_secret_access_key=storage_config.get("aws_secret_access_key"),
+                region_name=storage_config.get("region_name"),
+                endpoint_url=storage_config.get("endpoint_url"),
+                botocore_config_kwargs=storage_config.get("s3_config_kwargs"),
+                use_token=storage_config.get("use_token"),
+                role_arn=storage_config.get("role_arn"),
+                token_duration_seconds=storage_config.get("token_duration_seconds"),
+            )
+        else:
+            self._s3 = s3_client
 
         self._attrs: Optional[SimpleNamespace] = None
 
@@ -128,7 +84,7 @@ class CloudObject:
         logger.info(f"Created reference for %s", self)
 
     @property
-    def path(self) -> PureS3Path:
+    def path(self) -> StoragePath:
         """
         Get the S3Path of this Cloud Object
 
@@ -137,7 +93,7 @@ class CloudObject:
         return self._obj_path
 
     @property
-    def meta_path(self) -> PureS3Path:
+    def meta_path(self) -> StoragePath:
         """
         Get the S3Path of the metadata of this Cloud Object
 
@@ -168,7 +124,11 @@ class CloudObject:
         return int(self._meta_headers["ContentLength"])
 
     @property
-    def s3(self) -> S3Client:
+    def storage(self) -> S3Client:
+        """
+        Return a reference of the storage client
+        :return:
+        """
         return self._s3
 
     @property
@@ -177,23 +137,66 @@ class CloudObject:
 
     @property
     def open(self) -> smart_open.smart_open:
+        """
+        Open cloud object content as a file using smart_open
+        """
         logger.debug("Creating new smart_open client for uri %s", self.path.as_uri())
-        client = self.s3._new_client()
+        client = self.storage._new_client()
         return partial(smart_open.open, self.path.as_uri(), transport_params={"client": client})
 
+    @property
+    def open_metadata(self) -> smart_open.smart_open:
+        """
+        Open cloud object metadata content as a file using smart_open
+        """
+        logger.debug("Creating new smart_open client for uri %s", self.path.as_uri())
+        client = self.storage._new_client()
+        return partial(smart_open.open, self.meta_path.as_uri(), transport_params={"client": client})
+
     @classmethod
-    def from_s3(cls, cloud_object_class, s3_path, s3_config=None, fetch=True) -> "CloudObject":
-        co_instance = cls(cloud_object_class, s3_path, s3_config)
+    def from_s3(
+            cls,
+            cloud_object_class: CloudDataFormatTemplate,
+            s3_path: str,
+            s3_config: dict = None,
+            fetch: bool = True,
+            metadata_bucket: str = None
+    ) -> CloudObject:
+        return cls.from_storage(cloud_object_class, s3_path, s3_config, fetch, metadata_bucket)
+
+    @classmethod
+    def from_storage(
+            cls,
+            cloud_object_class: CloudDataFormatTemplate,
+            storage_uri: str,
+            storage_config: Optional[dict] = None,
+            fetch: Optional[bool] = True,
+            metadata_bucket: Optional[str] = None
+    ) -> CloudObject:
+        obj_path = StoragePath.from_uri(storage_uri)
+        if metadata_bucket is None:
+            metadata_bucket = obj_path.bucket + ".meta"
+        metadata_path = StoragePath.from_storage_bucket_key(obj_path.storage, metadata_bucket, obj_path.key)
+        attributes_path = StoragePath.from_storage_bucket_key(obj_path.storage, metadata_bucket,
+                                                              obj_path.key + ".attrs")
+        co = cls(cloud_object_class, obj_path, metadata_path, obj_path.storage, storage_config)
         if fetch:
-            co_instance.fetch(enforce_obj=True)
-        return co_instance
+            co.fetch(enforce_obj=True)
+        return co
+
+    @classmethod
+    def from_bucket_key(cls, cloud_object_class, storage, bucket, key, storage_config=None, fetch=True) -> CloudObject:
+        co = cls(cloud_object_class, storage_uri, storage_config)
+        if fetch:
+            co.fetch(enforce_obj=True)
+        return co
 
     @classmethod
     def new_from_file(cls, cloud_object_class, file_path, cloud_path, s3_config=None) -> "CloudObject":
         co_instance = cls(cloud_object_class, cloud_path, s3_config)
 
         if co_instance.exists():
-            raise Exception("Object already exists")
+            raise Exception("Object already exists!")
 
         bucket, key = split_s3_path(cloud_path)
 
@@ -207,13 +210,13 @@ class CloudObject:
 
     def is_preprocessed(self) -> bool:
         try:
-            head_object(self.s3, bucket=self._meta_path.bucket, key=self._meta_path.key)
+            head_object(self.storage, bucket=self._meta_path.bucket, key=self._meta_path.key)
             return True
         except KeyError:
             return False
 
     def fetch(
-        self, enforce_obj: bool = True, enforce_meta: bool = False
+            self, enforce_obj: bool = True, enforce_meta: bool = False
     ) -> Tuple[Optional[Dict[str, str]], Optional[Dict[str, str]], Optional[Dict[str, str]]]:
         """
         Get object metadata from storage with HEAD object request
@@ -249,7 +252,7 @@ class CloudObject:
                 # TODO check if dataplug version metadata from attrs object matches local dataplug version
                 res, _ = head_object(self._s3, self._attrs_path.bucket, self._attrs_path.key)
                 self._attrs_headers = res
-                get_res = self.s3.get_object(Bucket=self._attrs_path.bucket, Key=self._attrs_path.key)
+                get_res = self.storage.get_object(Bucket=self._attrs_path.bucket, Key=self._attrs_path.key)
                 try:
                     attrs_dict = pickle.load(get_res["Body"])
                     # Get default attributes from the class,
@@ -271,14 +274,16 @@ class CloudObject:
         return self._obj_headers, self._meta_headers, self._attrs_headers
 
     def preprocess(
-        self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args, **kwargs
+            self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args,
+            **kwargs
     ):
         future = self.async_preprocess(preprocessor_backend, force, ignore, *args, **kwargs)
         future.check_result()
         self.fetch()
 
     def async_preprocess(
-        self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args, **kwargs
+            self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args,
+            **kwargs
     ) -> Optional[PreprocessingJobFuture]:
         """
         Manually launch the preprocessing job for this cloud object on the specified preprocessing backend
@@ -291,7 +296,7 @@ class CloudObject:
         """
         # Check if meta bucket exists
         try:
-            meta_bucket_head = self.s3.head_bucket(Bucket=self.meta_path.bucket)
+            meta_bucket_head = self.storage.head_bucket(Bucket=self.meta_path.bucket)
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] != '404':
                 raise error
@@ -300,7 +305,7 @@ class CloudObject:
         if not meta_bucket_head:
             logger.info("Creating meta bucket... (%s)".format(self.meta_path.bucket))
             try:
-                create_bucket_response = self.s3.create_bucket(Bucket=self.meta_path.bucket)
+                create_bucket_response = self.storage.create_bucket(Bucket=self.meta_path.bucket)
             except botocore.exceptions.ClientError as error:
                 logger.error("Metadata bucket %s not found -- Also failed to create it", self.meta_path.bucket)
                 raise error

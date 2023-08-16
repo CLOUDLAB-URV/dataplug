@@ -10,14 +10,13 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from ...cloudobject import CloudDataType
-from ...dataslice import CloudObjectSlice
-
+from dataplug.core.cloudobject import CloudDataFormatTemplate
+from dataplug.core.dataslice import CloudObjectSlice
 from ...preprocessing.preprocessor import MapReducePreprocessor, PreprocessingMetadata
 
 if TYPE_CHECKING:
     from typing import List
-    from ...cloudobject import CloudObject
+    from dataplug.core.cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +29,7 @@ class FASTAPreprocessor(MapReducePreprocessor):
     def _get_seq_as_nparray(cloud_object: CloudObject, mapper_id: int, map_chunk_size: int, num_mappers: int):
         range_0 = mapper_id * map_chunk_size
         range_1 = cloud_object.size if mapper_id == num_mappers - 1 else (mapper_id + 1) * map_chunk_size
-        get_res = cloud_object.s3.get_object(
+        get_res = cloud_object.storage.get_object(
             Bucket=cloud_object.path.bucket, Key=cloud_object.path.key, Range=f"bytes={range_0}-{range_1 - 1}"
         )
         assert get_res["ResponseMetadata"]["HTTPStatusCode"] in (200, 206)
@@ -91,7 +90,7 @@ class FASTAPreprocessor(MapReducePreprocessor):
         return PreprocessingMetadata(metadata=idx.tobytes(), attributes={"num_sequences": num_sequences})
 
 
-@CloudDataType(preprocessor=FASTAPreprocessor)
+@CloudDataFormatTemplate(preprocessor=FASTAPreprocessor)
 class FASTA:
     def __init__(self, cloud_object):
         self.cloud_object = cloud_object
@@ -106,7 +105,7 @@ class FASTASlice(CloudObjectSlice):
     def get(self):
         buff = io.BytesIO()
 
-        get_response = self.cloud_object.s3.get_object(
+        get_response = self.cloud_object.storage.get_object(
             Bucket=self.cloud_object.path.bucket,
             Key=self.cloud_object.path.key,
             Range=f"bytes={self.range_0}-{self.range_1 - 1}",
@@ -115,7 +114,7 @@ class FASTASlice(CloudObjectSlice):
 
         if self.header is not None:
             header_r0, header_r1 = self.header
-            header_response = self.cloud_object.s3.get_object(
+            header_response = self.cloud_object.storage.get_object(
                 Bucket=self.cloud_object.path.bucket,
                 Key=self.cloud_object.path.key,
                 Range=f"bytes={header_r0}-{header_r1 - 1}",
@@ -133,7 +132,7 @@ class FASTASlice(CloudObjectSlice):
 
 
 def partition_chunks_strategy(cloud_object: CloudObject, num_chunks: int):
-    res = cloud_object.s3.get_object(Bucket=cloud_object.meta_path.bucket, Key=cloud_object.meta_path.key)
+    res = cloud_object.storage.get_object(Bucket=cloud_object.meta_path.bucket, Key=cloud_object.meta_path.key)
     idx = np.frombuffer(res['Body'].read(), dtype=np.uint32).reshape((cloud_object.attributes.num_sequences, 2))
     chunk_sz = math.ceil(cloud_object.size / num_chunks)
     ranges = [(chunk_sz * i, (chunk_sz * i) + chunk_sz) for i in range(num_chunks)]

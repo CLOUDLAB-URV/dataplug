@@ -10,8 +10,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 import tqdm
 
-from dataplug.cloudobject import CloudDataType, CloudObject
-from dataplug.dataslice import CloudObjectSlice
+from dataplug.core.cloudobject import CloudDataFormatTemplate, CloudObject
+from dataplug.core.dataslice import CloudObjectSlice
 from dataplug.preprocessing import BatchPreprocessor, PreprocessingMetadata
 from dataplug.util import force_delete_path
 
@@ -60,7 +60,7 @@ class LiDARPreprocessor(BatchPreprocessor):
         try:
             force_delete_path(tmp_index_file_path)
 
-            obj_res = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
+            obj_res = cloud_object.storage.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
             assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200
             data_stream = obj_res["Body"]
 
@@ -113,7 +113,7 @@ class LiDARPreprocessor(BatchPreprocessor):
             force_delete_path(tmp_index_file_path)
 
 
-@CloudDataType(preprocessor=LiDARPreprocessor)
+@CloudDataFormatTemplate(preprocessor=LiDARPreprocessor)
 class LiDARPointCloud:
     def __init__(self, cloud_object):
         self.cloud_object = cloud_object
@@ -133,8 +133,8 @@ class LiDARSlice(CloudObjectSlice):
     def _get_lasdata(self):
         # Download original file header
         byte_range = f"bytes=0-{self.cloud_object.attributes.offset_to_point_data}"
-        res = self.cloud_object.s3.get_object(Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
-                                              Range=byte_range)
+        res = self.cloud_object.storage.get_object(Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
+                                                   Range=byte_range)
         assert res.get("ResponseMetadata", {}).get("HTTPStatusCode") in (200, 206)
         header_buff = io.BytesIO(res["Body"].read())
         header_buff.seek(0)
@@ -160,8 +160,9 @@ class LiDARSlice(CloudObjectSlice):
             # print(range_1 - range_0)
             byte_range = f"bytes={range_0}-{range_1 - 1}"
             # print(byte_range)
-            res = self.cloud_object.s3.get_object(Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
-                                                  Range=byte_range)
+            res = self.cloud_object.storage.get_object(Bucket=self.cloud_object.path.bucket,
+                                                       Key=self.cloud_object.path.key,
+                                                       Range=byte_range)
             assert res.get("ResponseMetadata", {}).get("HTTPStatusCode") in (200, 206)
             body = res["Body"].read()
 
@@ -234,7 +235,8 @@ def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[Li
     # LASIndex requires filename with .lax suffix
     tmp_index_file_path = tempfile.mktemp() + ".lax"
     try:
-        cloud_object.s3.download_file(cloud_object.meta_path.bucket, cloud_object.meta_path.key, tmp_index_file_path)
+        cloud_object.storage.download_file(cloud_object.meta_path.bucket, cloud_object.meta_path.key,
+                                           tmp_index_file_path)
 
         cmd = [_get_laxquery_path(), tmp_index_file_path]
         cmd.extend(bounds_str_fmt)

@@ -5,7 +5,7 @@ from collections import defaultdict
 import lithops
 
 from dataplug import CloudObject
-from dataplug.types.basic import UTF8Text, whole_words_strategy
+from dataplug.formats.generic import UTF8Text, whole_words_strategy
 from dataplug.util import setup_logging
 
 

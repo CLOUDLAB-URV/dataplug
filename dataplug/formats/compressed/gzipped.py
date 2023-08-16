@@ -1,25 +1,24 @@
 from __future__ import annotations
 
+import io
 import logging
 import os
 import re
-import io
 import subprocess
 import tempfile
 import threading
 import time
-import tqdm
 from math import ceil
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+import tqdm
 
-from ...cloudobject import CloudDataType, CloudObject, CloudObjectSlice
+from dataplug.core.cloudobject import CloudDataFormatTemplate, CloudObject, CloudObjectSlice
 from ...preprocessing.preprocessor import BatchPreprocessor, PreprocessingMetadata
 from ...util import force_delete_path
 
 logger = logging.getLogger(__name__)
-
 
 # GZTool version 1.4.3
 # https://github.com/circulosmeos/gztool
@@ -52,7 +51,7 @@ class GZipTextPreprocessor(BatchPreprocessor):
         gztool = _get_gztool_path()
         tmp_index_file_name = tempfile.mktemp()
         try:
-            obj_res = cloud_object.s3.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
+            obj_res = cloud_object.storage.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
             assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200
             data_stream = obj_res["Body"]
 
@@ -105,7 +104,7 @@ class GZipTextPreprocessor(BatchPreprocessor):
 
             # Store index binary file
             gzip_index_key = cloud_object.meta_path.key + ".idx"
-            cloud_object.s3.upload_file(
+            cloud_object.storage.upload_file(
                 Filename=tmp_index_file_name,
                 Bucket=cloud_object.meta_path.bucket,
                 Key=gzip_index_key,
@@ -157,7 +156,7 @@ class GZipTextPreprocessor(BatchPreprocessor):
 
 
 def _get_ranges_from_line_pairs(cloud_object: CloudObject, pairs):
-    meta_obj = cloud_object.s3.get_object(Bucket=cloud_object.meta_path.bucket, Key=cloud_object.meta_path.key)
+    meta_obj = cloud_object.storage.get_object(Bucket=cloud_object.meta_path.bucket, Key=cloud_object.meta_path.key)
     meta_buff = io.BytesIO(meta_obj["Body"].read())
     meta_buff.seek(0)
     df = pd.read_parquet(meta_buff)
@@ -233,7 +232,7 @@ def partition_num_chunks(self, n_chunks):
     raise NotImplementedError()
 
 
-@CloudDataType(preprocessor=GZipTextPreprocessor)
+@CloudDataFormatTemplate(preprocessor=GZipTextPreprocessor)
 class GZipText:
     pass
 
@@ -253,14 +252,14 @@ class GZipTextSlice(CloudObjectSlice):
         try:
             t0 = time.perf_counter()
             # Get index and store it to temp file
-            self.cloud_object.s3.download_file(
+            self.cloud_object.storage.download_file(
                 Bucket=self.cloud_object.meta_path.bucket,
                 Key=self.cloud_object["index_key"],
                 Filename=tmp_index_file,
             )
 
             # Get compressed byte range
-            res = self.cloud_object.s3.get_object(
+            res = self.cloud_object.storage.get_object(
                 Bucket=self.cloud_object.path.bucket,
                 Key=self.cloud_object.path.key,
                 Range=f"bytes={self.range_0 - 1}-{self.range_1 - 1}",

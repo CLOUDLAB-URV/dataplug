@@ -14,12 +14,12 @@ try:
 except ModuleNotFoundError:
     pass
 
-from dataplug.cloudobject import CloudDataType, CloudObjectSlice
+from dataplug.core.cloudobject import CloudDataFormatTemplate, CloudObjectSlice
 from dataplug.preprocessing import BatchPreprocessor, PreprocessingMetadata
 
 if TYPE_CHECKING:
     from typing import List
-    from dataplug.cloudobject import CloudObject
+    from dataplug.core.cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ class COPCPreprocessor(BatchPreprocessor):
         return PreprocessingMetadata(attributes=copc_attrs)
 
 
-@CloudDataType(preprocessor=COPCPreprocessor)
+@CloudDataFormatTemplate(preprocessor=COPCPreprocessor)
 class CloudOptimizedPointCloud:
     """
     Cloud Data Type for the COPC file format
@@ -97,7 +97,7 @@ class COPCSlice(CloudObjectSlice):
         super().__init__()
 
     def _get_points(self):
-        file_url = self.cloud_object.s3.generate_presigned_url(
+        file_url = self.cloud_object.storage.generate_presigned_url(
             "get_object",
             Params={"Bucket": self.cloud_object.path.bucket, "Key": self.cloud_object.path.key},
             ExpiresIn=300,

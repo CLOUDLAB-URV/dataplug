@@ -3,11 +3,11 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from ..handler import batch_job_handler, map_job_handler, reduce_job_handler
 from ..backendbase import PreprocessorBackendBase, PreprocessingJobFuture
+from ..handler import batch_job_handler, map_job_handler, reduce_job_handler
 
 if TYPE_CHECKING:
-    from ...cloudobject import CloudObject
+    from dataplug.core.cloudobject import CloudObject
     from ..preprocessor import BatchPreprocessor, MapReducePreprocessor
 else:
     CloudObject = object

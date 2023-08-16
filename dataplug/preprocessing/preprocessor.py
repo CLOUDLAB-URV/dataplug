@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import BinaryIO, Dict, List, Any, Optional
-    from dataplug.cloudobject import CloudObject
+    from dataplug.core.cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +30,11 @@ class MapReducePreprocessor:
         self.map_chunk_size = map_chunk_size
 
     def map(
-        self,
-        cloud_object: CloudObject,
-        mapper_id: int,
-        map_chunk_size: int,
-        num_mappers: int,
+            self,
+            cloud_object: CloudObject,
+            mapper_id: int,
+            map_chunk_size: int,
+            num_mappers: int,
     ) -> PreprocessingMetadata:
         """
         Map function for Map-Reduce preprocessor
@@ -47,7 +47,7 @@ class MapReducePreprocessor:
         raise NotImplementedError()
 
     def reduce(
-        self, map_results: List[PreprocessingMetadata], cloud_object: CloudObject, n_mappers: int
+            self, map_results: List[PreprocessingMetadata], cloud_object: CloudObject, n_mappers: int
     ) -> PreprocessingMetadata:
         """
         Reduce function for Map-Reduce preprocessor

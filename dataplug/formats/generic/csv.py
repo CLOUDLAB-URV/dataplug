@@ -1,17 +1,38 @@
+from __future__ import annotations
+
+import io
 import logging
 from math import ceil
-from typing import BinaryIO, List, Tuple, Union, ByteString, Dict
-import pandas as pd
-import numpy as np
-import io
+from typing import List
 
-from ...cloudobject import CloudObject, CloudDataType, CloudObjectSlice
+import numpy as np
+import pandas as pd
+
+from dataplug.core import CloudDataFormatTemplate, PartitioningStrategy, CloudObject, CloudObjectSlice
 from ...preprocessing import BatchPreprocessor, PreprocessingMetadata
 
 logger = logging.getLogger(__name__)
 
 
+@CloudDataFormatTemplate
+class CSV:
+    # Define preprocessor class for CSV format
+    preprocessor: CSVPreprocessor
+    # Define data slice class for CSV format
+    data_slice: CSVSlice
+
+    # Define attribute keys and types for CSV format
+    columns: List[str]
+    dtypes: List[np.dtype]
+    separator: str
+
+
 class CSVPreprocessor(BatchPreprocessor):
+    """
+    Preprocessor class for CSV format, based on the Batch preprocessor
+    It reads the top 25 rows in order to extract column names, types and character separator
+    """
+
     def preprocess(self, cloud_object: CloudObject, separator=","):
         with cloud_object.open("r", encoding="utf-8") as csv_file:
             head = "".join(csv_file.readline() for _ in range(25))
@@ -28,16 +49,13 @@ class CSVPreprocessor(BatchPreprocessor):
         return PreprocessingMetadata(attributes=attrs)
 
 
-@CloudDataType(preprocessor=CSVPreprocessor)
-class CSV:
-    columns: List[str]
-    dtypes: List[np.dtype]
-    separator: str
-
-
 class CSVSlice(CloudObjectSlice):
+    """
+
+    """
+
     def __init__(self, threshold=None, *args, **kwargs):
-        self.threshold = threshold
+        self.padding = threshold
         self.first = False
         self.last = False
         self.header = ""
@@ -47,10 +65,13 @@ class CSVSlice(CloudObjectSlice):
         return self.get_rows_as_string()
 
     def get_rows_as_string(self):
-        """Return the slice as a string"""
+        """
+        Return the slice as a string
+        """
+
         r0 = self.range_0 - 1 if not self.first else self.range_0
-        r1 = self.range_1 + self.threshold if not self.last else self.range_1
-        res = self.cloud_object.s3.get_object(
+        r1 = self.range_1 + self.padding if not self.last else self.range_1
+        res = self.cloud_object.storage.get_object(
             Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=f"bytes={r0}-{r1}"
         )
         retval = res["Body"].read().decode("utf-8")
@@ -73,9 +94,12 @@ class CSVSlice(CloudObjectSlice):
         return retval[first_row_start_pos:last_row_end_pos]
 
     def generator_csv(self, read_size):
-        "Return the slice as a generator"
+        """
+        Return the slice as a generator
+        """
+
         r0 = self.range_0 - 1 if not self.first else self.range_0
-        r1 = self.range_1 + self.threshold if not self.last else self.range_1
+        r1 = self.range_1 + self.padding if not self.last else self.range_1
         res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key, Range=f"bytes={r0}-{r1}")
         last_row_end_pos = self.range_1 - self.range_0
 
@@ -83,7 +107,7 @@ class CSVSlice(CloudObjectSlice):
         buffer = b""
         b_new_line = b"\n"
 
-        # find the nearest first row start position, discard the first partitial row
+        # find the nearest first row start position, discard the first partial row
         if not self.first:
             chars = b""
             while chars != b_new_line:
@@ -110,12 +134,12 @@ class CSVSlice(CloudObjectSlice):
                     buffer = buffer.split(b_new_line, 1)[1]
 
         # If the buffer has contents in it, there is one partial line that
-        # has been omited, read until a \n has been found (within the threshold) and yield it
+        # has been omitted, read until a \n has been found (within the threshold) and yield it
 
         if len(buffer) > 0:
             next_el = res["Body"].read(1)
             counter = 0
-            while next_el != b_new_line and counter <= self.threshold:
+            while next_el != b_new_line and counter <= self.padding:
                 buffer = buffer + next_el
                 next_el = res["Body"].read(1)
                 counter += 1
@@ -138,9 +162,10 @@ class CSVSlice(CloudObjectSlice):
         return dataframe
 
 
+@PartitioningStrategy(CSV)
 def batches_partition_strategy(cloud_object: CSV, num_batches: int, threshold: int = 32) -> List[CSVSlice]:
     """
-    This partition strategy chunks csv files by number of chunks avoiding to cut rows in half
+    This partition strategy chunks csv files by number of chunks avoiding cutting rows in half
     """
     chunk_sz = ceil(cloud_object.size / num_batches)
 
@@ -158,6 +183,7 @@ def batches_partition_strategy(cloud_object: CSV, num_batches: int, threshold: i
     return slices
 
 
+@PartitioningStrategy(CSV)
 def partition_size_strategy(cloud_object: CSV, partition_size: int) -> List[CSVSlice]:
     num_batches = ceil(cloud_object.size / partition_size)
 

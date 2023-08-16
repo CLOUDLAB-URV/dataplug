@@ -1,12 +1,11 @@
 from dataplug import CloudObject
-from dataplug.types.basic import CSV, batches_partition_strategy
+from dataplug.formats.generic import CSV, batches_partition_strategy
 from dataplug.preprocessing import DummyPreprocessor
 
 from dataplug.util import setup_logging, setup_rich_traceback
 
 setup_logging("DEBUG")
 setup_rich_traceback()
-
 
 # class TestCSVPartition(unittest.TestCase):
 #     config = {

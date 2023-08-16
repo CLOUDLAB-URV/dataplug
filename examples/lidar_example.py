@@ -2,7 +2,7 @@ import logging
 import time
 
 from dataplug import CloudObject
-from dataplug.types.geospatial.laspc import LiDARPointCloud, square_split_strategy
+from dataplug.formats.geospatial.laspc import LiDARPointCloud, square_split_strategy
 from dataplug.util import setup_logging
 
 

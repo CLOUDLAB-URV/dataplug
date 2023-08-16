@@ -1,22 +1,15 @@
 from __future__ import annotations
 
-import io
 import logging
-import pickle
-import re
-import time
 from typing import TYPE_CHECKING
 
-import pandas as pd
-
-from ...cloudobject import CloudDataType
-
-from ...preprocessing.preprocessor import MapReducePreprocessor, PreprocessingMetadata
+from dataplug.core.cloudobject import CloudDataFormatTemplate
 from .fasta import FASTAPreprocessor
+from ...preprocessing.preprocessor import PreprocessingMetadata
 
 if TYPE_CHECKING:
     from typing import List
-    from ...cloudobject import CloudObject
+    from dataplug.core.cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
 
@@ -36,9 +29,7 @@ class LargeFASTAPreprocessor(FASTAPreprocessor):
         ...
 
 
-@CloudDataType(preprocessor=FASTAPreprocessor)
+@CloudDataFormatTemplate(preprocessor=FASTAPreprocessor)
 class LargeFASTA:
     def __init__(self, cloud_object):
         self.cloud_object = cloud_object
-
-

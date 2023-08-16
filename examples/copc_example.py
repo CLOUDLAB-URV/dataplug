@@ -1,7 +1,7 @@
 import laspy
 
 from dataplug import CloudObject
-from dataplug.types.geospatial.copc import CloudOptimizedPointCloud, square_split_strategy
+from dataplug.formats.geospatial.copc import CloudOptimizedPointCloud, square_split_strategy
 
 # setup_logging(logging.INFO)
 

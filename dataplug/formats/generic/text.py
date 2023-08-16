@@ -1,29 +1,30 @@
 import logging
 from math import ceil
-from typing import BinaryIO, List
+from typing import List
 
-from ...cloudobject import CloudDataType, CloudObjectSlice
+from dataplug.core.formattemplate import CloudDataFormatTemplate
+from dataplug.core.dataslice import DataSlice, PartitioningStrategy
 
 logger = logging.getLogger(__name__)
 
 
-@CloudDataType()
+@CloudDataFormatTemplate
 class UTF8Text:
-    pass
+    preprocessor = None  # No preprocessor needed for UTF8 text
 
 
-class UTF8TextSlice(CloudObjectSlice):
+@DataSlice
+class UTF8TextSlice:
     def __init__(self, padding, *args, **kwargs):
         self.padding = padding
         self.first = False
         self.last = False
-        super().__init__(*args, **kwargs)
 
     def get(self):
         r0 = self.range_0 - 1 if not self.first else self.range_0
         r1 = self.range_1 + self.padding if not self.last else self.range_1
 
-        res = self.cloud_object.s3.get_object(
+        res = self.cloud_object.storage.get_object(
             Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=f"bytes={r0}-{r1}"
         )
         body = res["Body"].read().decode("utf-8")
@@ -46,7 +47,7 @@ class UTF8TextSlice(CloudObjectSlice):
                     r0 = self.padding * pad_count
                     r1 = (self.padding * pad_count) + self.padding
                     r1 = self.cloud_object.size if r1 > self.cloud_object.size else r1
-                    res = self.cloud_object.s3.get_object(
+                    res = self.cloud_object.storage.get_object(
                         Bucket=self.cloud_object.path.bucket,
                         Key=self.cloud_object.path.key,
                         Range=f"bytes={r0}-{r1}",
@@ -58,9 +59,10 @@ class UTF8TextSlice(CloudObjectSlice):
         return body[s0:s1]
 
 
+@PartitioningStrategy(dataformat=UTF8Text)
 def whole_words_strategy(cloud_object: UTF8Text, num_chunks: int, padding: int = 32) -> List[UTF8TextSlice]:
     """
-    This partition strategy chunks raw text by number of chunks avoiding to cut words in half
+    This partition strategy chunks raw text by number of chunks avoiding cutting words in half
     """
     chunk_sz = ceil(cloud_object.size / num_chunks)
 

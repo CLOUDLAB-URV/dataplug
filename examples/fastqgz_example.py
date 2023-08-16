@@ -1,7 +1,7 @@
 import logging
 
 from dataplug import CloudObject
-from dataplug.types.genomics.fastq import FASTQGZip, partition_reads_batches
+from dataplug.formats.genomics.fastq import FASTQGZip, partition_reads_batches
 from dataplug.util import setup_logging
 
 

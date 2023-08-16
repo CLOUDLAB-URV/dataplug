@@ -1,7 +1,7 @@
 import logging
 
 from dataplug import CloudObject
-from dataplug.types.genomics.fasta import FASTA, partition_chunks_strategy
+from dataplug.formats.genomics.fasta import FASTA, partition_chunks_strategy
 from dataplug.preprocessing import LithopsPreprocessor, DummyPreprocessor
 from dataplug.util import setup_logging
 

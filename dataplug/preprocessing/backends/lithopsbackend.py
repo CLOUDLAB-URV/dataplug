@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import logging
 import json
-from typing import TYPE_CHECKING, Union, Optional
+import logging
+from typing import TYPE_CHECKING
 
 try:
     import lithops
@@ -13,7 +13,7 @@ from ..handler import batch_job_handler, map_job_handler, reduce_job_handler
 from ..backendbase import PreprocessorBackendBase, PreprocessingJobFuture
 
 if TYPE_CHECKING:
-    from ...cloudobject import CloudObject
+    from dataplug.core.cloudobject import CloudObject
     from ..preprocessor import BatchPreprocessor, MapReducePreprocessor
 else:
     CloudObject = object
