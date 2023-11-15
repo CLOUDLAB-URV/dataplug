@@ -1,21 +1,27 @@
 from math import ceil
 from typing import List
 
-from dataplug.core.cloudobject import CloudDataFormatTemplate
-from dataplug.formats.compressed.gzipped import (
-    GZipText,
-    _get_ranges_from_line_pairs,
-    GZipTextSlice,
-)
+from dataplug import CloudDataFormat, PartitioningStrategy, FormatPreprocessor
+
+from ..compressed.gzipped import GZipText, GZipTextPreprocessor, GZipTextSlice, _get_ranges_from_line_pairs
 
 
-@CloudDataFormatTemplate(inherit_from=GZipText)
+@CloudDataFormat
 class FASTQGZip:
+    pass
+
+
+@FormatPreprocessor(FASTQGZip)
+class FASTQGZipPreprocessor(GZipTextPreprocessor):
+    pass
+
+
+class FASTQGZipSlice(GZipTextSlice):
     def __init__(self, *args, **kwargs):
-        super().__init__()
-        # super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
+@PartitioningStrategy(FASTQGZip)
 def partition_reads_batches(cloud_object: FASTQGZip, num_batches: int) -> List[GZipTextSlice]:
     total_lines = cloud_object.get_attribute("total_lines")
 

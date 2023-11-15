@@ -19,8 +19,8 @@ def main():
         "role_arn": "arn:aws:iam::123456789012:role/S3Access",
     }
 
-    co = CloudObject.from_s3(
-        LiDARPointCloud, "s3://dataplug-geospatial/example_files/example.las", s3_config=local_minio
+    co = CloudObject.from_path(
+        LiDARPointCloud, "s3://dataplug-geospatial/example_files/example.las", storage_config=local_minio
     )
 
     # backend = LithopsPreprocessor()

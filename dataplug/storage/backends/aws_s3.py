@@ -3,15 +3,19 @@ from __future__ import annotations
 import json
 import time
 import uuid
+import logging
 
 from typing import TYPE_CHECKING
-from pathlib import _PosixFlavour
 
 import boto3
 import botocore.client
 
+from ..storage import S3ObjectStorage
+
 if TYPE_CHECKING:
     from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 S3_FULL_ACCESS_POLICY = json.dumps(
     {
@@ -30,17 +34,17 @@ S3_FULL_ACCESS_POLICY = json.dumps(
 )
 
 
-class PickleableS3ClientProxy:
+class PickleableS3Client(S3ObjectStorage):
     def __init__(
-            self,
-            aws_access_key_id: str,
-            aws_secret_access_key: str,
-            region_name: str,
-            endpoint_url: str,
-            use_token: Optional[bool] = None,
-            role_arn: Optional[str] = None,
-            token_duration_seconds: Optional[int] = None,
-            botocore_config_kwargs: Optional[dict] = None,
+        self,
+        aws_access_key_id: str,
+        aws_secret_access_key: str,
+        region_name: str,
+        endpoint_url: str,
+        use_token: Optional[bool] = None,
+        role_arn: Optional[str] = None,
+        token_duration_seconds: Optional[int] = None,
+        botocore_config_kwargs: Optional[dict] = None,
     ):
         self.region_name = region_name
         self.endpoint_url = endpoint_url
@@ -153,6 +157,9 @@ class PickleableS3ClientProxy:
             region_name=self.region_name,
             config=botocore.client.Config(**self.botocore_config_kwargs),
         )
+
+    def _open(self, *args, **kwargs):
+        return partial(smart_open.open, self.path.as_uri(), *args, **kwargs, transport_params={"client": client})
 
     def abort_multipart_upload(self, *args, **kwargs):
         response = self.__client.abort_multipart_upload(*args, **kwargs)

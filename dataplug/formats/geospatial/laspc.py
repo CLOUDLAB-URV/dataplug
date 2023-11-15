@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import io
-import logging
 import math
 import subprocess
 import tempfile
@@ -10,10 +9,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 import tqdm
 
-from dataplug.core.cloudobject import CloudDataFormatTemplate, CloudObject
-from dataplug.core.dataslice import CloudObjectSlice
-from dataplug.preprocessing import BatchPreprocessor, PreprocessingMetadata
-from dataplug.util import force_delete_path
+from ...core import *
+from ...preprocessing import BatchPreprocessor, PreprocessingMetadata
+from ...util import force_delete_path
 
 if typing.TYPE_CHECKING:
     from typing import List, Tuple
@@ -26,6 +24,11 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 CHUNK_SIZE = 65536
+
+
+@CloudDataFormat
+class LiDARPointCloud:
+    pass
 
 
 def _get_lasindex_path():
@@ -42,6 +45,7 @@ def _get_laxquery_path():
     return path
 
 
+@FormatPreprocessor(LiDARPointCloud)
 class LiDARPreprocessor(BatchPreprocessor):
     def __init__(self):
         try:
@@ -102,7 +106,7 @@ class LiDARPreprocessor(BatchPreprocessor):
                     "maxs": las_file.header.maxs,
                     "point_count": las_file.header.point_count,
                     "point_format_size": las_file.header.point_format.size,
-                    "offset_to_point_data": las_file.header.offset_to_point_data
+                    "offset_to_point_data": las_file.header.offset_to_point_data,
                 }
 
             with open(tmp_index_file_path, "rb") as index_file:
@@ -113,15 +117,16 @@ class LiDARPreprocessor(BatchPreprocessor):
             force_delete_path(tmp_index_file_path)
 
 
-@CloudDataFormatTemplate(preprocessor=LiDARPreprocessor)
-class LiDARPointCloud:
-    def __init__(self, cloud_object):
-        self.cloud_object = cloud_object
-
-
 class LiDARSlice(CloudObjectSlice):
-    def __init__(self, min_x: float, min_y: float, max_x: float, max_y: float,
-                 las_file_byte_ranges: List[Tuple[int, int]], buffer_size: int):
+    def __init__(
+        self,
+        min_x: float,
+        min_y: float,
+        max_x: float,
+        max_y: float,
+        las_file_byte_ranges: List[Tuple[int, int]],
+        buffer_size: int,
+    ):
         self.min_x = min_x
         self.min_y = min_y
         self.max_x = max_x
@@ -133,8 +138,9 @@ class LiDARSlice(CloudObjectSlice):
     def _get_lasdata(self):
         # Download original file header
         byte_range = f"bytes=0-{self.cloud_object.attributes.offset_to_point_data}"
-        res = self.cloud_object.storage.get_object(Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
-                                                   Range=byte_range)
+        res = self.cloud_object.storage.get_object(
+            Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=byte_range
+        )
         assert res.get("ResponseMetadata", {}).get("HTTPStatusCode") in (200, 206)
         header_buff = io.BytesIO(res["Body"].read())
         header_buff.seek(0)
@@ -160,9 +166,9 @@ class LiDARSlice(CloudObjectSlice):
             # print(range_1 - range_0)
             byte_range = f"bytes={range_0}-{range_1 - 1}"
             # print(byte_range)
-            res = self.cloud_object.storage.get_object(Bucket=self.cloud_object.path.bucket,
-                                                       Key=self.cloud_object.path.key,
-                                                       Range=byte_range)
+            res = self.cloud_object.storage.get_object(
+                Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=byte_range
+            )
             assert res.get("ResponseMetadata", {}).get("HTTPStatusCode") in (200, 206)
             body = res["Body"].read()
 
@@ -183,8 +189,12 @@ class LiDARSlice(CloudObjectSlice):
         las_chunk.update_header()
 
         # Filter out points not pertaining to this partition
-        mask = (las_chunk.x >= self.min_x) & (las_chunk.x <= self.max_x) \
-               & (las_chunk.y >= self.min_y) & (las_chunk.y <= self.max_y)
+        mask = (
+            (las_chunk.x >= self.min_x)
+            & (las_chunk.x <= self.max_x)
+            & (las_chunk.y >= self.min_y)
+            & (las_chunk.y <= self.max_y)
+        )
         las_chunk.points = las_chunk.points[mask]
         return las_chunk
 
@@ -195,6 +205,7 @@ class LiDARSlice(CloudObjectSlice):
         self._get_lasdata().write(file_name)
 
 
+@PartitioningStrategy(LiDARPointCloud)
 def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[LiDARSlice]:
     """
     This partition strategy chunks a LAS file in equal spatial squared chunks.
@@ -235,8 +246,9 @@ def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[Li
     # LASIndex requires filename with .lax suffix
     tmp_index_file_path = tempfile.mktemp() + ".lax"
     try:
-        cloud_object.storage.download_file(cloud_object.meta_path.bucket, cloud_object.meta_path.key,
-                                           tmp_index_file_path)
+        cloud_object.storage.download_file(
+            cloud_object.meta_path.bucket, cloud_object.meta_path.key, tmp_index_file_path
+        )
 
         cmd = [_get_laxquery_path(), tmp_index_file_path]
         cmd.extend(bounds_str_fmt)
@@ -255,7 +267,9 @@ def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[Li
         for interval in line.split(";"):
             start, end = interval.split(",")
             start, end = int(start), int(end)
-            if (end - start) < 100:  # Skip intervals that are too small, yes we're losing points but nobody has to know
+            if (
+                end - start
+            ) < 100:  # Skip intervals that are too small, yes we're losing points but nobody has to know
                 continue
             intervals.append((start, end))
         point_chunks.append(intervals)

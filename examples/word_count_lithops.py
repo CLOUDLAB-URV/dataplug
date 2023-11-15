@@ -35,7 +35,7 @@ if __name__ == "__main__":
         "role_arn": "arn:aws:iam::123456789012:role/S3Access",
     }
 
-    co = CloudObject.from_s3(UTF8Text, "s3://testdata/lorem_ipsum.txt", s3_config=local_minio)
+    co = CloudObject.from_path(UTF8Text, "s3://testdata/lorem_ipsum.txt", storage_config=local_minio)
 
     data_slices = co.partition(whole_words_strategy, num_chunks=8)
 
