@@ -23,7 +23,7 @@ class FASTQGZipSlice(GZipTextSlice):
 
 @PartitioningStrategy(FASTQGZip)
 def partition_reads_batches(cloud_object: FASTQGZip, num_batches: int) -> List[GZipTextSlice]:
-    total_lines = cloud_object.get_attribute("total_lines")
+    total_lines = int(cloud_object.get_attribute("total_lines"))
 
     # Check if number of lines is a multiple of 4 (FASTQ reads are 4 lines each)
     if (total_lines % 4) != 0:

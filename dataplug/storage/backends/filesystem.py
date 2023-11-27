@@ -24,9 +24,10 @@ class PosixFileSystemClient(S3ObjectStorage):
         for path, fh in self.__file_handles.items():
             fh.close()
 
-    def _parse_full_path(self, path: str) -> (str, str):
+    def _parse_full_path(self, path: str) -> StoragePath:
         full_path = pathlib.PosixPath(path)
-        return str(full_path.parent.absolute()), full_path.name
+        bucket, key = str(full_path.parent.absolute()), full_path.name
+        return StoragePath.from_bucket_key("file", bucket, key)
 
     def _open_as_file(self, Bucket: str, Key: str, *args, **kwargs):
         return pathlib.Path(os.path.join(Bucket, Key)).resolve().open(*args, **kwargs)

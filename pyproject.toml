@@ -35,8 +35,8 @@ lithops = [
 [tool.setuptools]
 include-package-data = false
 
-[tool.setuptools.dynamic]
-version = {attr = "dataplug.version.__version__"}
+#[tool.setuptools.dynamic]
+#version = {attr = "dataplug.version.__version__"}
 
 [tool.setuptools.packages.find]
 include = ["dataplug*"]

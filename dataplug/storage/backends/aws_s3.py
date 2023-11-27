@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 import boto3
 import botocore.client
 
-from ..storage import S3ObjectStorage
+from ..storage import S3ObjectStorage, StoragePath
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -36,15 +36,16 @@ S3_FULL_ACCESS_POLICY = json.dumps(
 
 class PickleableS3Client(S3ObjectStorage):
     def __init__(
-        self,
-        aws_access_key_id: str,
-        aws_secret_access_key: str,
-        region_name: str,
-        endpoint_url: str,
-        use_token: Optional[bool] = None,
-        role_arn: Optional[str] = None,
-        token_duration_seconds: Optional[int] = None,
-        botocore_config_kwargs: Optional[dict] = None,
+            self,
+            aws_access_key_id: str,
+            aws_secret_access_key: str,
+            region_name: str,
+            aws_session_token: str = None,
+            endpoint_url: str = None,
+            use_token: Optional[bool] = None,
+            role_arn: Optional[str] = None,
+            token_duration_seconds: Optional[int] = None,
+            botocore_config_kwargs: Optional[dict] = None,
     ):
         self.region_name = region_name
         self.endpoint_url = endpoint_url
@@ -102,12 +103,13 @@ class PickleableS3Client(S3ObjectStorage):
             self.credentials = {
                 "AccessKeyId": aws_access_key_id,
                 "SecretAccessKey": aws_secret_access_key,
-                "SessionToken": None,
+                "SessionToken": aws_session_token,
             }
             self.__client = boto3.client(
                 "s3",
                 aws_access_key_id=self.credentials["AccessKeyId"],
                 aws_secret_access_key=self.credentials["SecretAccessKey"],
+                aws_session_token=self.credentials.get("SessionToken"),
                 endpoint_url=self.endpoint_url,
                 region_name=self.region_name,
                 config=botocore.client.Config(**self.botocore_config_kwargs),
@@ -157,6 +159,10 @@ class PickleableS3Client(S3ObjectStorage):
             region_name=self.region_name,
             config=botocore.client.Config(**self.botocore_config_kwargs),
         )
+
+    def _parse_full_path(self, path: str) -> StoragePath:
+        bucket, key = path.split("/", 1)
+        return StoragePath.from_bucket_key("s3", bucket, key)
 
     def _open(self, *args, **kwargs):
         return partial(smart_open.open, self.path.as_uri(), *args, **kwargs, transport_params={"client": client})
