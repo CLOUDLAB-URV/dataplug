@@ -51,3 +51,33 @@ def partition_reads_batches(cloud_object: FASTQGZip, num_batches: int) -> List[G
     ]
 
     return chunks
+
+
+@PartitioningStrategy(FASTQGZip)
+def partition_sequences_per_chunk(cloud_object: FASTQGZip, seq_per_chunk: int, strategy: str = "expand") -> List[
+    GZipTextSlice]:
+    total_lines = int(cloud_object.get_attribute("total_lines"))
+    lines_per_chunk = seq_per_chunk * 4
+    parts = ceil(total_lines / lines_per_chunk)
+    pairs = [((lines_per_chunk * i) + 1, (lines_per_chunk * i) + lines_per_chunk) for i in range(parts)]
+
+    # Adjust last pair
+    if pairs[-1][1] > total_lines:
+        if strategy == "expand":
+            l0, _ = pairs[-1]
+            pairs[-1] = (l0, total_lines)
+        elif strategy == "merge":
+            l0, l1 = pairs.pop()
+            extra = l1 - l0
+            pair = pairs[-1]
+            pairs[-1] = pair[0], pair[1] + extra
+        else:
+            raise Exception(f"Unknown strategy {strategy}")
+
+    byte_ranges = _get_ranges_from_line_pairs(cloud_object, pairs)
+    chunks = [
+        GZipTextSlice(line_0, line_1, range_0, range_1)
+        for (line_0, line_1), (range_0, range_1) in zip(byte_ranges, pairs)
+    ]
+
+    return chunks
