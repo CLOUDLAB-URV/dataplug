@@ -308,22 +308,22 @@ class GZipTextSlice(CloudObjectSlice):
 
                 if last_line is not None:
                     last_line = last_line + chunk_lines.pop(0)
-                    yield last_line
                     lines_read += 1
-                    if lines_read > lines_to_read:
+                    if lines_read >= lines_to_read:
                         proc.stdout.close()
                         break
+                    yield last_line
                     last_line = None
                 if text[-1] != "\n":
                     last_line = chunk_lines.pop()
 
                 for line in chunk_lines:
-                    yield line
                     lines_read += 1
-                    if lines_read > lines_to_read:
+                    if lines_read >= lines_to_read:
                         # Stop decompressing lines if number of lines to read in this chunk is reached
                         proc.stdout.close()
                         break
+                    yield line
 
                 # Try to read next decompressed chunk
                 # a ValueError is raised if the pipe is closed, meaning the writer or the subprocess closed it
