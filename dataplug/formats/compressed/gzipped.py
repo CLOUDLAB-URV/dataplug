@@ -244,11 +244,11 @@ class GZipTextSlice(CloudObjectSlice):
         self.line_1 = line_1
         super().__init__(*args, **kwargs)
 
-    def get(self):
+    def _lines_iterator(self):
         tmp_index_file = tempfile.mktemp()
         gztool = _get_gztool_path()
-        lines = []
         lines_to_read = self.line_1 - self.line_0 + 1
+        lines_read = 0
 
         try:
             t0 = time.perf_counter()
@@ -301,34 +301,36 @@ class GZipTextSlice(CloudObjectSlice):
 
             output_chunk = proc.stdout.read(CHUNK_SIZE)
             last_line = None
-            with tqdm.tqdm(total=lines_to_read) as pb:
-                while output_chunk != b"":
-                    # logger.debug('Read %d bytes from pipe', len(chunk))
-                    text = output_chunk.decode("utf-8")
-                    chunk_lines = text.splitlines()
+            while output_chunk != b"":
+                # logger.debug('Read %d bytes from pipe', len(chunk))
+                text = output_chunk.decode("utf-8")
+                chunk_lines = text.splitlines()
 
-                    if last_line is not None:
-                        last_line = last_line + chunk_lines.pop(0)
-                        lines.append(last_line)
-                        last_line = None
+                if last_line is not None:
+                    last_line = last_line + chunk_lines.pop(0)
+                    yield last_line
+                    lines_read += 1
+                    if lines_read > lines_to_read:
+                        proc.stdout.close()
+                        break
+                    last_line = None
+                if text[-1] != "\n":
+                    last_line = chunk_lines.pop()
 
-                    if text[-1] != "\n":
-                        last_line = chunk_lines.pop()
-
-                    lines.extend(chunk_lines)
-                    pb.update(len(chunk_lines))
-
-                    # Stop decompressing lines if number of lines to read in this chunk is reached
-                    if len(lines) > lines_to_read:
+                for line in chunk_lines:
+                    yield line
+                    lines_read += 1
+                    if lines_read > lines_to_read:
+                        # Stop decompressing lines if number of lines to read in this chunk is reached
                         proc.stdout.close()
                         break
 
-                    # Try to read next decompressed chunk
-                    # a ValueError is raised if the pipe is closed, meaning the writer or the subprocess closed it
-                    try:
-                        output_chunk = proc.stdout.read(CHUNK_SIZE)
-                    except ValueError:
-                        output_chunk = b""
+                # Try to read next decompressed chunk
+                # a ValueError is raised if the pipe is closed, meaning the writer or the subprocess closed it
+                try:
+                    output_chunk = proc.stdout.read(CHUNK_SIZE)
+                except ValueError:
+                    output_chunk = b""
 
             try:
                 proc.wait()
@@ -339,7 +341,22 @@ class GZipTextSlice(CloudObjectSlice):
 
             t1 = time.perf_counter()
             logger.debug("Got partition in %.3f seconds", t1 - t0)
-
-            return lines[: self.line_1 - self.line_0]
         finally:
             force_delete_path(tmp_index_file)
+
+    def get(self):
+        return list(self._lines_iterator())
+
+    def iter_lines(self):
+        return self._lines_iterator()
+
+    def to_file(self, file_name):
+        with open(file_name, "w") as f:
+            for line in self._lines_iterator():
+                f.write(line + "\n")
+
+    def to_file_obj(self, file_obj, close_fd=False):
+        for line in self._lines_iterator():
+            file_obj.write(line + "\n")
+        if close_fd and hasattr(file_obj, "close"):
+            file_obj.close()

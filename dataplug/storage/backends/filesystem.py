@@ -9,11 +9,10 @@ import botocore
 from typing import TYPE_CHECKING, Union, IO, Any
 from botocore.response import StreamingBody
 
-from ..storage import S3ObjectStorage
+from ..storage import S3ObjectStorage, StoragePath
 
 if TYPE_CHECKING:
     from mypy_boto3_s3.type_defs import DeleteTypeDef
-    from ..storage import StoragePath
 
 
 class PosixFileSystemClient(S3ObjectStorage):
