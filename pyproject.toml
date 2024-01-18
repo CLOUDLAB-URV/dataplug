@@ -31,6 +31,9 @@ dependencies = [
 lithops = [
     "lithops>=2.8.0"
 ]
+imzml = [
+    "pyimzml"
+]
 
 [tool.setuptools]
 include-package-data = false
