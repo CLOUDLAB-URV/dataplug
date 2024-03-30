@@ -3,19 +3,15 @@ from __future__ import annotations
 import json
 import time
 import uuid
-import logging
 
 from typing import TYPE_CHECKING
+from pathlib import _PosixFlavour
 
 import boto3
 import botocore.client
 
-from ..storage import S3ObjectStorage, StoragePath
-
 if TYPE_CHECKING:
     from typing import Optional
-
-logger = logging.getLogger(__name__)
 
 S3_FULL_ACCESS_POLICY = json.dumps(
     {
@@ -34,7 +30,7 @@ S3_FULL_ACCESS_POLICY = json.dumps(
 )
 
 
-class PickleableS3Client(S3ObjectStorage):
+class PickleableS3ClientProxy:
     def __init__(
             self,
             aws_access_key_id: str,
@@ -159,13 +155,6 @@ class PickleableS3Client(S3ObjectStorage):
             region_name=self.region_name,
             config=botocore.client.Config(**self.botocore_config_kwargs),
         )
-
-    def _parse_full_path(self, path: str) -> StoragePath:
-        bucket, key = path.split("/", 1)
-        return StoragePath.from_bucket_key("s3", bucket, key)
-
-    def _open(self, *args, **kwargs):
-        return partial(smart_open.open, self.path.as_uri(), *args, **kwargs, transport_params={"client": client})
 
     def abort_multipart_upload(self, *args, **kwargs):
         response = self.__client.abort_multipart_upload(*args, **kwargs)

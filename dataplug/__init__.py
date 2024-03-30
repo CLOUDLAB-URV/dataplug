@@ -1,4 +1,3 @@
-from .cloudobject import CloudObject
-from .dataset import CloudDataset
-from .core import CloudDataFormat, FormatPreprocessor, PartitioningStrategy
+from dataplug.core.cloudobject import CloudObject
+from . import datatypes
 from . import preprocessing

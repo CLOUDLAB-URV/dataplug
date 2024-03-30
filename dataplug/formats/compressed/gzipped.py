@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 
-from dataplug.cloudobject import CloudDataFormat, CloudObject, CloudObjectSlice
+from dataplug.core.cloudobject import CloudDataFormatTemplate, CloudObject, CloudObjectSlice
 from ...preprocessing.preprocessor import BatchPreprocessor, PreprocessingMetadata
 from ...util import force_delete_path
 
@@ -67,8 +67,7 @@ class GZipTextPreprocessor(BatchPreprocessor):
                 stderr=subprocess.PIPE,
             )
 
-            # TODO program might get stuck if subprocess fails, blocking io should be done in a backgroun thread or
-            #  using async/await
+            # TODO program might get stuck if subprocess fails, blocking io should be done in a backgroun thread or using async/await
             with tqdm.tqdm(total=cloud_object.size) as pb:
                 try:
                     chunk = data_stream.read(CHUNK_SIZE)
@@ -229,11 +228,11 @@ def partition_chunk_lines(cloud_object: CloudObject, lines_per_chunk, strategy="
 
 
 def partition_num_chunks(self, n_chunks):
-    # TODO
+    # TODO implement this strategy
     raise NotImplementedError()
 
 
-@CloudDataFormat
+@CloudDataFormatTemplate(preprocessor=GZipTextPreprocessor)
 class GZipText:
     pass
 

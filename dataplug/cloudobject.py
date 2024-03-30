@@ -37,12 +37,12 @@ class CloudObject(metaclass=NoPublicConstructor):
     """
 
     def __init__(
-            self,
-            data_format: CloudDataFormat,
-            object_path: StoragePath,
-            meta_path: StoragePath,
-            attributes_path: StoragePath,
-            storage: S3Client,
+        self,
+        data_format: CloudDataFormat,
+        object_path: StoragePath,
+        meta_path: StoragePath,
+        attributes_path: StoragePath,
+        storage: S3Client,
     ):
         self._obj_headers: Optional[Dict[str, str]] = None  # Storage headers of the data object
         self._meta_headers: Optional[Dict[str, str]] = None  # Storage headers of the metadata object
@@ -125,12 +125,12 @@ class CloudObject(metaclass=NoPublicConstructor):
 
     @classmethod
     def from_path(
-            cls,
-            data_format: CloudDataFormat,
-            storage_uri: str,
-            storage_config: Optional[dict] = None,
-            fetch: Optional[bool] = True,
-            metadata_bucket: Optional[str] = None,
+        cls,
+        data_format: CloudDataFormat,
+        storage_uri: str,
+        storage_config: Optional[dict] = None,
+        fetch: Optional[bool] = True,
+        metadata_bucket: Optional[str] = None,
     ) -> CloudObject:
         match = re.match(r"^([a-zA-Z0-9]+)://", storage_uri)
         if match:
@@ -139,9 +139,10 @@ class CloudObject(metaclass=NoPublicConstructor):
         else:
             raise ValueError(f"{storage_uri} is not an uri")
 
-        path = storage_uri[len(prefix):]
+        path = storage_uri[len(prefix) :]
         storage_client = create_client(storage, storage_config or {})
-        obj_path = storage_client._parse_full_path(path)
+        bucket, key = storage_client._parse_full_path(path)
+        obj_path = StoragePath.from_bucket_key(storage, bucket, key)
 
         if metadata_bucket is None:
             metadata_bucket = obj_path.bucket + ".meta"
@@ -160,14 +161,14 @@ class CloudObject(metaclass=NoPublicConstructor):
 
     @classmethod
     def from_bucket_key(
-            cls,
-            data_format: CloudDataFormat,
-            storage: str,
-            bucket: str,
-            key: str,
-            metadata_bucket: Optional[str] = None,
-            storage_config: Optional[dict] = None,
-            fetch: bool = True,
+        cls,
+        data_format: CloudDataFormat,
+        storage: str,
+        bucket: str,
+        key: str,
+        metadata_bucket: Optional[str] = None,
+        storage_config: Optional[dict] = None,
+        fetch: bool = True,
     ) -> CloudObject:
         obj_path = StoragePath.from_bucket_key(storage, bucket, key)
         if metadata_bucket is None:
@@ -196,7 +197,7 @@ class CloudObject(metaclass=NoPublicConstructor):
         return self._meta_headers is not None or self._attrs_headers is not None
 
     def fetch(
-            self, enforce_obj: bool = True, enforce_meta: bool = False
+        self, enforce_obj: bool = True, enforce_meta: bool = False
     ) -> Tuple[Optional[Dict[str, str]], Optional[Dict[str, str]], Optional[Dict[str, str]]]:
         """
         Get object metadata from storage with HEAD object request
@@ -237,8 +238,7 @@ class CloudObject(metaclass=NoPublicConstructor):
         return self._obj_headers, self._meta_headers, self._attrs_headers
 
     def preprocess(
-            self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args,
-            **kwargs
+        self, preprocessor_backend: PreprocessorBackendBase, force: bool = False, ignore: bool = False, *args, **kwargs
     ):
         """
         Manually launch the preprocessing job for this cloud object on the specified preprocessing backend

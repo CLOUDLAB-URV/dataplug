@@ -5,4 +5,3 @@ pandas
 pyarrow
 smart_open
 tqdm
-dill

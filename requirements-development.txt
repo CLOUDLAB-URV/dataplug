@@ -1,3 +1,11 @@
+boto3
+botocore
+numpy
+pandas
+pyarrow
+smart_open
+tqdm
+dill
 mypy
 boto3-stubs[s3,ec2]
 black

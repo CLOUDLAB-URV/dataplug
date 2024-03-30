@@ -8,21 +8,25 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from ...core import *
+from dataplug.core import CloudDataFormatTemplate, PartitioningStrategy, CloudObject, CloudObjectSlice
 from ...preprocessing import BatchPreprocessor, PreprocessingMetadata
 
 logger = logging.getLogger(__name__)
 
 
-@CloudDataFormat
+@CloudDataFormatTemplate
 class CSV:
+    # Define preprocessor class for CSV format
+    preprocessor: CSVPreprocessor
+    # Define data slice class for CSV format
+    data_slice: CSVSlice
+
     # Define attribute keys and types for CSV format
     columns: List[str]
     dtypes: List[np.dtype]
     separator: str
 
 
-@FormatPreprocessor(CSV)
 class CSVPreprocessor(BatchPreprocessor):
     """
     Preprocessor class for CSV format, based on the Batch preprocessor
@@ -46,6 +50,10 @@ class CSVPreprocessor(BatchPreprocessor):
 
 
 class CSVSlice(CloudObjectSlice):
+    """
+
+    """
+
     def __init__(self, threshold=None, *args, **kwargs):
         self.padding = threshold
         self.first = False
@@ -60,6 +68,7 @@ class CSVSlice(CloudObjectSlice):
         """
         Return the slice as a string
         """
+
         r0 = self.range_0 - 1 if not self.first else self.range_0
         r1 = self.range_1 + self.padding if not self.last else self.range_1
         res = self.cloud_object.storage.get_object(
@@ -154,9 +163,7 @@ class CSVSlice(CloudObjectSlice):
 
 
 @PartitioningStrategy(CSV)
-def batches_partition_strategy(
-    cloud_object: CloudObject[CSV], num_batches: int, threshold: int = 32
-) -> List[CSVSlice]:
+def batches_partition_strategy(cloud_object: CSV, num_batches: int, threshold: int = 32) -> List[CSVSlice]:
     """
     This partition strategy chunks csv files by number of chunks avoiding cutting rows in half
     """
@@ -177,7 +184,7 @@ def batches_partition_strategy(
 
 
 @PartitioningStrategy(CSV)
-def partition_size_strategy(cloud_object: CloudObject, partition_size: int) -> List[CSVSlice]:
+def partition_size_strategy(cloud_object: CSV, partition_size: int) -> List[CSVSlice]:
     num_batches = ceil(cloud_object.size / partition_size)
 
     slices = []

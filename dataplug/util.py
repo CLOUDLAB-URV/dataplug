@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import re
 import os
-import pickle
 import shutil
 
 import botocore
@@ -16,28 +15,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 S3_PATH_REGEX = re.compile(r"^\w+://.+/.+$")
-
-T = TypeVar("T")
-
-
-class NoPublicConstructor(type):
-    """
-    Metaclass that ensures a private constructor
-    If a class uses this metaclass like this:
-
-        class SomeClass(metaclass=NoPublicConstructor):
-            pass
-
-    If you try to instantiate your class (`SomeClass()`),
-    a `TypeError` will be thrown.
-    Source: https://stackoverflow.com/questions/8212053/private-constructor-in-python
-    """
-
-    def __call__(cls, *args, **kwargs):
-        raise TypeError(f"{cls.__module__}.{cls.__qualname__} has no public constructor")
-
-    def _create(cls: Type[T], *args: Any, **kwargs: Any) -> T:
-        return super().__call__(*args, **kwargs)  # type: ignore
 
 
 def setup_logging(level=logging.INFO):
@@ -66,30 +43,22 @@ def force_delete_path(path):
             shutil.rmtree(path)
 
 
-def fully_qualified_name(thing):
-    if thing is not None:
-        return thing.__module__ + "." + thing.__qualname__
-    else:
-        return None
-
-
 def head_object(s3client, bucket, key):
+    metadata = {}
     try:
         head_res = s3client.head_object(Bucket=bucket, Key=key)
-        if "ResponseMetadata" in head_res:
-            del head_res["ResponseMetadata"]
-        return head_res
+        del head_res["ResponseMetadata"]
+        response = head_res
+        if "Metadata" in head_res:
+            metadata.update(head_res["Metadata"])
+            del response["Metadata"]
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "404":
-            return None
+            raise KeyError()
+        else:
+            raise e
+    return response, metadata
 
-
-def list_all_objects(s3client, bucket, prefix):
-    paginator = s3client.get_paginator("list_objects_v2")
-    response_iterator = paginator.paginate(Bucket=bucket, Prefix=prefix)
-    for response in response_iterator:
-        for content in response.get("Contents", []):
-            yield content
 
 
 def patch_object(cloud_object: CloudObject):

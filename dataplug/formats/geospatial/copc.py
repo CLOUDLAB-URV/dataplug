@@ -14,40 +14,16 @@ try:
 except ModuleNotFoundError:
     pass
 
-from dataplug.cloudobject import CloudDataFormat, CloudObjectSlice, FormatPreprocessor, PartitioningStrategy
+from dataplug.core.cloudobject import CloudDataFormatTemplate, CloudObjectSlice
 from dataplug.preprocessing import BatchPreprocessor, PreprocessingMetadata
 
 if TYPE_CHECKING:
     from typing import List
-    from dataplug.cloudobject import CloudObject
+    from dataplug.core.cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
 
 
-@CloudDataFormat
-class CloudOptimizedPointCloud:
-    """
-    Cloud Data Type for the COPC file format
-    """
-
-    points: int
-    x_scale: float
-    y_scale: float
-    z_scale: float
-    x_offset: float
-    y_offset: float
-    z_offset: float
-    x_max: float
-    y_max: float
-    z_max: float
-    x_min: float
-    y_min: float
-    z_min: float
-    root_offset: float
-    root_size: float
-
-
-@FormatPreprocessor(CloudOptimizedPointCloud)
 class COPCPreprocessor(BatchPreprocessor):
     def __init__(self):
         try:
@@ -86,6 +62,30 @@ class COPCPreprocessor(BatchPreprocessor):
         print(copc_attrs)
 
         return PreprocessingMetadata(attributes=copc_attrs)
+
+
+@CloudDataFormatTemplate(preprocessor=COPCPreprocessor)
+class CloudOptimizedPointCloud:
+    """
+    Cloud Data Type for the COPC file format
+    """
+    attribute1 = None
+    attribute2: int = -2
+    points: int
+    x_scale: float
+    y_scale: float
+    z_scale: float
+    x_offset: float
+    y_offset: float
+    z_offset: float
+    x_max: float
+    y_max: float
+    z_max: float
+    x_min: float
+    y_min: float
+    z_min: float
+    root_offset: float
+    root_size: float
 
 
 class COPCSlice(CloudObjectSlice):
@@ -149,7 +149,6 @@ class COPCSlice(CloudObjectSlice):
             output.write_points(points)
 
 
-@PartitioningStrategy(CloudOptimizedPointCloud)
 def square_split_strategy(cloud_object: CloudOptimizedPointCloud, num_chunks: int) -> List[COPCSlice]:
     """
     This partition strategy chunks a COPC file in equal spatial squared chunks.
