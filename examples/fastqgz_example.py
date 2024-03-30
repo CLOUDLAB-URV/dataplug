@@ -27,14 +27,18 @@ def main():
     backend = LocalPreprocessor()
     co.preprocess(backend, force=True)
 
-    data_slices = co.partition(partition_reads_batches, num_batches=3000)
+    data_slices = co.partition(partition_reads_batches, num_batches=1234)
 
     lines = 0
     for data_slice in data_slices:
         batch = data_slice.get()
+        # print("\n".join(batch[:4]))
+        # print("---")
+        # print("\n".join(batch[-4:]))
         lines += len(batch)
 
     print(lines)
+    print(co.attributes.total_lines)
 
     # batch = data_slices[-2].get()
     # for line in batch[:4]:

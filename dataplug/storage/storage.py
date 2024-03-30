@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import importlib
 import logging
-import re
 from typing import TYPE_CHECKING, Union, IO, Any
 
 from ..util import NoPublicConstructor
@@ -86,8 +85,8 @@ class S3ObjectStorage:
     Amazon S3 API interface for abstracting the storage backend
     """
 
-    def _parse_full_path(self, bucket: str, key: str) -> StoragePath:
-        pass
+    def _parse_full_path(self, path: str) -> StoragePath:
+        raise NotImplementedError()
 
     def _open_as_file(self, Bucket: str, Key: str, *args, **kwargs) -> IO[Any]:
         raise NotImplementedError()
@@ -169,4 +168,5 @@ def create_client(prefix, storage_config):
     module_name, class_name = STORAGE_BACKENDS[prefix].rsplit(".", 1)
     module = importlib.import_module(module_name)
     storage_backend = getattr(module, class_name)
+    print(storage_config)
     return storage_backend(**storage_config)

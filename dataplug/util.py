@@ -3,11 +3,15 @@ from __future__ import annotations
 import logging
 import re
 import os
+import pickle
 import shutil
 
 import botocore
 
-from typing import Type, Any, TypeVar
+from typing import Type, Any, TypeVar, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from dataplug import CloudObject
 
 logger = logging.getLogger(__name__)
 
@@ -86,3 +90,18 @@ def list_all_objects(s3client, bucket, prefix):
     for response in response_iterator:
         for content in response.get("Contents", []):
             yield content
+
+
+def patch_object(cloud_object: CloudObject):
+    head = cloud_object.storage.head_object(Bucket=cloud_object.meta_path.bucket, Key=cloud_object.meta_path.key)
+    print(head)
+    metadata = head.get("Metadata", {})
+    print(metadata)
+    attrs_bin = pickle.dumps(metadata)
+    cloud_object.storage.put_object(
+        Body=attrs_bin,
+        Bucket=cloud_object._attrs_path.bucket,
+        Key=cloud_object._attrs_path.key,
+        Metadata={"dataplug": "dev"},
+    )
+    cloud_object.fetch()
