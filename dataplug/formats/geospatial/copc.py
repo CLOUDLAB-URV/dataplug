@@ -14,22 +14,46 @@ try:
 except ModuleNotFoundError:
     pass
 
-from dataplug.cloudobject import CloudDataFormat, CloudObjectSlice, FormatPreprocessor, PartitioningStrategy
-from dataplug.preprocessing import BatchPreprocessor, PreprocessingMetadata
+from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
+from ...preprocessing.metadata import PreprocessingMetadata
 
 if TYPE_CHECKING:
+    from ...cloudobject import CloudObject
     from typing import List
-    from dataplug.cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
 
 
-@CloudDataFormat
+def preprocess_copc(cloud_object: CloudObject) -> PreprocessingMetadata:
+    with cloud_object.open(mode="rb") as copc_file:
+        copc_reader = laspy.copc.CopcReader(copc_file)
+        copc_attrs = {
+            "points": copc_reader.header.point_count,
+            "x_scale": copc_reader.header.x_scale,
+            "y_scale": copc_reader.header.y_scale,
+            "z_scale": copc_reader.header.z_scale,
+            "x_offset": copc_reader.header.x_offset,
+            "y_offset": copc_reader.header.y_offset,
+            "z_offset": copc_reader.header.z_offset,
+            "x_max": copc_reader.header.x_max,
+            "y_max": copc_reader.header.y_max,
+            "z_max": copc_reader.header.z_max,
+            "x_min": copc_reader.header.x_min,
+            "y_min": copc_reader.header.y_min,
+            "z_min": copc_reader.header.z_min,
+            "root_offset": copc_reader.copc_info.hierarchy_root_offset,
+            "root_size": copc_reader.copc_info.hierarchy_root_size,
+        }
+
+    print(copc_attrs)
+    return PreprocessingMetadata(attributes=copc_attrs)
+
+
+@CloudDataFormat(preprocessing_function=preprocess_copc)
 class CloudOptimizedPointCloud:
     """
     Cloud Data Type for the COPC file format
     """
-
     points: int
     x_scale: float
     y_scale: float
@@ -45,47 +69,6 @@ class CloudOptimizedPointCloud:
     z_min: float
     root_offset: float
     root_size: float
-
-
-@FormatPreprocessor(CloudOptimizedPointCloud)
-class COPCPreprocessor(BatchPreprocessor):
-    def __init__(self):
-        try:
-            import pdal
-            import laspy.copc
-        except ModuleNotFoundError as e:
-            logger.error("Missing Geospatial packages!")
-            raise e
-        super().__init__()
-
-    def preprocess(self, cloud_object: CloudObject) -> PreprocessingMetadata:
-        """
-        This preprocessing job opens a COPC file and extracts some attributes related to this tile
-        :param cloud_object:
-        :return:
-        """
-        with cloud_object.open(mode="rb") as copc_file:
-            copc_reader = laspy.copc.CopcReader(copc_file)
-            copc_attrs = {
-                "points": copc_reader.header.point_count,
-                "x_scale": copc_reader.header.x_scale,
-                "y_scale": copc_reader.header.y_scale,
-                "z_scale": copc_reader.header.z_scale,
-                "x_offset": copc_reader.header.x_offset,
-                "y_offset": copc_reader.header.y_offset,
-                "z_offset": copc_reader.header.z_offset,
-                "x_max": copc_reader.header.x_max,
-                "y_max": copc_reader.header.y_max,
-                "z_max": copc_reader.header.z_max,
-                "x_min": copc_reader.header.x_min,
-                "y_min": copc_reader.header.y_min,
-                "z_min": copc_reader.header.z_min,
-                "root_offset": copc_reader.copc_info.hierarchy_root_offset,
-                "root_size": copc_reader.copc_info.hierarchy_root_size,
-            }
-        print(copc_attrs)
-
-        return PreprocessingMetadata(attributes=copc_attrs)
 
 
 class COPCSlice(CloudObjectSlice):
@@ -150,7 +133,7 @@ class COPCSlice(CloudObjectSlice):
 
 
 @PartitioningStrategy(CloudOptimizedPointCloud)
-def square_split_strategy(cloud_object: CloudOptimizedPointCloud, num_chunks: int) -> List[COPCSlice]:
+def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[COPCSlice]:
     """
     This partition strategy chunks a COPC file in equal spatial squared chunks.
     'num_chunks' must be a perfect square, otherwise the number of chunks will be rounded to the closest perfect

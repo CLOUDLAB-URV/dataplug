@@ -1,3 +1,14 @@
+# --- requirements ---
+boto3
+botocore
+numpy
+pandas
+pyarrow
+smart_open
+tqdm
+joblib
+
+# ---- dev ----
 mypy
 boto3-stubs[s3,ec2]
 black

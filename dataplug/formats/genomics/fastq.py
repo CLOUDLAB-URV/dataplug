@@ -1,28 +1,23 @@
+from __future__ import annotations
+
 from math import ceil
-from typing import List
+from typing import TYPE_CHECKING
 
-from dataplug import CloudDataFormat, PartitioningStrategy, FormatPreprocessor
+from ...entities import PartitioningStrategy
+from ...formats.compressed.gzipped import (
+    _get_ranges_from_line_pairs,
+    GZipTextSlice, GZipText,
+)
 
-from ..compressed.gzipped import GZipText, GZipTextPreprocessor, GZipTextSlice, _get_ranges_from_line_pairs
+if TYPE_CHECKING:
+    from typing import List
+    from ...cloudobject import CloudObject
 
-
-@CloudDataFormat
-class FASTQGZip:
-    pass
-
-
-@FormatPreprocessor(FASTQGZip)
-class FASTQGZipPreprocessor(GZipTextPreprocessor):
-    pass
-
-
-class FASTQGZipSlice(GZipTextSlice):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+FASTQGZip = GZipText
 
 
 @PartitioningStrategy(FASTQGZip)
-def partition_reads_batches(cloud_object: FASTQGZip, num_batches: int) -> List[GZipTextSlice]:
+def partition_reads_batches(cloud_object: CloudObject, num_batches: int) -> List[GZipTextSlice]:
     total_lines = int(cloud_object.get_attribute("total_lines"))
 
     # Check if number of lines is a multiple of 4 (FASTQ reads are 4 lines each)
@@ -54,8 +49,8 @@ def partition_reads_batches(cloud_object: FASTQGZip, num_batches: int) -> List[G
 
 
 @PartitioningStrategy(FASTQGZip)
-def partition_sequences_per_chunk(cloud_object: FASTQGZip, seq_per_chunk: int, strategy: str = "expand") -> List[
-    GZipTextSlice]:
+def partition_sequences_per_chunk(cloud_object: FASTQGZip,
+                                  seq_per_chunk: int, strategy: str = "expand") -> List[GZipTextSlice]:
     total_lines = int(cloud_object.get_attribute("total_lines"))
     lines_per_chunk = seq_per_chunk * 4
     parts = ceil(total_lines / lines_per_chunk)

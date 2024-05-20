@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cloud-dataplug"
-dynamic = ["version"]
+version = "1.0.0"
 authors = [
-    { name = "Aitor Arjona", email = "aitor.arjona@urv.cat" },
+    { name = "Aitor Arjona", email = "aitor.a98@gmail.com" },
 ]
-description = "Pluggable data types for cloud-native scientific workloads"
+description = "Pluggable data partitioning for cloud-native scientific workloads"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "License :: OSI Approved :: Apache Software License",
@@ -25,15 +25,18 @@ dependencies = [
     "pyarrow",
     "smart_open",
     "tqdm",
+    "joblib",
 ]
 
 [project.optional-dependencies]
-lithops = [
-    "lithops>=2.8.0"
-]
-imzml = [
+metabolomics = [
     "pyimzml"
 ]
+geospatial = [
+    "laspy",
+    "PDAL"
+]
+
 
 [tool.setuptools]
 include-package-data = false

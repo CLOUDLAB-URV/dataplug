@@ -129,8 +129,7 @@ dmypy.json
 .pyre/
 
 # IDE
-.idea/
-.vscode/
+.idea
 
 # Data tests
 *.laz

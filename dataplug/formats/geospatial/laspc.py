@@ -1,19 +1,21 @@
 from __future__ import annotations
 
 import io
+import logging
 import math
 import subprocess
 import tempfile
-import typing
+from typing import TYPE_CHECKING
 from concurrent.futures import ThreadPoolExecutor
 
 import tqdm
 
-from ...core import *
-from ...preprocessing import BatchPreprocessor, PreprocessingMetadata
+from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
+from ...preprocessing.metadata import PreprocessingMetadata
 from ...util import force_delete_path
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
+    from ...cloudobject import CloudObject
     from typing import List, Tuple
 
 try:
@@ -24,11 +26,6 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 CHUNK_SIZE = 65536
-
-
-@CloudDataFormat
-class LiDARPointCloud:
-    pass
 
 
 def _get_lasindex_path():
@@ -45,88 +42,80 @@ def _get_laxquery_path():
     return path
 
 
-@FormatPreprocessor(LiDARPointCloud)
-class LiDARPreprocessor(BatchPreprocessor):
-    def __init__(self):
-        try:
-            import laspy
-        except ModuleNotFoundError as e:
-            logger.error("Missing Geospatial packages!")
-            raise e
-        super().__init__()
+def preprocess_laspc(cloud_object: CloudObject) -> PreprocessingMetadata:
+    lasindex = _get_lasindex_path()
 
-    def preprocess(self, cloud_object: CloudObject) -> PreprocessingMetadata:
-        lasindex = _get_lasindex_path()
+    # lasindex tool requires index terminated with .lax
+    tmp_index_file_path = tempfile.mktemp() + ".lax"
 
-        # lasindex tool requires index terminated with .lax
-        tmp_index_file_path = tempfile.mktemp() + ".lax"
+    try:
+        force_delete_path(tmp_index_file_path)
 
-        try:
-            force_delete_path(tmp_index_file_path)
+        obj_res = cloud_object.storage.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
+        assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200
+        data_stream = obj_res["Body"]
 
-            obj_res = cloud_object.storage.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
-            assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200
-            data_stream = obj_res["Body"]
+        cmd = [lasindex, "-stdin", "-o", tmp_index_file_path]
+        logger.debug(" ".join(cmd))
+        index_proc = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
 
-            cmd = [lasindex, "-stdin", "-o", tmp_index_file_path]
-            logger.debug(" ".join(cmd))
-            index_proc = subprocess.Popen(
-                cmd,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-
-            with tqdm.tqdm(total=cloud_object.size) as pb:
-                try:
+        with tqdm.tqdm(total=cloud_object.size) as pb:
+            try:
+                chunk = data_stream.read(CHUNK_SIZE)
+                while chunk != b"":
+                    # logger.debug('Writing %d bytes to Pipe STDIN', len(chunk))
+                    index_proc.stdin.write(chunk)
+                    pb.update(len(chunk))
                     chunk = data_stream.read(CHUNK_SIZE)
-                    while chunk != b"":
-                        # logger.debug('Writing %d bytes to Pipe STDIN', len(chunk))
-                        index_proc.stdin.write(chunk)
-                        pb.update(len(chunk))
-                        chunk = data_stream.read(CHUNK_SIZE)
-                    if hasattr(data_stream, "close"):
-                        data_stream.close()
-                    # index_proc.stdin.close()
-                except BrokenPipeError as e:
-                    stdout, stderr = index_proc.communicate()
-                    logger.error(stdout.decode("utf-8"))
-                    logger.error(stderr.decode("utf-8"))
-                    raise e
+                if hasattr(data_stream, "close"):
+                    data_stream.close()
+                # index_proc.stdin.close()
+            except BrokenPipeError as e:
+                stdout, stderr = index_proc.communicate()
+                logger.error(stdout.decode("utf-8"))
+                logger.error(stderr.decode("utf-8"))
+                raise e
 
-            stdout, stderr = index_proc.communicate()
-            logger.debug(stdout.decode("utf-8"))
-            logger.debug(stderr.decode("utf-8"))
+        stdout, stderr = index_proc.communicate()
+        logger.debug(stdout.decode("utf-8"))
+        logger.debug(stderr.decode("utf-8"))
 
-            # Get attributes
-            with cloud_object.open("rb") as input_file:
-                las_file = laspy.open(source=input_file, closefd=False)
-                las_meta = {
-                    "mins": las_file.header.mins,
-                    "maxs": las_file.header.maxs,
-                    "point_count": las_file.header.point_count,
-                    "point_format_size": las_file.header.point_format.size,
-                    "offset_to_point_data": las_file.header.offset_to_point_data,
-                }
+        # Get attributes
+        with cloud_object.open("rb") as input_file:
+            las_file = laspy.open(source=input_file, closefd=False)
+            las_meta = {
+                "mins": las_file.header.mins,
+                "maxs": las_file.header.maxs,
+                "point_count": las_file.header.point_count,
+                "point_format_size": las_file.header.point_format.size,
+                "offset_to_point_data": las_file.header.offset_to_point_data
+            }
 
-            with open(tmp_index_file_path, "rb") as index_file:
-                lax_data = index_file.read()
+        with open(tmp_index_file_path, "rb") as index_file:
+            lax_data = index_file.read()
 
-            return PreprocessingMetadata(metadata=lax_data, attributes=las_meta)
-        finally:
-            force_delete_path(tmp_index_file_path)
+        return PreprocessingMetadata(metadata=lax_data, attributes=las_meta)
+    finally:
+        force_delete_path(tmp_index_file_path)
+
+
+@CloudDataFormat(preprocessing_function=preprocess_laspc)
+class LiDARPointCloud:
+    mins: float
+    maxs: float
+    point_count: int
+    point_format_size: int
+    offset_to_point_data: int
 
 
 class LiDARSlice(CloudObjectSlice):
-    def __init__(
-        self,
-        min_x: float,
-        min_y: float,
-        max_x: float,
-        max_y: float,
-        las_file_byte_ranges: List[Tuple[int, int]],
-        buffer_size: int,
-    ):
+    def __init__(self, min_x: float, min_y: float, max_x: float, max_y: float,
+                 las_file_byte_ranges: List[Tuple[int, int]], buffer_size: int):
         self.min_x = min_x
         self.min_y = min_y
         self.max_x = max_x
@@ -138,9 +127,8 @@ class LiDARSlice(CloudObjectSlice):
     def _get_lasdata(self):
         # Download original file header
         byte_range = f"bytes=0-{self.cloud_object.attributes.offset_to_point_data}"
-        res = self.cloud_object.storage.get_object(
-            Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=byte_range
-        )
+        res = self.cloud_object.storage.get_object(Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
+                                                   Range=byte_range)
         assert res.get("ResponseMetadata", {}).get("HTTPStatusCode") in (200, 206)
         header_buff = io.BytesIO(res["Body"].read())
         header_buff.seek(0)
@@ -166,9 +154,9 @@ class LiDARSlice(CloudObjectSlice):
             # print(range_1 - range_0)
             byte_range = f"bytes={range_0}-{range_1 - 1}"
             # print(byte_range)
-            res = self.cloud_object.storage.get_object(
-                Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=byte_range
-            )
+            res = self.cloud_object.storage.get_object(Bucket=self.cloud_object.path.bucket,
+                                                       Key=self.cloud_object.path.key,
+                                                       Range=byte_range)
             assert res.get("ResponseMetadata", {}).get("HTTPStatusCode") in (200, 206)
             body = res["Body"].read()
 
@@ -189,12 +177,8 @@ class LiDARSlice(CloudObjectSlice):
         las_chunk.update_header()
 
         # Filter out points not pertaining to this partition
-        mask = (
-            (las_chunk.x >= self.min_x)
-            & (las_chunk.x <= self.max_x)
-            & (las_chunk.y >= self.min_y)
-            & (las_chunk.y <= self.max_y)
-        )
+        mask = (las_chunk.x >= self.min_x) & (las_chunk.x <= self.max_x) \
+               & (las_chunk.y >= self.min_y) & (las_chunk.y <= self.max_y)
         las_chunk.points = las_chunk.points[mask]
         return las_chunk
 
@@ -205,7 +189,7 @@ class LiDARSlice(CloudObjectSlice):
         self._get_lasdata().write(file_name)
 
 
-@PartitioningStrategy(LiDARPointCloud)
+@PartitioningStrategy(dataformat=LiDARPointCloud)
 def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[LiDARSlice]:
     """
     This partition strategy chunks a LAS file in equal spatial squared chunks.
@@ -246,9 +230,8 @@ def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[Li
     # LASIndex requires filename with .lax suffix
     tmp_index_file_path = tempfile.mktemp() + ".lax"
     try:
-        cloud_object.storage.download_file(
-            cloud_object.meta_path.bucket, cloud_object.meta_path.key, tmp_index_file_path
-        )
+        cloud_object.storage.download_file(cloud_object.meta_path.bucket, cloud_object.meta_path.key,
+                                           tmp_index_file_path)
 
         cmd = [_get_laxquery_path(), tmp_index_file_path]
         cmd.extend(bounds_str_fmt)
@@ -267,9 +250,7 @@ def square_split_strategy(cloud_object: CloudObject, num_chunks: int) -> List[Li
         for interval in line.split(";"):
             start, end = interval.split(",")
             start, end = int(start), int(end)
-            if (
-                end - start
-            ) < 100:  # Skip intervals that are too small, yes we're losing points but nobody has to know
+            if (end - start) < 100:  # Skip intervals that are too small, yes we're losing points but nobody has to know
                 continue
             intervals.append((start, end))
         point_chunks.append(intervals)

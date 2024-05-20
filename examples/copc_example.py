@@ -29,10 +29,10 @@ if __name__ == "__main__":
         "use_token": True,
     }
 
-    co = CloudObject.from_path(
+    co = CloudObject.from_s3(
         CloudOptimizedPointCloud,
         "s3://geospatial/copc/CA_YosemiteNP_2019/USGS_LPC_CA_YosemiteNP_2019_D19_11SKB6892.laz",
-        storage_config=local_minio,
+        s3_config=local_minio,
     )
     # backend = DummyPreprocessor()
     # co.preprocessing(backend, force=True)

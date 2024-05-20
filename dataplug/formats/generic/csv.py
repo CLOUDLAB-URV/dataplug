@@ -3,189 +3,144 @@ from __future__ import annotations
 import io
 import logging
 from math import ceil
-from typing import List
+from typing import TYPE_CHECKING
 
-import numpy as np
 import pandas as pd
 
-from ...core import *
-from ...preprocessing import BatchPreprocessor, PreprocessingMetadata
+from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
+from ...preprocessing.metadata import PreprocessingMetadata
+
+if TYPE_CHECKING:
+    from typing import List
+    from ...cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
 
 
-@CloudDataFormat
-class CSV:
-    # Define attribute keys and types for CSV format
-    columns: List[str]
-    dtypes: List[np.dtype]
-    separator: str
+def preprocess_csv(cloud_object: CloudObject) -> PreprocessingMetadata:
+    top = []
+    with cloud_object.open("r") as f:
+        for i in range(20):
+            top.append(f.readline().strip())
+    df = pd.read_csv(io.StringIO("\n".join(top)))
+    print(df.columns)
+    print(df.dtypes)
 
-
-@FormatPreprocessor(CSV)
-class CSVPreprocessor(BatchPreprocessor):
-    """
-    Preprocessor class for CSV format, based on the Batch preprocessor
-    It reads the top 25 rows in order to extract column names, types and character separator
-    """
-
-    def preprocess(self, cloud_object: CloudObject, separator=","):
-        with cloud_object.open("r", encoding="utf-8") as csv_file:
-            head = "".join(csv_file.readline() for _ in range(25))
-            head_buff = io.StringIO(head)
-            head_buff.seek(0)
-            df = pd.read_csv(head_buff, sep=separator)
-
-        attrs = {
-            "columns": df.columns.values.tolist(),
+    return PreprocessingMetadata(
+        attributes={
+            "columns": df.columns.tolist(),
             "dtypes": df.dtypes.tolist(),
-            "separator": separator,
         }
+    )
 
-        return PreprocessingMetadata(attributes=attrs)
+
+@CloudDataFormat(preprocessing_function=preprocess_csv)
+class CSV:
+    columns: List[str]
+    dtypes: List[str]
 
 
 class CSVSlice(CloudObjectSlice):
-    def __init__(self, threshold=None, *args, **kwargs):
-        self.padding = threshold
-        self.first = False
-        self.last = False
-        self.header = ""
+    def __init__(self, chunk_id, num_chunks, padding, *args, **kwargs):
+        self.chunk_id = chunk_id
+        self.num_chunks = num_chunks
+        self.padding = padding
         super().__init__(*args, **kwargs)
 
     def get(self):
-        return self.get_rows_as_string()
-
-    def get_rows_as_string(self):
-        """
-        Return the slice as a string
-        """
-        r0 = self.range_0 - 1 if not self.first else self.range_0
-        r1 = self.range_1 + self.padding if not self.last else self.range_1
         res = self.cloud_object.storage.get_object(
-            Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key, Range=f"bytes={r0}-{r1}"
+            Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
+            Range=f"bytes={self.range_0}-{self.range_1}"
         )
-        retval = res["Body"].read().decode("utf-8")
+        body = res["Body"].read().decode("utf-8")
+        buff = io.StringIO(body)
 
-        first_row_start_pos = 0
-        last_row_end_pos = self.range_1 - self.range_0
-        # find the nearest first row start position
-        while retval[first_row_start_pos] != "\n":
-            first_row_start_pos += 1
+        head_offset = 0
+        if self.chunk_id != 0:
+            # Check if the previous character is a newline for chunks in the middle
+            first = buff.read(1)
+            if first != "\n":
+                # If not a newline, it means we are in the middle of a line
+                # We truncate the line and read the next one
+                # The truncated line will be read by the previous chunk
+                buff.readline()
+                head_offset = buff.tell()
 
-        # find the nearest last row end position within the threshold
-        if not self.last:
-            while retval[last_row_end_pos] != "\n":
-                last_row_end_pos += 1
+        buff.seek(0, io.SEEK_END)
+        tail_offset = buff.tell()
 
-        # store the header of the first slice as an attribute
-        if self.first:
-            self.header = retval[first_row_start_pos:last_row_end_pos].split("\n")[0] + "\n"
+        if self.chunk_id != self.num_chunks - 1:
+            buff.seek(tail_offset - self.padding)
+            tail_offset = buff.tell()
 
-        return retval[first_row_start_pos:last_row_end_pos]
+            buff.seek(tail_offset - 1)
+            last = buff.read(1)
+            retries = 0
+            while last != "\n":
+                last = buff.read(1)
+                if not last:
+                    # Expand the buffer
+                    retries += 1
+                    r0 = self.range_1 + (self.padding * retries)
+                    r1 = r0 + self.padding
+                    res = self.cloud_object.storage.get_object(
+                        Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
+                        Range=f"bytes={r0}-{r1}"
+                    )
+                    vcf_body = res["Body"].read().decode("utf-8")
+                    buff.write(vcf_body)
+                    last = buff.read(1)
 
-    def generator_csv(self, read_size):
-        """
-        Return the slice as a generator
-        """
+            tail_offset = buff.tell()
 
-        r0 = self.range_0 - 1 if not self.first else self.range_0
-        r1 = self.range_1 + self.padding if not self.last else self.range_1
-        res = self.s3.get_object(Bucket=self.obj_path.bucket, Key=self.obj_path.key, Range=f"bytes={r0}-{r1}")
-        last_row_end_pos = self.range_1 - self.range_0
+        full_body = buff.getvalue()[head_offset:tail_offset]
 
-        total_bytes_read = read_size
-        buffer = b""
-        b_new_line = b"\n"
+        if self.range_0 != 0:
+            # Add the columns header if it is not the first chunk
+            header = ",".join(self.cloud_object.attributes.columns) + "\n"
+            full_body = header + full_body
 
-        # find the nearest first row start position, discard the first partial row
-        if not self.first:
-            chars = b""
-            while chars != b_new_line:
-                chars = res["Body"].read(1)
-                total_bytes_read += 1
-        total_bytes_read = total_bytes_read - 1
+        return full_body
 
-        # yield the n-2 reads
-        while total_bytes_read <= last_row_end_pos:
-            buffer = buffer + res["Body"].read(read_size)
-            for line in buffer.splitlines(keepends=True):
-                if len(buffer.split(b_new_line, 1)) > 1:
-                    yield line
-                    buffer = buffer.split(b_new_line, 1)[1]
-            total_bytes_read += read_size
-
-        # yield the n-1 read (rows left until last_row_end_pos)
-        if total_bytes_read > last_row_end_pos:
-            last_read_size = last_row_end_pos - (total_bytes_read - read_size)
-            buffer = buffer + res["Body"].read(last_read_size)
-            for line in buffer.splitlines(keepends=True):
-                if len(buffer.split(b_new_line, 1)) > 1:
-                    yield line
-                    buffer = buffer.split(b_new_line, 1)[1]
-
-        # If the buffer has contents in it, there is one partial line that
-        # has been omitted, read until a \n has been found (within the threshold) and yield it
-
-        if len(buffer) > 0:
-            next_el = res["Body"].read(1)
-            counter = 0
-            while next_el != b_new_line and counter <= self.padding:
-                buffer = buffer + next_el
-                next_el = res["Body"].read(1)
-                counter += 1
-
-            if not self.first:
-                yield buffer + b_new_line
-            else:
-                yield buffer
-
-    def as_pandas_dataframe(self):
-        columns = self.cloud_object.attributes.columns
-        dtypes = dict(zip(columns, self.cloud_object.attributes.dtypes))
-        dataframe = pd.read_csv(
-            io.StringIO(self.get_rows_as_string()),
-            sep=",",
-            header=None,
-            names=columns,
-            dtype=dtypes,
-        )
-        return dataframe
+    def get_as_pandas(self):
+        import pandas as pd
+        return pd.read_csv(io.StringIO(self.get()))
 
 
-@PartitioningStrategy(CSV)
-def batches_partition_strategy(
-    cloud_object: CloudObject[CSV], num_batches: int, threshold: int = 32
-) -> List[CSVSlice]:
+@PartitioningStrategy(dataformat=CSV)
+def partition_chunk_size(cloud_object: CloudObject, chunk_size: int, padding=256) -> List[CSVSlice]:
     """
-    This partition strategy chunks csv files by number of chunks avoiding cutting rows in half
+    This partition strategy chunks CSV data by a fixed size
     """
-    chunk_sz = ceil(cloud_object.size / num_batches)
+    assert chunk_size <= cloud_object.size, "Chunk size must be smaller than the file size"
+    num_chunks = ceil(cloud_object.size / chunk_size)
 
     slices = []
-    for i in range(num_batches):
-        r0 = chunk_sz * i
-        r1 = (chunk_sz * i) + chunk_sz
-        r1 = cloud_object.size if r1 > cloud_object.size else r1
-        data_slice = CSVSlice(range_0=r0, range_1=r1, threshold=threshold)
-        data_slice.first = True if i == 0 else False
+    for i in range(num_chunks):
+        r0 = chunk_size * i
+        r0 = r0 - 1 if r0 > 0 else r0  # Read one extra byte from the previous chunk, we will check if it is a newline
+        r1 = (chunk_size * i) + chunk_size
+        r1 = cloud_object.size if r1 > cloud_object.size else r1 + padding
+        data_slice = CSVSlice(range_0=r0, range_1=r1, chunk_id=i, num_chunks=num_chunks, padding=padding)
         slices.append(data_slice)
-
-    slices[-1].last = True
 
     return slices
 
 
-@PartitioningStrategy(CSV)
-def partition_size_strategy(cloud_object: CloudObject, partition_size: int) -> List[CSVSlice]:
-    num_batches = ceil(cloud_object.size / partition_size)
+@PartitioningStrategy(dataformat=CSV)
+def partition_num_chunks(cloud_object: CloudObject, num_chunks: int, padding=256) -> List[CSVSlice]:
+    """
+    This partition strategy chunks CSV data in a fixed number of chunks
+    """
+    chunk_size = ceil(cloud_object.size / num_chunks)
 
     slices = []
-    for i in range(num_batches):
-        r0 = partition_size * i
-        r1 = (partition_size * i) + partition_size
-        r1 = cloud_object.size if r1 > cloud_object.size else r1
-        data_slice = CSVSlice(range_0=r0, range_1=r1)
+    for i in range(num_chunks):
+        r0 = chunk_size * i
+        r0 = r0 - 1 if r0 > 0 else r0  # Read one extra byte from the previous chunk, we will check if it is a newline
+        r1 = (chunk_size * i) + chunk_size
+        r1 = cloud_object.size if r1 > cloud_object.size else r1 + padding  # Add padding to read the last line
+        data_slice = CSVSlice(range_0=r0, range_1=r1, chunk_id=i, num_chunks=num_chunks, padding=padding)
         slices.append(data_slice)
 
     return slices
