@@ -5,95 +5,81 @@ from typing import TYPE_CHECKING
 
 from boto3.s3.transfer import TransferConfig
 
-from .preprocessor import BatchPreprocessor, MapReducePreprocessor, PreprocessingMetadata
 from ..util import force_delete_path
 from ..version import __version__
 
 if TYPE_CHECKING:
-    from dataplug.core.cloudobject import CloudObject
+    from ..cloudobject import CloudObject
     from typing import List
 
 
-def check_preprocessing_output(preprocess_meta: PreprocessingMetadata, cloud_object: CloudObject):
-    if all((preprocess_meta.object_body, preprocess_meta.object_file_path)):
-        raise Exception("Choose one for object preprocessing result: object_body or object_file_path")
+def joblib_handler(args):
+    # Joblib delayed function expect only one argument, so we need to unpack the arguments
+    preprocessing_function, parameters = args
+    co = parameters["cloud_object"]
+    if "chunk_data" in parameters and parameters["chunk_data"] is None:
+        chunk_id = parameters.get("chunk_id", 0)
+        chunk_size = parameters.get("chunk_size", co.size)
+        num_chunks = parameters.get("num_chunks", 1)
 
-    # Upload object body to meta bucket with the same key as original (prevent to overwrite)
-    if preprocess_meta.object_body is not None:
-        if hasattr(preprocess_meta.object_body, "read"):
-            cloud_object.storage.upload_fileobj(
-                Fileobj=preprocess_meta.object_body,
-                Bucket=cloud_object.meta_path.bucket,
-                Key=cloud_object.path.key,
+        range_0 = chunk_id * chunk_size
+        range_1 = co.size if chunk_size == num_chunks - 1 \
+            else (chunk_id + 1) * chunk_size
+        get_res = co.storage.get_object(
+            Bucket=co.path.bucket, Key=co.path.key, Range=f"bytes={range_0}-{range_1 - 1}"
+        )
+        parameters["chunk_data"] = get_res["Body"]
+
+    metadata = preprocessing_function(**parameters)
+    if all((metadata.metadata, metadata.metadata_file_path)):
+        raise Exception("Choose one for object preprocessing result: metadata or metadata_file_path")
+
+    # Upload metadata body to meta bucket with the same key as the original object
+    if metadata.metadata is not None:
+        if hasattr(metadata.metadata, "read"):
+            co.storage.upload_fileobj(
+                Fileobj=metadata.metadata,
+                Bucket=co.meta_path.bucket,
+                Key=co.path.key,
                 ExtraArgs={"Metadata": {"dataplug": __version__}},
                 Config=TransferConfig(use_threads=True, max_concurrency=256),
             )
+            if hasattr(metadata.metadata, "close"):
+                metadata.metadata.close()
         else:
-            cloud_object.storage.put_object(
-                Body=preprocess_meta.object_body,
-                Bucket=cloud_object.meta_path.bucket,
-                Key=cloud_object.path.key,
+            co.storage.put_object(
+                Body=metadata.metadata,
+                Bucket=co.meta_path.bucket,
+                Key=co.path.key,
                 Metadata={"dataplug": __version__},
             )
-    if preprocess_meta.object_file_path is not None:
-        cloud_object.storage.upload_file(
-            Filename=preprocess_meta.object_file_path,
-            Bucket=cloud_object.meta_path.bucket,
-            Key=cloud_object.path.key,
+
+    if metadata.metadata_file_path is not None:
+        co.storage.upload_file(
+            Filename=metadata.metadata_file_path,
+            Bucket=co.meta_path.bucket,
+            Key=co.path.key,
             ExtraArgs={"Metadata": {"dataplug": __version__}},
             Config=TransferConfig(use_threads=True, max_concurrency=256),
         )
-        force_delete_path(preprocess_meta.object_file_path)
+        force_delete_path(metadata.metadata_file_path)
 
-    # Upload attributes to meta bucket
-    if preprocess_meta.attributes is not None:
-        attrs_bin = pickle.dumps(preprocess_meta.attributes)
-        cloud_object.storage.put_object(
-            Body=attrs_bin,
-            Bucket=cloud_object._attrs_path.bucket,
-            Key=cloud_object._attrs_path.key,
+    if metadata.metadata is None and metadata.metadata_file_path is None:
+        # Upload empty metadata object to meta bucket, to signal that the preprocessing was successful
+        co.storage.put_object(
+            Body=b"",
+            Bucket=co.meta_path.bucket,
+            Key=co.path.key,
             Metadata={"dataplug": __version__},
         )
 
-    # Upload metadata object to meta bucket
-    if preprocess_meta.metadata is not None:
-        if hasattr(preprocess_meta.metadata, "read"):
-            cloud_object.storage.upload_fileobj(
-                Fileobj=preprocess_meta.metadata,
-                Bucket=cloud_object.meta_path.bucket,
-                Key=cloud_object.meta_path.key,
-                ExtraArgs={"Metadata": {"dataplug": __version__}},
-                Config=TransferConfig(use_threads=True, max_concurrency=256),
-            )
-        else:
-            cloud_object.storage.put_object(
-                Body=preprocess_meta.metadata,
-                Bucket=cloud_object.meta_path.bucket,
-                Key=cloud_object.meta_path.key,
-                Metadata={"dataplug": __version__},
-            )
+    # Upload attributes to meta bucket
+    if metadata.attributes is not None:
+        attrs_bin = pickle.dumps(metadata.attributes)
+        co.storage.put_object(
+            Body=attrs_bin,
+            Bucket=co._attrs_path.bucket,
+            Key=co._attrs_path.key,
+            Metadata={"dataplug": __version__},
+        )
 
-        if hasattr(preprocess_meta.metadata, "close"):
-            preprocess_meta.metadata.close()
-
-
-def batch_job_handler(preprocessor: BatchPreprocessor, cloud_object: CloudObject):
-    # Call preprocessing code
-    preprocess_result = preprocessor.preprocess(cloud_object)
-    check_preprocessing_output(preprocess_result, cloud_object)
-
-
-def map_job_handler(
-        preprocessor: MapReducePreprocessor, cloud_object: CloudObject, mapper_id: int
-) -> PreprocessingMetadata:
-    # Call map process code
-    result = preprocessor.map(cloud_object, mapper_id, preprocessor.map_chunk_size, preprocessor.num_mappers)
-    return result
-
-
-def reduce_job_handler(
-        preprocessor: MapReducePreprocessor, cloud_object: CloudObject, map_results: List[PreprocessingMetadata]
-) -> PreprocessingMetadata:
-    # Call reduce process code
-    preprocess_result = preprocessor.reduce(map_results, cloud_object, n_mappers=len(map_results))
-    check_preprocessing_output(preprocess_result, cloud_object)

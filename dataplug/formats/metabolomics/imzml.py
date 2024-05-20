@@ -5,14 +5,17 @@ import logging
 import shutil
 from typing import TYPE_CHECKING
 
-from pyimzml.ImzMLParser import ImzMLParser
+try:
+    from pyimzml.ImzMLParser import ImzMLParser
+except ModuleNotFoundError:
+    pass
 
-from ...core import *
-from ...preprocessing.preprocessor import BatchPreprocessor, PreprocessingMetadata
+from ...cloudobject import CloudObject
+from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
+from ...preprocessing.preprocessor import PreprocessingMetadata
 
 if TYPE_CHECKING:
     from typing import List, Tuple
-    from dataplug.cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
 
@@ -31,57 +34,51 @@ class ImzML:
     int_lengths: List[int]
 
 
-@FormatPreprocessor(ImzML)
-class ImzMLPreprocessor(BatchPreprocessor):
-    """
-    ImzML preprocessor parses the .imzML file and extracts the metadata needed for chunking.
-    """
+def preprocess_imzml(self, cloud_object: CloudObject) -> PreprocessingMetadata:
+    obj_res = cloud_object.storage.get_object(
+        Bucket=cloud_object.path.bucket, Key=cloud_object.path.key.replace(".ibd", ".imzML")
+    )
+    assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200
+    data_stream = obj_res["Body"]
 
-    def preprocess(self, cloud_object: CloudObject) -> PreprocessingMetadata:
-        obj_res = cloud_object.storage.get_object(
-            Bucket=cloud_object.path.bucket, Key=cloud_object.path.key.replace(".ibd", ".imzML")
-        )
-        assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200
-        data_stream = obj_res["Body"]
+    parser = ImzMLParser(data_stream, ibd_file=None)
+    if "IMS:1000030" in parser.metadata.file_description:
+        is_continuous = True
+    elif "IMS:1000031" in parser.metadata.file_description:
+        is_continuous = False
+    else:
+        raise Exception("ImzML has neither continuous nor processed accession")
 
-        parser = ImzMLParser(data_stream, ibd_file=None)
-        if "IMS:1000030" in parser.metadata.file_description:
-            is_continuous = True
-        elif "IMS:1000031" in parser.metadata.file_description:
-            is_continuous = False
-        else:
-            raise Exception("ImzML has neither continuous nor processed accession")
-
-        # Perform some sanity checks on the ImzML
-        last_int_offset = 0
-        for mz_off, int_off in zip(parser.mzOffsets, parser.intensityOffsets):
-            # mz should always come before int
-            if mz_off > int_off:
+    # Perform some sanity checks on the ImzML
+    last_int_offset = 0
+    for mz_off, int_off in zip(parser.mzOffsets, parser.intensityOffsets):
+        # mz should always come before int
+        if mz_off > int_off:
+            raise Exception("This imzML file is not supported")
+        if is_continuous:
+            # in continuous mode, all mz offsets should point to the same byte
+            if mz_off != parser.mzOffsets[0]:
                 raise Exception("This imzML file is not supported")
-            if is_continuous:
-                # in continuous mode, all mz offsets should point to the same byte
-                if mz_off != parser.mzOffsets[0]:
-                    raise Exception("This imzML file is not supported")
-            else:
-                # mz and int are expected to be stored sequentially
-                if mz_off < last_int_offset:
-                    raise Exception("This imzML file is not supported")
-            last_int_offset = int_off
+        else:
+            # mz and int are expected to be stored sequentially
+            if mz_off < last_int_offset:
+                raise Exception("This imzML file is not supported")
+        last_int_offset = int_off
 
-        attrs = {
-            "is_continuous": is_continuous,
-            "coordinates": parser.coordinates,
-            "mz_precision": parser.mzPrecision,
-            "int_precision": parser.intensityPrecision,
-            "mz_size": parser.sizeDict[parser.mzPrecision],
-            "int_size": parser.sizeDict[parser.intensityPrecision],
-            "mz_offsets": parser.mzOffsets,
-            "int_offsets": parser.intensityOffsets,
-            "mz_lengths": parser.mzLengths,
-            "int_lengths": parser.intensityLengths,
-        }
+    attrs = {
+        "is_continuous": is_continuous,
+        "coordinates": parser.coordinates,
+        "mz_precision": parser.mzPrecision,
+        "int_precision": parser.intensityPrecision,
+        "mz_size": parser.sizeDict[parser.mzPrecision],
+        "int_size": parser.sizeDict[parser.intensityPrecision],
+        "mz_offsets": parser.mzOffsets,
+        "int_offsets": parser.intensityOffsets,
+        "mz_lengths": parser.mzLengths,
+        "int_lengths": parser.intensityLengths,
+    }
 
-        return PreprocessingMetadata(attributes=attrs)
+    return PreprocessingMetadata(attributes=attrs)
 
 
 class ImzMLSlice(CloudObjectSlice):

@@ -9,14 +9,17 @@ import tempfile
 import threading
 import time
 from math import ceil
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
-import tqdm
 
-from dataplug.core.cloudobject import CloudDataFormatTemplate, CloudObject, CloudObjectSlice
-from ...preprocessing.preprocessor import BatchPreprocessor, PreprocessingMetadata
+from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
+from ...preprocessing.metadata import PreprocessingMetadata
 from ...util import force_delete_path
+
+if TYPE_CHECKING:
+    from ...cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
 
@@ -40,119 +43,114 @@ def _get_gztool_path():
     return path
 
 
-class GZipTextPreprocessor(BatchPreprocessor):
-    def __init__(self):
-        super().__init__()
+def preprocess_gzip(cloud_object: CloudObject) -> PreprocessingMetadata:
+    """
+    Create index file from gzip archive using gztool (https://github.com/circulosmeos/gztool)
+    """
+    gztool = _get_gztool_path()
+    tmp_index_file_name = tempfile.mktemp()
+    try:
+        obj_res = cloud_object.storage.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
+        assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200
+        data_stream = obj_res["Body"]
 
-    def preprocess(self, cloud_object: CloudObject) -> PreprocessingMetadata:
-        """
-        Create index file from gzip archive using gztool (https://github.com/circulosmeos/gztool)
-        """
-        gztool = _get_gztool_path()
-        tmp_index_file_name = tempfile.mktemp()
+        force_delete_path(tmp_index_file_name)
+        t0 = time.perf_counter()
+
+        # Create index and save to tmp file
+        # TODO tmp file is needed, sending to stdout is not working at the moment (todo fix)
+        index_proc = subprocess.Popen(
+            [gztool, "-i", "-x", "-I", tmp_index_file_name],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        # TODO program might get stuck if subprocess fails, blocking io should be done in a background thread or using
+        #  async/await
         try:
-            obj_res = cloud_object.storage.get_object(Bucket=cloud_object.path.bucket, Key=cloud_object.path.key)
-            assert obj_res.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200
-            data_stream = obj_res["Body"]
-
-            force_delete_path(tmp_index_file_name)
-            t0 = time.perf_counter()
-
-            # Create index and save to tmp file
-            # TODO tmp file is needed, sending to stdout is not working at the moment (todo fix)
-            index_proc = subprocess.Popen(
-                [gztool, "-i", "-x", "-I", tmp_index_file_name],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-
-            # TODO program might get stuck if subprocess fails, blocking io should be done in a backgroun thread or using async/await
-            with tqdm.tqdm(total=cloud_object.size) as pb:
-                try:
-                    chunk = data_stream.read(CHUNK_SIZE)
-                    while chunk != b"":
-                        # logger.debug('Writing %d bytes to Pipe STDIN', len(chunk))
-                        index_proc.stdin.write(chunk)
-                        pb.update(len(chunk))
-                        chunk = data_stream.read(CHUNK_SIZE)
-                    if hasattr(data_stream, "close"):
-                        data_stream.close()
-                except BrokenPipeError as e:
-                    stdout, stderr = index_proc.communicate()
-                    logger.error(stdout.decode("utf-8"))
-                    logger.error(stderr.decode("utf-8"))
-                    raise e
-
+            chunk = data_stream.read(CHUNK_SIZE)
+            while chunk != b"":
+                # logger.debug('Writing %d bytes to Pipe STDIN', len(chunk))
+                index_proc.stdin.write(chunk)
+                chunk = data_stream.read(CHUNK_SIZE)
+            if hasattr(data_stream, "close"):
+                data_stream.close()
+        except BrokenPipeError as e:
             stdout, stderr = index_proc.communicate()
+            logger.error(stdout.decode("utf-8"))
+            logger.error(stderr.decode("utf-8"))
+            raise e
+
+        stdout, stderr = index_proc.communicate()
+        logger.debug(stdout.decode("utf-8"))
+        logger.debug(stderr.decode("utf-8"))
+        if index_proc.returncode > 0:
             logger.debug(stdout.decode("utf-8"))
             logger.debug(stderr.decode("utf-8"))
-            if index_proc.returncode > 0:
-                logger.debug(stdout.decode("utf-8"))
-                logger.debug(stderr.decode("utf-8"))
-                raise Exception("Error creating gz index")
+            raise Exception("Error creating gz index")
 
-            # Generate list of access windows from index
-            proc = subprocess.run(
-                [gztool, "-ell", "-I", tmp_index_file_name],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            output = proc.stdout
-            # logger.debug(output)
+        # Generate list of access windows from index
+        proc = subprocess.run(
+            [gztool, "-ell", "-I", tmp_index_file_name],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        output = proc.stdout
+        # logger.debug(output)
 
-            # Store index binary file
-            gzip_index_key = cloud_object.meta_path.key + ".idx"
-            cloud_object.storage.upload_file(
-                Filename=tmp_index_file_name,
-                Bucket=cloud_object.meta_path.bucket,
-                Key=gzip_index_key,
-            )
+        # Store index binary file
+        gzip_index_key = cloud_object.meta_path.key + ".idx"
+        cloud_object.storage.upload_file(
+            Filename=tmp_index_file_name,
+            Bucket=cloud_object.meta_path.bucket,
+            Key=gzip_index_key,
+        )
 
-            # Get the total number of lines
-            total_lines = int(RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop())
-            logger.debug("Indexed gzipped text file with %s total lines", total_lines)
-            t1 = time.perf_counter()
-            logger.debug("Index generated in %.3f seconds", t1 - t0)
+        # Get the total number of lines
+        total_lines = int(RE_NUMS.findall(RE_NLINES.findall(output).pop()).pop())
+        logger.debug("Indexed gzipped text file with %s total lines", total_lines)
+        t1 = time.perf_counter()
+        logger.debug("Index generated in %.3f seconds", t1 - t0)
 
-            # Generator function that parses output to avoid copying all window data as lists
-            def _lines_generator():
-                for f in RE_WINDOWS.finditer(output):
-                    nums = [int(n) for n in RE_NUMS.findall(f.group())]
-                    yield nums
+        # Generator function that parses output to avoid copying all window data as lists
+        def _lines_generator():
+            for f in RE_WINDOWS.finditer(output):
+                nums = [int(n) for n in RE_NUMS.findall(f.group())]
+                yield nums
 
-            # Generate data frame that stores gzip index windows offsets
-            df = pd.DataFrame(
-                _lines_generator(),
-                columns=[
-                    "window",
-                    "compressed_byte",
-                    "uncompressed_byte",
-                    "line_number",
-                    "window_size",
-                    "window_offset",
-                ],
-            )
-            df.set_index(["window"], inplace=True)
+        # Generate data frame that stores gzip index windows offsets
+        df = pd.DataFrame(
+            _lines_generator(),
+            columns=[
+                "window",
+                "compressed_byte",
+                "uncompressed_byte",
+                "line_number",
+                "window_size",
+                "window_offset",
+            ],
+        )
+        df.set_index(["window"], inplace=True)
 
-            # Store data frame as parquet
-            out_stream = io.BytesIO()
-            df.to_parquet(out_stream, engine="pyarrow")
-            # df.to_csv(os.path.join(tempfile.gettempdir(), f'{meta.obj_path.stem}.csv'))  # debug
+        # Store data frame as parquet
+        out_stream = io.BytesIO()
+        df.to_parquet(out_stream, engine="pyarrow")
+        # df.to_csv(os.path.join(tempfile.gettempdir(), f'{meta.obj_path.stem}.csv'))  # debug
 
-            os.remove(tmp_index_file_name)
+        os.remove(tmp_index_file_name)
 
-            out_stream.seek(0)
-            return PreprocessingMetadata(
-                metadata=out_stream,
-                attributes={
-                    "total_lines": total_lines,
-                    "index_key": gzip_index_key,
-                },
-            )
-        finally:
-            force_delete_path(tmp_index_file_name)
+        out_stream.seek(0)
+        return PreprocessingMetadata(
+            metadata=out_stream,
+            attributes={
+                "total_lines": total_lines,
+                "index_key": gzip_index_key,
+            },
+        )
+    finally:
+        force_delete_path(tmp_index_file_name)
 
 
 def _get_ranges_from_line_pairs(cloud_object: CloudObject, pairs):
@@ -191,6 +189,13 @@ def _get_ranges_from_line_pairs(cloud_object: CloudObject, pairs):
     return byte_ranges
 
 
+@CloudDataFormat(preprocessing_function=preprocess_gzip)
+class GZipText:
+    total_lines: int
+    index_key: str
+
+
+@PartitioningStrategy(dataformat=GZipText)
 def partition_chunk_lines(cloud_object: CloudObject, lines_per_chunk, strategy="expand"):
     """
     Partitioning strategy for GZipped compressed text files, it partitions the text based on number of lines
@@ -227,14 +232,10 @@ def partition_chunk_lines(cloud_object: CloudObject, lines_per_chunk, strategy="
     return chunks
 
 
+@PartitioningStrategy(dataformat=GZipText)
 def partition_num_chunks(self, n_chunks):
     # TODO implement this strategy
     raise NotImplementedError()
-
-
-@CloudDataFormatTemplate(preprocessor=GZipTextPreprocessor)
-class GZipText:
-    pass
 
 
 class GZipTextSlice(CloudObjectSlice):
@@ -277,7 +278,8 @@ class GZipTextSlice(CloudObjectSlice):
             ]
             proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
-            # TODO program might get stuck if subprocess fails, blocking io should be done in a backgroun thread or using async/await
+            # TODO program might get stuck if subprocess fails
+            # blocking io should be done in a background thread or using async/await
             def _writer_feeder():
                 logger.debug("Writer thread started")
                 input_chunk = body.read(CHUNK_SIZE)

@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 import logging
-import re
 import os
+import re
 import shutil
+from typing import TYPE_CHECKING
 
 import botocore
-
-from typing import Type, Any, TypeVar, TYPE_CHECKING
+import tqdm
 
 if TYPE_CHECKING:
-    from dataplug import CloudObject
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def setup_logging(level=logging.INFO):
     root_logger.addHandler(ch)
 
 
-def split_s3_path(path):
+def split_s3path_string(path):
     if not S3_PATH_REGEX.fullmatch(path):
         raise ValueError(f"Path must satisfy regex {S3_PATH_REGEX}")
 
@@ -60,17 +60,12 @@ def head_object(s3client, bucket, key):
     return response, metadata
 
 
+def upload_file_with_progress(s3client, bucket, key, filename):
+    file_sz = os.stat(filename).st_size
+    with tqdm.tqdm(total=file_sz) as pbar:
+        def upload_callback(size):
+            pbar.update(size)
 
-def patch_object(cloud_object: CloudObject):
-    head = cloud_object.storage.head_object(Bucket=cloud_object.meta_path.bucket, Key=cloud_object.meta_path.key)
-    print(head)
-    metadata = head.get("Metadata", {})
-    print(metadata)
-    attrs_bin = pickle.dumps(metadata)
-    cloud_object.storage.put_object(
-        Body=attrs_bin,
-        Bucket=cloud_object._attrs_path.bucket,
-        Key=cloud_object._attrs_path.key,
-        Metadata={"dataplug": "dev"},
-    )
-    cloud_object.fetch()
+        with open(filename, 'rb') as data:
+            s3client.upload_fileobj(
+                data, bucket, key, Callback=upload_callback)

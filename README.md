@@ -1,41 +1,85 @@
-# dataplug
+# Dataplug: Unstructured Scientific Data Partitioning for Cloud-Native Workloads
 
-**dataplug is a Python framework for efficiently accessing partitions of unstructured data stored in object storage for elastic workloads in the Cloud**
+**Dataplug is a client-side only, extensible, Python framework with the goal of enabling efficient data partitioning of unstructured scientific data stored in object storage (like Amazon S3) for elastic workloads in the Cloud**
 
-- Using dataplug, users can define **Cloud-native data types** for objects and files stored in Object Storage. Each type implements data-format specific preprocessing techniques to generate indexes and metadata, which are later used to partition one or more object *on-the-fly* using efficient Object Storage native APIs (HTTP PUT/GET).
+- Dataplug provides a **plug-in interface to enable data partitioning to a multitude of scientific data types, from a variety of domains, stored in S3**.  Currently, Dataplug supports the following data types:
 
-- **Dataplug avoids costly ETL preprocessing jobs**, such as generating static partitions of a dataset. Static partitions are not ideal, as it imposes an arbitrary partition size that does not fit all workloads, or it may also involve potentially duplicated data.
+  - Generic
+      - [CSV](docs/formats/generic/csv.md)
+      - [Raw Text](docs/formats/generic/rawtext.md)
+  - Genomics
+      - [FASTA](docs/formats/genomics/FASTA.md)
+      - [FASTQ](docs/formats/genomics/FASTQ.md)
+      - [VCF](docs/formats/genomics/VCF.md)
+  - Geospatial
+      - [LiDAR](docs/formats/geospatial/lidar.md)
+      - [Cloud-Optimized Point Cloud](docs/formats/geospatial/copc.md)
+  - Metabolomics
+      - [ImzML](docs/formats/metabolomics/imzml.md) 
 
-- **Dataplug implements an extensible interface**, where users can define new cloud-native data types, new preprocessing techniques, and new partitioning strategies, so that it always fits the needs of the workload at hand. In addition, users can publish and share implemented extensions publicly via plugins for other users to use them, promoting good practices such as reusable optimized code.
+- Dataplug follows a **read-only cloud-aware pre-processing** approach to enable **on-the-fly dynamic partitioning of scientific unstructured data**.
+  - It is **cloud-aware** because it specifically targets cold raw data residing in huge repositories in object storage (e.g. Amazon S3).
+    S3 allows partial reads at high bandwidth by using HTTP GET Byte-range requests.
+    Dataplug builds indexes around this premise to enable parallel chunked access to unstructured data.
+    It compensates high latency of object storage with many parallel reads at high bandwidth.
+  - It is **Read-only** because, in object storage, objects are immutable.
+    Thus, pre-processing is read-only, meaning that index and metadata are stored decoupled from data, in another object.
+    Raw cold data is kept as-is in storage. This voids to re-write the entire dataset for partitioning.
+    Since indexes are several orders of magnitude smaller, the data movements are considerably reduced.
 
-- **Dataplug is serverless and is portable** for use with your favourite distributed data analytics cluster or serverless framework (Dask, Ray, PySpark, Lithops, ...) in any Cloud (AWS, Google Cloud, ...) or on-premise, without the need to manage servers for preprocessing jobs.
+- Dataplug allows **re-partitioning a dataset at zero-cost**.
+  - Dataplug introduces the concept of **data slicing**. A *data slice* is a lazily-evaluated partition of a pre-processed dataset in its raw form, present in object storage (1).
+  - Users can perform different **partitioning strategies** (2) on the same dataset without actually moving data around (3).
+  - *Data slices* are serializable, and can be sent to remote workers using any Python-compatible distributed computing environment (4) (e.g. PySpark, Dask or Ray).
+  - *Data slices* are evaluated at the moment of accessing the data, and not before (5). This allows many remote workers to perform many HTTP GET Byte-range requests in parallel onto the raw dataset, exploiting S3's high bandwidth capabilities.
+
+![Dataplug Architecture](docs/framework-architecture.png)
+
+## Installation
+
+- Dataplug is only available through GitHub. You can use `pip` to install it directly from the repository:
+
+    ```bash
+    pip install git+https://github.com/CLOUDLAB-URV/dataplug
+    ```
+
 
 ### Partitioning text example
 
 ```python
+from dataplug import CloudObject
+from dataplug.formats.genomics.fastq import FASTQGZip, partition_reads_batches
 
-# Assign UTF8Text data type for object in s3://testdata/lorem_ipsum.txt
-co = CloudObject.from_s3(UTF8Text, 's3://testdata/lorem_ipsum.txt')
+# Assign FASTQGZip data type for object in s3://genomics/SRR6052133_1.fastq.gz
+co = CloudObject.from_s3(FASTQGZip, "s3://genomics/SRR6052133_1.fastq.gz")
 
-# Generate 8 partitions, using whole_words_strategy, which avoids cutting words in half
-# A data_slice is a reference to a partition, which is lazily evaluated
-data_slices = co.partition(whole_words_strategy, num_chunks=8)
+# Partition the FASTQGZip object into 200 chunks
+data_slices = co.partition(partition_reads_batches, num_batches=200)  # This does not move data around, it only creates data slices from the indexes
 
-def word_count(data_slice):
-    # Evaluate the data_slice, which will return the actual partition text
-    text_chunk = data_slice.get()
+def process_fastq_data(data_slice):
+    # Evaluate the data_slice, which will perform the actual HTTP GET requests to get the FASTQ partition data
+    fastq_reads = data_slice.get()
+    ...
 
-    words = defaultdict(lambda: 0)
-    for word in text_chunk.split():
-        words[word] += 1
-    return dict(words)
+# Use Dask for deploying a parallel distributed job
+import dask.bag as db
+from dask.distributed import Client
 
-# Use Lithops for deploying a parallel serverless job
-# which will scatter generated data slices, one to each worker 
-fexec = lithops.FunctionExecutor()
-fexec.map(word_count, data_slices)
-result = fexec.get_result()
+client = Client()
+# Create a Dask Bag from the data_slices list
+dask_bag = db.from_sequence(data_slices)
+
+# Apply the process_fastq_data function to each data slice. Dask will serialize the data_slices and send them to the workers
+dask_bag.map(process_fastq_data).compute()
 ```
+## Documentation
 
+- [Dataplug Documentation](docs/README.md)
+- [Dataplug API Reference](docs/api.md)
+- [Developing new data format plugins](docs/develop_plugins.md)
+
+## Acknowledgements
+
+This project has been partially funded by the EU Horizon programme under grant agreements No. 101086248, No. 101092644, No. 101092646, No. 101093110.
 
 

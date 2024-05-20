@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 import json
+import logging
 import time
 import uuid
-
+from contextlib import suppress
+from pathlib import _PosixFlavour, PurePath
 from typing import TYPE_CHECKING
-from pathlib import _PosixFlavour
 
 import boto3
 import botocore.client
 
 if TYPE_CHECKING:
     from typing import Optional
+    from mypy_boto3_s3.type_defs import DeleteObjectOutputTypeDef, DeleteObjectsOutputTypeDef
+
+logger = logging.getLogger(__name__)
 
 S3_FULL_ACCESS_POLICY = json.dumps(
     {
@@ -31,14 +35,22 @@ S3_FULL_ACCESS_POLICY = json.dumps(
 
 
 class PickleableS3ClientProxy:
+    """
+    A Pickleable S3 client proxy that can be pickled and unpickled.
+
+    Dataplug requires having an S3 client that can be pickled and sent remotely to workers, so that
+    remote workers can access S3 objects. This class is a proxy to an S3 client that can be pickled.
+    For it, we request temporary credentials to S3 using STS. To request temporary credentials, we
+    authenticate using the locally configured credentials (through the environment variables or the
+    AWS configuration file) and assume a role with full access to S3. The temporary credentials are
+    saved in the instance and used to create an S3 client, and to create a new client when the object
+    is unpickled.
+    """
+
     def __init__(
             self,
-            aws_access_key_id: str,
-            aws_secret_access_key: str,
-            region_name: str,
-            aws_session_token: str = None,
-            endpoint_url: str = None,
-            use_token: Optional[bool] = None,
+            region_name: Optional[str] = None,
+            endpoint_url: Optional[str] = None,
             role_arn: Optional[str] = None,
             token_duration_seconds: Optional[int] = None,
             botocore_config_kwargs: Optional[dict] = None,
@@ -48,68 +60,45 @@ class PickleableS3ClientProxy:
         self.botocore_config_kwargs = botocore_config_kwargs or {}
         self.role_arn = role_arn
         self.session_name = None
-        self.token_duration_seconds = token_duration_seconds or 86400
-        use_token = use_token if use_token is not None else True
+        self.token_duration_seconds = token_duration_seconds or 86400  # 24 hours
 
-        if use_token:
-            logger.debug("Using token for S3 authentication")
-            sts_admin = boto3.client(
-                "sts",
-                aws_access_key_id=aws_access_key_id,
-                aws_secret_access_key=aws_secret_access_key,
-                region_name=region_name,
-                endpoint_url=endpoint_url,
-                config=botocore.client.Config(**self.botocore_config_kwargs),
+        logger.debug("Requesting temporary credentials for S3 authentication")
+        sts_admin = boto3.client(
+            "sts",
+            region_name=region_name,
+            endpoint_url=endpoint_url,
+            config=botocore.client.Config(**self.botocore_config_kwargs),
+        )
+
+        if role_arn is not None:
+            self.session_name = "-".join(["dataplug", str(int(time.time())), uuid.uuid4().hex])
+            logger.debug(
+                "Assuming role %s with generated session name %s",
+                self.role_arn,
+                self.session_name,
             )
 
-            if role_arn is not None:
-                self.session_name = "-".join(["dataplug", str(int(time.time())), uuid.uuid4().hex])
-                logger.debug(
-                    "Assuming role %s with generated session name %s",
-                    self.role_arn,
-                    self.session_name,
-                )
-
-                response = sts_admin.assume_role(
-                    RoleArn=self.role_arn,
-                    RoleSessionName=self.session_name,
-                    Policy=S3_FULL_ACCESS_POLICY,
-                    DurationSeconds=self.token_duration_seconds,
-                )
-            else:
-                logger.debug("Getting session token")
-                response = sts_admin.get_session_token(DurationSeconds=self.token_duration_seconds)
-
-            self.credentials = response["Credentials"]
-
-            self.__client = boto3.client(
-                "s3",
-                aws_access_key_id=self.credentials["AccessKeyId"],
-                aws_secret_access_key=self.credentials["SecretAccessKey"],
-                aws_session_token=self.credentials["SessionToken"],
-                endpoint_url=self.endpoint_url,
-                region_name=self.region_name,
-                config=botocore.client.Config(**self.botocore_config_kwargs),
+            response = sts_admin.assume_role(
+                RoleArn=self.role_arn,
+                RoleSessionName=self.session_name,
+                Policy=S3_FULL_ACCESS_POLICY,
+                DurationSeconds=self.token_duration_seconds,
             )
         else:
-            logger.warning(
-                "Using user credentials is discouraged for security reasons! "
-                "Consider using token-based authentication instead"
-            )
-            self.credentials = {
-                "AccessKeyId": aws_access_key_id,
-                "SecretAccessKey": aws_secret_access_key,
-                "SessionToken": aws_session_token,
-            }
-            self.__client = boto3.client(
-                "s3",
-                aws_access_key_id=self.credentials["AccessKeyId"],
-                aws_secret_access_key=self.credentials["SecretAccessKey"],
-                aws_session_token=self.credentials.get("SessionToken"),
-                endpoint_url=self.endpoint_url,
-                region_name=self.region_name,
-                config=botocore.client.Config(**self.botocore_config_kwargs),
-            )
+            logger.debug("Getting session token")
+            response = sts_admin.get_session_token(DurationSeconds=self.token_duration_seconds)
+
+        self.credentials = response["Credentials"]
+
+        self.__client = boto3.client(
+            "s3",
+            aws_access_key_id=self.credentials["AccessKeyId"],
+            aws_secret_access_key=self.credentials["SecretAccessKey"],
+            aws_session_token=self.credentials["SessionToken"],
+            endpoint_url=self.endpoint_url,
+            region_name=self.region_name,
+            config=botocore.client.Config(**self.botocore_config_kwargs),
+        )
 
     def _new_client(self):
         session = boto3.Session(
@@ -194,6 +183,16 @@ class PickleableS3ClientProxy:
         logger.debug("%s", response.get("ResponseMetadata", {}))
         return response
 
+    def delete_object(self, *args, **kwargs) -> DeleteObjectOutputTypeDef:
+        response = self.__client.delete_object(*args, **kwargs)
+        logger.debug("%s", response.get("ResponseMetadata", {}))
+        return response
+
+    def delete_objects(self, *args, **kwargs) -> DeleteObjectsOutputTypeDef:
+        response = self.__client.delete_objects(*args, **kwargs)
+        logger.debug("%s", response.get("ResponseMetadata", {}))
+        return response
+
     def head_bucket(self, *args, **kwargs):
         response = self.__client.head_bucket(*args, **kwargs)
         logger.debug("%s", response.get("ResponseMetadata", {}))
@@ -251,3 +250,103 @@ class PickleableS3ClientProxy:
         response = self.__client.create_bucket(*args, **kwargs)
         logger.debug("%s", response.get("ResponseMetadata", {}))
         return response
+
+
+class _S3Flavour(_PosixFlavour):
+    is_supported = True
+
+    def parse_parts(self, parts):
+        drv, root, parsed = super().parse_parts(parts)
+        for part in parsed[1:]:
+            if part == "..":
+                index = parsed.index(part)
+                parsed.pop(index - 1)
+                parsed.remove(part)
+        return drv, root, parsed
+
+    def make_uri(self, path):
+        uri = super().make_uri(path)
+        return uri.replace("file:///", "s3://")
+
+
+class S3Path(PurePath):
+    """
+    PurePath subclass for AWS S3 service.
+    Source: https://github.com/liormizr/s3path
+    S3 is not a file-system but we can look at it like a POSIX system.
+    """
+
+    _flavour = _S3Flavour()
+    __slots__ = ()
+
+    @classmethod
+    def from_uri(cls, uri: str) -> "S3Path":
+        """
+        from_uri class method create a class instance from url
+
+        >> from s3path import PureS3Path
+        >> PureS3Path.from_url('s3://<bucket>/<key>')
+        << PureS3Path('/<bucket>/<key>')
+        """
+        if not uri.startswith("s3://"):
+            raise ValueError("Provided uri seems to be no S3 URI!")
+        return cls(uri[4:])
+
+    @classmethod
+    def from_bucket_key(cls, bucket: str, key: str) -> "S3Path":
+        """
+        from_bucket_key class method create a class instance from bucket, key pair's
+
+        >> from s3path import PureS3Path
+        >> PureS3Path.from_bucket_key(bucket='<bucket>', key='<key>')
+        << PureS3Path('/<bucket>/<key>')
+        """
+        bucket = cls(cls._flavour.sep, bucket)
+        if len(bucket.parts) != 2:
+            raise ValueError("bucket argument contains more then one path element: {}".format(bucket))
+        key = cls(key)
+        if key.is_absolute():
+            key = key.relative_to("/")
+        return bucket / key
+
+    @property
+    def bucket(self) -> str:
+        """
+        The AWS S3 Bucket name, or ''
+        """
+        self._absolute_path_validation()
+        with suppress(ValueError):
+            _, bucket, *_ = self.parts
+            return bucket
+        return ""
+
+    @property
+    def key(self) -> str:
+        """
+        The AWS S3 Key name, or ''
+        """
+        self._absolute_path_validation()
+        key = self._flavour.sep.join(self.parts[2:])
+        return key
+
+    @property
+    def virtual_directory(self) -> str:
+        """
+        The parent virtual directory of a key
+        Example: foo/bar/baz -> foo/baz
+        """
+        vdir, _ = self.key.rsplit("/", 1)
+        return vdir
+
+    def as_uri(self) -> str:
+        """
+        Return the path as a 's3' URI.
+        """
+        return super().as_uri()
+
+    def _absolute_path_validation(self):
+        if not self.is_absolute():
+            raise ValueError("relative path have no bucket, key specification")
+
+    def __repr__(self) -> str:
+        return "{}(bucket={},key={})".format(self.__class__.__name__, self.bucket, self.key)

@@ -10,90 +10,73 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from dataplug.core.cloudobject import CloudDataFormatTemplate
-from dataplug.core.dataslice import CloudObjectSlice
-from ...preprocessing.preprocessor import MapReducePreprocessor, PreprocessingMetadata
+from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
+from ...preprocessing.metadata import PreprocessingMetadata
 
 if TYPE_CHECKING:
     from typing import List
-    from dataplug.core.cloudobject import CloudObject
+    from ...cloudobject import CloudObject
+    from botocore.response import StreamingBody
 
 logger = logging.getLogger(__name__)
 
 
-class FASTAPreprocessor(MapReducePreprocessor):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+def preprocess_fasta(cloud_object: CloudObject, chunk_data: StreamingBody,
+                     chunk_id: int, chunk_size: int, num_chunks: int):
+    chunk_offset = chunk_id * chunk_size
 
-    @staticmethod
-    def _get_seq_as_nparray(cloud_object: CloudObject, mapper_id: int, map_chunk_size: int, num_mappers: int):
-        range_0 = mapper_id * map_chunk_size
-        range_1 = cloud_object.size if mapper_id == num_mappers - 1 else (mapper_id + 1) * map_chunk_size
-        get_res = cloud_object.storage.get_object(
-            Bucket=cloud_object.path.bucket, Key=cloud_object.path.key, Range=f"bytes={range_0}-{range_1 - 1}"
-        )
-        assert get_res["ResponseMetadata"]["HTTPStatusCode"] in (200, 206)
-        t0 = time.perf_counter()
-        data = get_res["Body"].read()
-        t1 = time.perf_counter()
+    t0 = time.perf_counter()
+    data = chunk_data.read()
+    t1 = time.perf_counter()
 
-        logger.info("Got partition data in %.2f s", t1 - t0)
+    logger.info("Got chunk data in %.2f s", t1 - t0)
 
-        # we use greedy regex so that match offsets also gets the \n character
-        t0 = time.perf_counter()
-        matches = list(re.finditer(rb">.+(\n)?", data))
+    t0 = time.perf_counter()
+    # we use greedy regex so that match offsets also gets the \n character
+    matches = list(re.finditer(rb">.+(\n)?", data))
 
-        sequences = []
-        for match in matches:
-            start = range_0 + match.start()
-            end = range_0 + match.end()
-            # seq_id = match.group().decode("utf-8").split(" ")[0].replace(">", "")
-            sequences.append((start, end))
+    sequences = []
+    for match in matches:
+        start = chunk_offset + match.start()
+        end = chunk_offset + match.end()
+        # seq_id = match.group().decode("utf-8").split(" ")[0].replace(">", "")
+        sequences.append((start, end))
 
-        if matches and b"\n" not in matches[-1].group():
-            # last match corresponds to a cut sequence identifier, as newline was not read
-            offset = range_0 + matches[-1].start()
-            # read split sequence id line
-            with cloud_object.open("rb") as fasta_file:
-                fasta_file.seek(offset)
-                seq_id_line = fasta_file.readline()
-                # get the current offset after reading line, it will be offset for the start of the sequence
-                end = fasta_file.tell()
-            # seq_id = seq_id_line.decode("utf-8").split(" ")[0].replace(">", "")
-            sequences.pop()  # remove last split sequence id added previously
-            sequences.append((offset, end))
+    if matches and b"\n" not in matches[-1].group():
+        # last match corresponds to a cut sequence identifier, as newline was not read
+        offset = chunk_offset + matches[-1].start()
+        # read split sequence id line
+        with cloud_object.open("rb") as fasta_file:
+            fasta_file.seek(offset)
+            seq_id_line = fasta_file.readline()
+            # get the current offset after reading line, it will be offset for the start of the sequence
+            end = fasta_file.tell()
+        # seq_id = seq_id_line.decode("utf-8").split(" ")[0].replace(">", "")
+        sequences.pop()  # remove last split sequence id added previously
+        sequences.append((offset, end))
 
-        t1 = time.perf_counter()
-        logger.info("Found %d sequences in %.2f s", len(sequences), t1 - t0)
+    t1 = time.perf_counter()
+    logger.info("Found %d sequences in %.2f s", len(sequences), t1 - t0)
 
-        arr = np.array(sequences, dtype=np.uint32)
-        return arr
-
-    def map(
-            self, cloud_object: CloudObject, mapper_id: int, map_chunk_size: int, num_mappers: int
-    ) -> PreprocessingMetadata:
-        arr = self._get_seq_as_nparray(cloud_object, mapper_id, map_chunk_size, num_mappers)
-
-        arr_bytes = arr.tobytes()
-        return PreprocessingMetadata(metadata=arr_bytes)
-
-    def reduce(
-            self, map_results: List[PreprocessingMetadata], cloud_object: CloudObject, n_mappers: int
-    ) -> PreprocessingMetadata:
-        map_results = [np.frombuffer(meta.metadata, dtype=np.uint32) for meta in map_results]
-        num_sequences = int(sum((arr.shape[0] / 2) for arr in map_results))
-
-        idx = np.concatenate(map_results)
-
-        logger.info("Indexed %d sequences", num_sequences)
-
-        return PreprocessingMetadata(metadata=idx.tobytes(), attributes={"num_sequences": num_sequences})
+    arr = np.array(sequences, dtype=np.uint32)
+    arr_bytes = arr.tobytes()
+    return PreprocessingMetadata(metadata=arr_bytes)
 
 
-@CloudDataFormatTemplate(preprocessor=FASTAPreprocessor)
+def merge_fasta_metadata(cloud_object: CloudObject, chunk_metadata: List[PreprocessingMetadata]):
+    map_results = [np.frombuffer(meta.metadata, dtype=np.uint32) for meta in chunk_metadata]
+    num_sequences = int(sum((arr.shape[0] / 2) for arr in map_results))
+
+    idx = np.concatenate(map_results)
+
+    logger.info("Indexed %d sequences", num_sequences)
+
+    return PreprocessingMetadata(metadata=idx.tobytes(), attributes={"num_sequences": num_sequences})
+
+
+@CloudDataFormat(preprocessing_function=preprocess_fasta, finalizer_function=merge_fasta_metadata)
 class FASTA:
-    def __init__(self, cloud_object):
-        self.cloud_object = cloud_object
+    num_sequences: int
 
 
 class FASTASlice(CloudObjectSlice):
@@ -131,6 +114,7 @@ class FASTASlice(CloudObjectSlice):
         return buff.getvalue()
 
 
+@PartitioningStrategy(dataformat=FASTA)
 def partition_chunks_strategy(cloud_object: CloudObject, num_chunks: int):
     res = cloud_object.storage.get_object(Bucket=cloud_object.meta_path.bucket, Key=cloud_object.meta_path.key)
     idx = np.frombuffer(res['Body'].read(), dtype=np.uint32).reshape((cloud_object.attributes.num_sequences, 2))

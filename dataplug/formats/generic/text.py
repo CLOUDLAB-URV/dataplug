@@ -1,20 +1,25 @@
+from __future__ import annotations
+
 import logging
 from math import ceil
-from typing import List
+from typing import TYPE_CHECKING
 
-from dataplug.core.formattemplate import CloudDataFormatTemplate
-from dataplug.core.dataslice import DataSlice, PartitioningStrategy
+
+from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
+
+if TYPE_CHECKING:
+    from typing import List
+    from ...cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
 
 
-@CloudDataFormatTemplate
+@CloudDataFormat
 class UTF8Text:
-    preprocessor = None  # No preprocessor needed for UTF8 text
+    pass
 
 
-@DataSlice
-class UTF8TextSlice:
+class UTF8TextSlice(CloudObjectSlice):
     def __init__(self, padding, *args, **kwargs):
         self.padding = padding
         self.first = False
@@ -60,7 +65,7 @@ class UTF8TextSlice:
 
 
 @PartitioningStrategy(dataformat=UTF8Text)
-def whole_words_strategy(cloud_object: UTF8Text, num_chunks: int, padding: int = 32) -> List[UTF8TextSlice]:
+def whole_words_strategy(cloud_object: CloudObject, num_chunks: int, padding: int = 32) -> List[UTF8TextSlice]:
     """
     This partition strategy chunks raw text by number of chunks avoiding cutting words in half
     """

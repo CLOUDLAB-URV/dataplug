@@ -9,30 +9,18 @@ import botocore
 from typing import TYPE_CHECKING, Union, IO, Any
 from botocore.response import StreamingBody
 
-from ..storage import S3ObjectStorage
 
 if TYPE_CHECKING:
     from mypy_boto3_s3.type_defs import DeleteTypeDef
-    from ..storage import StoragePath
 
 
-class PosixFileSystemClient(S3ObjectStorage):
+class FileSystemS3API:
     def __init__(self):
         self.__file_handles = {}
 
     def __del__(self):
         for path, fh in self.__file_handles.items():
             fh.close()
-
-    def _parse_full_path(self, path: str) -> (str, str):
-        full_path = pathlib.PosixPath(path)
-        return str(full_path.parent.absolute()), full_path.name
-
-    def _open_as_file(self, Bucket: str, Key: str, *args, **kwargs):
-        return pathlib.Path(os.path.join(Bucket, Key)).resolve().open(*args, **kwargs)
-
-    def _build_path(self, Bucket: str, Key: str):
-        return pathlib.Path(os.path.join(Bucket, Key)).resolve()
 
     def abort_multipart_upload(self, Bucket: str, Key: str, UploadId: str, *args, **kwargs):
         raise NotImplementedError()
