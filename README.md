@@ -85,7 +85,7 @@ dask_bag.map(process_fastq_data).compute()
 
 - [Dataplug Documentation](docs/README.md)
 - [Dataplug API Reference](docs/api.md)
-- [Developing new data format plugins](docs/develop_plugins.md)
+- [Developing new data format plugins](docs/develop-plugins.md)
 
 ## Acknowledgements
 
