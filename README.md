@@ -53,11 +53,19 @@ from dataplug.formats.genomics.fastq import FASTQGZip, partition_reads_batches
 # Assign FASTQGZip data type for object in s3://genomics/SRR6052133_1.fastq.gz
 co = CloudObject.from_s3(FASTQGZip, "s3://genomics/SRR6052133_1.fastq.gz")
 
+# Data must be pre-processed first ==> This only needs to be done once per dataset
+# Preprocessing will create reusable indexes to repartition
+# the data many times in many chunk sizes
+# Dataplug leverages joblib to deploy preprocessing jobs
+co.preprocess(parallel_config={"backend": "dask"})
+
 # Partition the FASTQGZip object into 200 chunks
-data_slices = co.partition(partition_reads_batches, num_batches=200)  # This does not move data around, it only creates data slices from the indexes
+# This does not move data around, it only creates data slices from the indexes
+data_slices = co.partition(partition_reads_batches, num_batches=200)
 
 def process_fastq_data(data_slice):
-    # Evaluate the data_slice, which will perform the actual HTTP GET requests to get the FASTQ partition data
+    # Evaluate the data_slice, which will perform the
+    # actual HTTP GET requests to get the FASTQ partition data
     fastq_reads = data_slice.get()
     ...
 
@@ -69,7 +77,8 @@ client = Client()
 # Create a Dask Bag from the data_slices list
 dask_bag = db.from_sequence(data_slices)
 
-# Apply the process_fastq_data function to each data slice. Dask will serialize the data_slices and send them to the workers
+# Apply the process_fastq_data function to each data slice
+# Dask will serialize the data_slices and send them to the workers
 dask_bag.map(process_fastq_data).compute()
 ```
 ## Documentation
