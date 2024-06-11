@@ -13,9 +13,9 @@
 - [Raw text](formats/generic/rawtext.md)
 
 ### Genomics
-- [FASTA](formats/genomics/FASTA.md)
-- [FASTQ](formats/genomics/FASTQ.md)
-- [VCF](formats/genomics/VCF.md)
+- [FASTA](formats/genomics/fasta.md)
+- [FASTQ](formats/genomics/fastqgz.md)
+- [VCF](formats/genomics/vcf.md)
 
 ### Geospatial
 - [LiDAR](formats/geospatial/lidar.md)
