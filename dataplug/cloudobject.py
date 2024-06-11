@@ -208,10 +208,12 @@ class CloudObject:
         self._attrs_headers = None
         self._attrs = {}
 
-    def preprocess(self, parallel_config, func_args=None, chunk_size=None, force=False, debug=False):
+    def preprocess(self, parallel_config=None, func_args=None, chunk_size=None, force=False, debug=False):
         assert self.exists(), "Object not found in S3"
         if self.is_preprocessed() and not force:
             return
+
+        parallel_config = parallel_config or {}
 
         # Check if the metadata bucket exists, if not create it
         try:
