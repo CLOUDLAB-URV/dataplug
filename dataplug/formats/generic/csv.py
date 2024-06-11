@@ -17,14 +17,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def preprocess_csv(cloud_object: CloudObject) -> PreprocessingMetadata:
+def preprocess_csv(cloud_object: CloudObject, separator=",") -> PreprocessingMetadata:
+    print(f"Preprocessing CSV file {cloud_object.path.key} (separator {separator})")
     top = []
     with cloud_object.open("r") as f:
         for i in range(20):
             top.append(f.readline().strip())
-    df = pd.read_csv(io.StringIO("\n".join(top)))
+    df = pd.read_csv(io.StringIO("\n".join(top)), sep=separator)
     print(df.columns)
     print(df.dtypes)
+    print(df.head(5))
 
     return PreprocessingMetadata(
         attributes={
