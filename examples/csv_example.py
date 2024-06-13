@@ -10,11 +10,14 @@ if __name__ == "__main__":
     # co = CloudObject.new_from_file(CSV, "../examples/sample_data/cities.csv", "s3://dataplug/cities.csv",
     #                                s3_config=minio, override=True)
     #
-    # parallel_config = {"verbose": 10}
+    parallel_config = {"verbose": 10}
     # co.preprocess(parallel_config=parallel_config, debug=True)
 
     co = CloudObject.from_s3(CSV, "s3://dataplug/cities.csv",
                              s3_config=minio)
+
+    # co.preprocess(parallel_config=parallel_config, extra_args={"separator": ","}, force=True)
+    co.preprocess(parallel_config=parallel_config, force=True)
 
     data_slices = co.partition(partition_num_chunks, num_chunks=25)
     for ds in data_slices:
