@@ -35,7 +35,7 @@
   - *Data slices* are serializable, and can be sent to remote workers using any Python-compatible distributed computing environment (4) (e.g. PySpark, Dask or Ray).
   - *Data slices* are evaluated at the moment of accessing the data, and not before (5). This allows many remote workers to perform many HTTP GET Byte-range requests in parallel onto the raw dataset, exploiting S3's high bandwidth capabilities.
 
-![Dataplug Architecture](docs/framework-architecture.png)
+<p align="center"><img src="docs/framework-architecture.png"></p>
 
 ## Installation
 
