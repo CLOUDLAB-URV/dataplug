@@ -1,6 +1,5 @@
-# Dataplug: Unstructured Scientific Data Partitioning for Cloud-Native Workloads
-
-**Dataplug is a client-side only, extensible, Python framework with the goal of enabling efficient data partitioning of unstructured scientific data stored in object storage (like Amazon S3) for elastic workloads in the Cloud**
+![](docs/logo.png)
+### Dataplug is a client-side only, extensible, Python framework with the goal of enabling efficient data partitioning of unstructured scientific data stored in object storage (like Amazon S3) for elastic workloads in the Cloud
 
 - Dataplug provides a **plug-in interface to enable data partitioning to a multitude of scientific data types, from a variety of domains, stored in S3**.  Currently, Dataplug supports the following data types:
 
@@ -90,5 +89,11 @@ dask_bag.map(process_fastq_data).compute()
 ## Acknowledgements
 
 This project has been partially funded by the EU Horizon programme under grant agreements No. 101086248, No. 101092644, No. 101092646, No. 101093110.
+
+The logo has been proudly generated using [cooltext.com](https://cooltext.com/).
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 
