@@ -51,6 +51,7 @@ class PickleableS3ClientProxy:
             self,
             region_name: Optional[str] = None,
             endpoint_url: Optional[str] = None,
+            credentials: Optional[dict] = None,
             role_arn: Optional[str] = None,
             token_duration_seconds: Optional[int] = None,
             botocore_config_kwargs: Optional[dict] = None,
@@ -70,8 +71,20 @@ class PickleableS3ClientProxy:
             config=botocore.client.Config(**self.botocore_config_kwargs),
         )
 
-        if role_arn is not None:
-            self.session_name = "-".join(["dataplug", str(int(time.time())), uuid.uuid4().hex])
+        if credentials:
+            # check if credentials are valid
+            if not all(
+                    key in credentials for key in ["AccessKeyId", "SecretAccessKey"]
+            ):
+                raise ValueError(
+                    "Invalid credentials. AccessKeyId and SecretAccessKey are required if credentials are provided."
+                )
+            self.credentials = credentials
+
+        elif role_arn is not None:
+            self.session_name = "-".join(
+                ["dataplug", str(int(time.time())), uuid.uuid4().hex]
+            )
             logger.debug(
                 "Assuming role %s with generated session name %s",
                 self.role_arn,
@@ -84,17 +97,20 @@ class PickleableS3ClientProxy:
                 Policy=S3_FULL_ACCESS_POLICY,
                 DurationSeconds=self.token_duration_seconds,
             )
+            self.credentials = response["Credentials"]
+
         else:
             logger.debug("Getting session token")
-            response = sts_admin.get_session_token(DurationSeconds=self.token_duration_seconds)
-
-        self.credentials = response["Credentials"]
+            response = sts_admin.get_session_token(
+                DurationSeconds=self.token_duration_seconds
+            )
+            self.credentials = response["Credentials"]
 
         self.__client = boto3.client(
             "s3",
             aws_access_key_id=self.credentials["AccessKeyId"],
             aws_secret_access_key=self.credentials["SecretAccessKey"],
-            aws_session_token=self.credentials["SessionToken"],
+            aws_session_token=self.credentials.get("SessionToken"),
             endpoint_url=self.endpoint_url,
             region_name=self.region_name,
             config=botocore.client.Config(**self.botocore_config_kwargs),
@@ -104,7 +120,7 @@ class PickleableS3ClientProxy:
         session = boto3.Session(
             aws_access_key_id=self.credentials["AccessKeyId"],
             aws_secret_access_key=self.credentials["SecretAccessKey"],
-            aws_session_token=self.credentials["SessionToken"],
+            aws_session_token=self.credentials.get("SessionToken"),
             region_name=self.region_name,
         )
         return session.client(
@@ -303,7 +319,9 @@ class S3Path(PurePath):
         """
         bucket = cls(cls._flavour.sep, bucket)
         if len(bucket.parts) != 2:
-            raise ValueError("bucket argument contains more then one path element: {}".format(bucket))
+            raise ValueError(
+                "bucket argument contains more then one path element: {}".format(bucket)
+            )
         key = cls(key)
         if key.is_absolute():
             key = key.relative_to("/")
@@ -349,4 +367,6 @@ class S3Path(PurePath):
             raise ValueError("relative path have no bucket, key specification")
 
     def __repr__(self) -> str:
-        return "{}(bucket={},key={})".format(self.__class__.__name__, self.bucket, self.key)
+        return "{}(bucket={},key={})".format(
+            self.__class__.__name__, self.bucket, self.key
+        )
