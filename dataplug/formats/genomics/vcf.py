@@ -124,7 +124,9 @@ class VCFSlice(CloudObjectSlice):
                         Range=f"bytes={r0}-{r1}"
                     )
                     vcf_body = res["Body"].read().decode("utf-8")
+                    pos = buff.tell()
                     buff.write(vcf_body)
+                    buff.seek(pos)
                     last = buff.read(1)
 
             tail_offset = buff.tell()
