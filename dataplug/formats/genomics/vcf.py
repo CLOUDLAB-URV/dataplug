@@ -6,13 +6,12 @@ import re
 from math import ceil
 from typing import TYPE_CHECKING
 
-from dataplug.entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
-from dataplug.preprocessing.metadata import PreprocessingMetadata
+from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
+from ...preprocessing.metadata import PreprocessingMetadata
 
 if TYPE_CHECKING:
     from typing import Dict, List, Union
-
-    from dataplug.cloudobject import CloudObject
+    from ...cloudobject import CloudObject
 
 logger = logging.getLogger("dataplug." + __name__)
 
