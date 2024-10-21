@@ -76,7 +76,7 @@ class FileSystemS3API:
             size = path.stat().st_size
             if "Range" in kwargs:
                 range_0, range_1 = kwargs["Range"].replace("bytes=", "").split("-")
-                range_0, range_1 = int(range_0), int(range_1) + 1
+                range_0, range_1 = int(range_0), int(range_1) + 1 # +1 to be inclusive, like S3 API
                 with path.open("rb") as f:
                     # Read all chunk into memory, as we could seek after the intended range if we just open the file
                     f.seek(range_0)

@@ -17,7 +17,6 @@ import joblib
 from .entities import CloudDataFormat, CloudObjectSlice
 from .preprocessing.handler import joblib_handler
 
-# from .storage.picklableS3 import PickleableS3ClientProxy, S3Path
 from .storage.filesystem import FileSystemS3API, FilePath
 from .util import head_object, upload_file_with_progress
 
