@@ -16,56 +16,59 @@ import joblib
 
 from .entities import CloudDataFormat, CloudObjectSlice
 from .preprocessing.handler import joblib_handler
-from .storage.picklableS3 import PickleableS3ClientProxy, S3Path
+
+# from .storage.picklableS3 import PickleableS3ClientProxy, S3Path
+from .storage.filesystem import FileSystemS3API, FilePath
 from .util import head_object, upload_file_with_progress
 
 if TYPE_CHECKING:
-    from mypy_boto3_s3 import S3Client
     from typing import List, Tuple, Dict, Optional, Any
-else:
-    S3Client = object
 
 logger = logging.getLogger(__name__)
 
 
 class CloudObject:
     def __init__(
-            self,
-            data_format: CloudDataFormat,
-            object_path: S3Path,
-            meta_path: S3Path,
-            attrs_path: S3Path,
-            storage_config: Optional[Dict[str, Any]] = None
+        self,
+        data_format: CloudDataFormat,
+        object_path: FilePath,
+        meta_path: FilePath,
+        attrs_path: FilePath,
+        storage_config: Optional[Dict[str, Any]] = None
     ):
-        self._obj_headers: Optional[Dict[str, str]] = None  # Storage headers of the data object
-        self._meta_headers: Optional[Dict[str, str]] = None  # Storage headers of the metadata object
-        self._attrs_headers: Optional[Dict[str, str]] = None  # Storage headers of the attributes object
+        # Storage headers of the data object
+        self._obj_headers: Optional[Dict[str, str]] = None
+        # Storage headers of the metadata object
+        self._meta_headers: Optional[Dict[str, str]] = None
+        # Storage headers of the attributes object
+        self._attrs_headers: Optional[Dict[str, str]] = None
+
+        # cls reference for the CloudDataType of this object
+        self._format_cls: CloudDataFormat = data_format
+
+        self._obj_path = object_path
 
         # S3 Path for the metadata object. Located in bucket suffixed
         # with .meta with the same key as original data object
-        self._obj_path = object_path
+        self._meta_path = meta_path
 
         # S3 Path for the attributes object. Located in bucket suffixed
         # with .meta with key as original data object suffixed with .attrs
-        self._meta_path = meta_path
-
-        self._format_cls: CloudDataFormat = data_format  # cls reference for the CloudDataType of this object
-
-        self._attrs_path = attrs_path  # S3 Path for the attributes object
+        self._attrs_path = attrs_path
         self._attrs: Optional[SimpleNamespace] = None
 
         storage_config = storage_config or {}
-        self._s3: S3Client = PickleableS3ClientProxy(**storage_config)
+        self._s3 = FileSystemS3API()
 
         logger.info("Created reference for %s", self)
         logger.debug(f"{self._obj_path=},{self._meta_path=}")
 
     @property
-    def path(self) -> S3Path:
+    def path(self) -> FilePath:
         return self._obj_path
 
     @property
-    def meta_path(self) -> S3Path:
+    def meta_path(self) -> FilePath:
         return self._meta_path
 
     @property
@@ -81,7 +84,7 @@ class CloudObject:
         return int(self._meta_headers["ContentLength"])
 
     @property
-    def storage(self) -> S3Client:
+    def storage(self) -> FileSystemS3API:
         return self._s3
 
     @property
@@ -93,61 +96,90 @@ class CloudObject:
         assert self.storage is not None
         logger.debug("Creating new smart_open client for uri %s", self.path.as_uri())
         client = copy.deepcopy(self.storage)
-        return partial(smart_open.open, self.path.as_uri(), transport_params={"client": client})
+        return partial(
+            smart_open.open, self.path.as_uri(), transport_params={"client": client}
+        )
 
     @property
     def open_metadata(self) -> smart_open.smart_open:
         assert self.storage is not None
         logger.debug("Creating new smart_open client for uri %s", self.path.as_uri())
         client = copy.deepcopy(self.storage)
-        return partial(smart_open.open, self.meta_path.as_uri(), transport_params={"client": client})
+        return partial(
+            smart_open.open,
+            self.meta_path.as_uri(),
+            transport_params={"client": client},
+        )
+
+    # @classmethod
+    # def from_s3(
+    #     cls,
+    #     data_format: CloudDataFormat,
+    #     storage_uri: str,
+    #     fetch: Optional[bool] = True,
+    #     metadata_bucket: Optional[str] = None,
+    #     s3_config: Optional[Dict[str, Any]] = None,
+    # ) -> CloudObject:
+    #     obj_path = S3Path.from_uri(storage_uri)
+    #     if metadata_bucket is None:
+    #         metadata_bucket = obj_path.bucket + ".meta"
+    #     metadata_path = S3Path.from_bucket_key(metadata_bucket, obj_path.key)
+    #     attributes_path = S3Path.from_bucket_key(
+    #         metadata_bucket, obj_path.key + ".attrs"
+    #     )
+    #     co = cls(data_format, obj_path, metadata_path, attributes_path, s3_config)
+    #     if fetch:
+    #         co.fetch()
+    #     return co
 
     @classmethod
-    def from_s3(
-            cls,
-            data_format: CloudDataFormat,
-            storage_uri: str,
-            fetch: Optional[bool] = True,
-            metadata_bucket: Optional[str] = None,
-            s3_config: Optional[Dict[str, Any]] = None,
+    def from_bucket_key(
+        cls,
+        data_format: CloudDataFormat,
+        bucket: str,
+        key: str,
+        fetch: Optional[bool] = True,
+        metadata_bucket: Optional[str] = None,
+        s3_config: Optional[Dict[str, Any]] = None,
     ) -> CloudObject:
-        obj_path = S3Path.from_uri(storage_uri)
+        obj_path = FilePath.from_bucket_key(bucket, key)
         if metadata_bucket is None:
-            metadata_bucket = obj_path.bucket + ".meta"
-        metadata_path = S3Path.from_bucket_key(metadata_bucket, obj_path.key)
-        attributes_path = S3Path.from_bucket_key(metadata_bucket, obj_path.key + ".attrs")
-        co = cls(data_format, obj_path, metadata_path, attributes_path, s3_config)
+            metadata_bucket = bucket + ".meta"
+        meta_path = FilePath.from_bucket_key(metadata_bucket, key)
+        attributes_path = FilePath.from_bucket_key(metadata_bucket, key + ".attrs")
+
+        co = cls(data_format, obj_path, meta_path, attributes_path)
         if fetch:
             co.fetch()
         return co
 
-    @classmethod
-    def from_bucket_key(cls, data_format, bucket, key, fetch=True) -> CloudObject:
-        obj_path = S3Path.from_bucket_key(bucket, key)
-        metadata_path = S3Path.from_bucket_key(bucket + ".meta", key)
-        attributes_path = S3Path.from_bucket_key(bucket + ".meta", key + ".attrs")
+    # @classmethod
+    # def new_from_file(
+    #     cls, data_format, file_path, cloud_path, s3_config=None, override=False
+    # ) -> "CloudObject":
+    #     obj_path = S3Path.from_uri(cloud_path)
+    #     metadata_path = S3Path.from_bucket_key(obj_path.bucket + ".meta", obj_path.key)
+    #     attributes_path = S3Path.from_bucket_key(
+    #         obj_path.bucket + ".meta", obj_path.key + ".attrs"
+    #     )
+    #     co_instance = cls(
+    #         data_format, obj_path, metadata_path, attributes_path, s3_config
+    #     )
 
-        co = cls(data_format, obj_path, metadata_path, attributes_path)
-        if fetch:
-            co.fetch()
-        return co
+    #     if co_instance.exists():
+    #         if not override:
+    #             raise Exception("Object already exists")
+    #         else:
+    #             # Clean preprocessing metadata if object already exists
+    #             co_instance.clean()
 
-    @classmethod
-    def new_from_file(cls, data_format, file_path, cloud_path, s3_config=None, override=False) -> "CloudObject":
-        obj_path = S3Path.from_uri(cloud_path)
-        metadata_path = S3Path.from_bucket_key(obj_path.bucket + ".meta", obj_path.key)
-        attributes_path = S3Path.from_bucket_key(obj_path.bucket + ".meta", obj_path.key + ".attrs")
-        co_instance = cls(data_format, obj_path, metadata_path, attributes_path, s3_config)
-
-        if co_instance.exists():
-            if not override:
-                raise Exception("Object already exists")
-            else:
-                # Clean preprocessing metadata if object already exists
-                co_instance.clean()
-
-        upload_file_with_progress(co_instance.storage, co_instance.path.bucket, co_instance.path.key, file_path)
-        return co_instance
+    #     upload_file_with_progress(
+    #         co_instance.storage,
+    #         co_instance.path.bucket,
+    #         co_instance.path.key,
+    #         file_path,
+    #     )
+    #     return co_instance
 
     def exists(self) -> bool:
         if not self._obj_headers:
@@ -166,10 +198,10 @@ class CloudObject:
 
     def fetch(self):
         if not self._obj_headers:
-            logger.info("Fetching object from S3")
+            logger.info("Fetching object from Storage")
             self._fetch_object()
         if not self._meta_headers:
-            logger.info("Fetching metadata from S3")
+            logger.info("Fetching metadata from Storage")
             self._fetch_metadata()
 
     def _fetch_object(self):
@@ -190,7 +222,9 @@ class CloudObject:
                 # Replace attributes that have been set in the preprocessing stage
                 base_attrs.update(attrs_dict)
                 # Create namedtuple so that the attributes object is immutable
-                co_named_tuple = namedtuple(self._format_cls.co_class.__name__ + "Attributes", base_attrs.keys())
+                co_named_tuple = namedtuple(
+                    self._format_cls.co_class.__name__ + "Attributes", base_attrs.keys()
+                )
                 self._attrs = co_named_tuple(**base_attrs)
             except Exception as e:
                 logger.error(e)
@@ -207,7 +241,14 @@ class CloudObject:
         self._attrs_headers = None
         self._attrs = {}
 
-    def preprocess(self, parallel_config=None, extra_args=None, chunk_size=None, force=False, debug=False):
+    def preprocess(
+        self,
+        parallel_config=None,
+        extra_args=None,
+        chunk_size=None,
+        force=False,
+        debug=False,
+    ):
         assert self.exists(), "Object not found in S3"
         if self.is_preprocessed() and not force:
             return
@@ -219,7 +260,7 @@ class CloudObject:
         try:
             meta_bucket_head = self.storage.head_bucket(Bucket=self.meta_path.bucket)
         except botocore.exceptions.ClientError as error:
-            if error.response['Error']['Code'] != '404':
+            if error.response["Error"]["Code"] != "404":
                 raise error
             meta_bucket_head = None
 
@@ -228,13 +269,20 @@ class CloudObject:
             try:
                 self.storage.create_bucket(Bucket=self.meta_path.bucket)
             except botocore.exceptions.ClientError as error:
-                logger.error("Metadata bucket %s not found -- Also failed to create it", self.meta_path.bucket)
+                logger.error(
+                    "Metadata bucket %s not found -- Also failed to create it",
+                    self.meta_path.bucket,
+                )
                 raise error
 
-        preproc_signature = inspect.signature(self._format_cls.preprocessing_function).parameters
+        preproc_signature = inspect.signature(
+            self._format_cls.preprocessing_function
+        ).parameters
         # Check if parameter cloud_object is in the signature
         if "cloud_object" not in preproc_signature:
-            raise Exception("Preprocessing function must have cloud_object as a parameter")
+            raise Exception(
+                "Preprocessing function must have cloud_object as a parameter"
+            )
 
         jobs = []
         if chunk_size is None:
@@ -262,16 +310,25 @@ class CloudObject:
             jobs.append(preproc_args)
             # preprocessing_metadata = self._format_cls.preprocessing_function(**preproc_args)
         else:
-            assert chunk_size != 0 and chunk_size <= self.size, ("Chunk size must be greater than 0 "
-                                                                 "and less or equal to object size")
+            assert chunk_size != 0 and chunk_size <= self.size, (
+                "Chunk size must be greater than 0 " "and less or equal to object size"
+            )
             # Partition the object in chunks and preprocess it in parallel
-            if not {"chunk_data", "chunk_id", "chunk_size", "num_chunks"}.issubset(preproc_signature.keys()):
-                raise Exception("Preprocessing function must have "
-                                "(chunk_data, chunk_id, chunk_size, num_chunks) as a parameters")
+            if not {"chunk_data", "chunk_id", "chunk_size", "num_chunks"}.issubset(
+                preproc_signature.keys()
+            ):
+                raise Exception(
+                    "Preprocessing function must have "
+                    "(chunk_data, chunk_id, chunk_size, num_chunks) as a parameters"
+                )
             num_chunks = self.size // chunk_size
             for chunk_id in range(num_chunks):
-                preproc_args = {"cloud_object": self, "chunk_id": chunk_id, "chunk_size": chunk_size,
-                                "num_chunks": num_chunks}
+                preproc_args = {
+                    "cloud_object": self,
+                    "chunk_id": chunk_id,
+                    "chunk_size": chunk_size,
+                    "num_chunks": num_chunks,
+                }
                 # Add extra args if there are any other arguments in the signature
                 for arg in preproc_signature.keys():
                     if arg not in preproc_args:
@@ -286,7 +343,14 @@ class CloudObject:
 
         with joblib.parallel_config(**parallel_config):
             jl = joblib.Parallel()
-            f = jl([joblib.delayed(joblib_handler)((self._format_cls.preprocessing_function, job)) for job in jobs])
+            f = jl(
+                [
+                    joblib.delayed(joblib_handler)(
+                        (self._format_cls.preprocessing_function, job)
+                    )
+                    for job in jobs
+                ]
+            )
             for res in f:
                 print(res)
 
