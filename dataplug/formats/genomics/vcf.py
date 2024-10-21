@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from typing import Dict, List, Union
     from ...cloudobject import CloudObject
 
-logger = logging.getLogger("dataplug." + __name__)
+logger = logging.getLogger(__name__)
 
 
 def preprocess_vcf(cloud_object: CloudObject) -> PreprocessingMetadata:
