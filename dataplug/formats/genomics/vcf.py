@@ -10,7 +10,7 @@ from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
 from ...preprocessing.metadata import PreprocessingMetadata
 
 if TYPE_CHECKING:
-    from typing import List, Dict, Union
+    from typing import Dict, List, Union
     from ...cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,9 @@ def preprocess_vcf(cloud_object: CloudObject) -> PreprocessingMetadata:
     header_metadata = {}
     with cloud_object.open("r") as f:
         line = f.readline().strip()
-        assert line.startswith("##fileformat=VCF"), "VCF file does not start with the correct header"
+        assert line.startswith(
+            "##fileformat=VCF"
+        ), "VCF file does not start with the correct header"
         key, value = line.replace("##", "").split("=")
         header_metadata[key] = value
         header.append(line)
@@ -61,7 +63,7 @@ def preprocess_vcf(cloud_object: CloudObject) -> PreprocessingMetadata:
             "vcf_attributes": header_metadata,
             "body_offset": body_offset,
         },
-        metadata=header
+        metadata=header,
     )
 
 
@@ -85,11 +87,13 @@ class VCFSlice(CloudObjectSlice):
 
     def get(self):
         res = self.cloud_object.storage.get_object(
-            Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
-            Range=f"bytes={self.range_0}-{self.range_1}"
+            Bucket=self.cloud_object.path.bucket,
+            Key=self.cloud_object.path.key,
+            Range=f"bytes={self.range_0}-{self.range_1}",
         )
         vcf_body = res["Body"].read().decode("utf-8")
         buff = io.StringIO(vcf_body)
+        # logger.info(f"Getting slice {self.chunk_id}. Range is {self.range_0}-{self.range_1}")
 
         head_offset = 0
         if self.chunk_id != 0:
@@ -100,15 +104,13 @@ class VCFSlice(CloudObjectSlice):
                 # We truncate the line and read the next one
                 # The truncated line will be read by the previous chunk
                 buff.readline()
-                head_offset = buff.tell()
+            # Set the head offset to skip a partial line (included if the first char is a newline)
+            head_offset = buff.tell()
 
         buff.seek(0, io.SEEK_END)
         tail_offset = buff.tell()
 
         if self.chunk_id != self.num_chunks - 1:
-            buff.seek(tail_offset - self.padding)
-            tail_offset = buff.tell()
-
             buff.seek(tail_offset - 1)
             last = buff.read(1)
             retries = 0
@@ -116,14 +118,18 @@ class VCFSlice(CloudObjectSlice):
                 last = buff.read(1)
                 if not last:
                     # Expand the buffer
+                    # + - 1 because ranges are both inclusive
+                    r0 = self.range_1 + (self.padding * retries) + 1
+                    r1 = r0 + self.padding - 1
                     retries += 1
-                    r0 = self.range_1 + (self.padding * retries)
-                    r1 = r0 + self.padding
+                    # logger.info(f"File: {self.cloud_object.path.key} Range: {r0}-{r1}")
                     res = self.cloud_object.storage.get_object(
-                        Bucket=self.cloud_object.path.bucket, Key=self.cloud_object.path.key,
-                        Range=f"bytes={r0}-{r1}"
+                        Bucket=self.cloud_object.path.bucket,
+                        Key=self.cloud_object.path.key,
+                        Range=f"bytes={r0}-{r1}",
                     )
                     vcf_body = res["Body"].read().decode("utf-8")
+                    buff.seek(0, io.SEEK_END)
                     pos = buff.tell()
                     buff.write(vcf_body)
                     buff.seek(pos)
@@ -135,7 +141,8 @@ class VCFSlice(CloudObjectSlice):
 
         # Get the VCF header
         res = self.cloud_object.storage.get_object(
-            Bucket=self.cloud_object.meta_path.bucket, Key=self.cloud_object.meta_path.key
+            Bucket=self.cloud_object.meta_path.bucket,
+            Key=self.cloud_object.meta_path.key,
         )
         vcf_header = res["Body"].read().decode("utf-8")
 
@@ -143,7 +150,9 @@ class VCFSlice(CloudObjectSlice):
 
 
 @PartitioningStrategy(dataformat=VCF)
-def partition_num_chunks(cloud_object: CloudObject, num_chunks: int, padding=256) -> List[VCFSlice]:
+def partition_num_chunks(
+    cloud_object: CloudObject, num_chunks: int, padding=256
+) -> List[VCFSlice]:
     """
     This partition strategy chunks VCF data in a fixed number of chunks
     """
@@ -152,10 +161,13 @@ def partition_num_chunks(cloud_object: CloudObject, num_chunks: int, padding=256
     slices = []
     for i in range(num_chunks):
         r0 = (chunk_size * i) + cloud_object["body_offset"]
-        r0 = r0 - 1 if i != 0 else r0  # Read one extra byte from the previous chunk, we will check if it is a newline
-        r1 = (chunk_size * i) + chunk_size + cloud_object["body_offset"]
-        r1 = cloud_object.size if r1 > cloud_object.size else r1 + padding  # Add padding to read the last line
-        data_slice = VCFSlice(range_0=r0, range_1=r1, chunk_id=i, num_chunks=num_chunks, padding=padding)
+        r1 = r0 + chunk_size - 1  # one less because ranges are inclusive
+        # Read one extra byte from the previous chunk, we will check if it is a newline
+        r0 = r0 - 1 if i != 0 else r0
+        r1 = cloud_object.size if r1 > cloud_object.size else r1
+        data_slice = VCFSlice(
+            range_0=r0, range_1=r1, chunk_id=i, num_chunks=num_chunks, padding=padding
+        )
         slices.append(data_slice)
 
     return slices
