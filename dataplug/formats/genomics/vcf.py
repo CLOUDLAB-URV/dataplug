@@ -164,7 +164,7 @@ def partition_num_chunks(
         r1 = r0 + chunk_size - 1  # one less because ranges are inclusive
         # Read one extra byte from the previous chunk, we will check if it is a newline
         r0 = r0 - 1 if i != 0 else r0
-        r1 = cloud_object.size if r1 > cloud_object.size else r1
+        r1 = (cloud_object.size - 1) if r1 > cloud_object.size else r1
         data_slice = VCFSlice(
             range_0=r0, range_1=r1, chunk_id=i, num_chunks=num_chunks, padding=padding
         )
