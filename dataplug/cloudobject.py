@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import copy
-import inspect
 import logging
 import pickle
-import tempfile
 from collections import namedtuple
 from copy import deepcopy
 from functools import partial
@@ -13,16 +11,15 @@ from typing import TYPE_CHECKING
 
 import botocore.exceptions
 import smart_open
-import joblib
 
 from .entities import CloudDataFormat, CloudObjectSlice
-from .preprocessing.handler import joblib_handler
+from .preprocessing.preprocess import monolithic_preprocessing, mapreduce_preprocessing
 from .storage.picklableS3 import PickleableS3ClientProxy, S3Path
 from .util import head_object, upload_file_with_progress
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
-    from typing import List, Tuple, Dict, Optional, Any
+    from typing import List, Dict, Optional, Any
 else:
     S3Client = object
 
@@ -232,64 +229,16 @@ class CloudObject:
                 logger.error("Metadata bucket %s not found -- Also failed to create it", self.meta_path.bucket)
                 raise error
 
-        preproc_signature = inspect.signature(self._format_cls.preprocessing_function).parameters
-        # Check if parameter cloud_object is in the signature
-        if "cloud_object" not in preproc_signature:
-            raise Exception("Preprocessing function must have cloud_object as a parameter")
-
-        jobs = []
         if chunk_size is None:
-            # Process the entire object as one batch job
-            preproc_args = {"cloud_object": self}
-            if "chunk_data" in preproc_signature:
-                # Placeholder, we will get the data inside the handler function, in case a remote joblib is used
-                # since a StreamingBody is not picklable
-                preproc_args["chunk_data"] = None
-                # get_res = self._s3.get_object(Bucket=self._obj_path.bucket, Key=self._obj_path.key)
-                # assert get_res["ResponseMetadata"]["HTTPStatusCode"] in (200, 206)
-                # preproc_args["chunk_data"] = get_res["Body"]
-            if "chunk_id" in preproc_signature:
-                preproc_args["chunk_id"] = 0
-            if "chunk_size" in preproc_signature:
-                preproc_args["chunk_size"] = self.size
-            if "num_chunks" in preproc_signature:
-                preproc_args["num_chunks"] = 1
-
-            # Add extra args if there are any other arguments in the signature
-            for arg in preproc_signature.keys():
-                if arg not in preproc_args and arg in extra_args:
-                    preproc_args[arg] = extra_args[arg]
-
-            jobs.append(preproc_args)
-            # preprocessing_metadata = self._format_cls.preprocessing_function(**preproc_args)
+            monolithic_preprocessing(self, parallel_config, self._format_cls.preprocessing_function, extra_args)
         else:
             assert chunk_size != 0 and chunk_size <= self.size, ("Chunk size must be greater than 0 "
                                                                  "and less or equal to object size")
-            # Partition the object in chunks and preprocess it in parallel
-            if not {"chunk_data", "chunk_id", "chunk_size", "num_chunks"}.issubset(preproc_signature.keys()):
-                raise Exception("Preprocessing function must have "
-                                "(chunk_data, chunk_id, chunk_size, num_chunks) as a parameters")
-            num_chunks = self.size // chunk_size
-            for chunk_id in range(num_chunks):
-                preproc_args = {"cloud_object": self, "chunk_id": chunk_id, "chunk_size": chunk_size,
-                                "num_chunks": num_chunks}
-                # Add extra args if there are any other arguments in the signature
-                for arg in preproc_signature.keys():
-                    if arg not in preproc_args:
-                        preproc_args[arg] = extra_args[arg]
-                jobs.append(preproc_args)
+            assert self._format_cls.finalizer_function is not None, "Finalizer function must be defined for mapreduce"
+            mapreduce_preprocessing(self, parallel_config, chunk_size, self._format_cls.preprocessing_function,
+                                    self._format_cls.finalizer_function, extra_args)
 
-        if debug:
-            # Run in the main thread for debugging
-            for job in jobs:
-                joblib_handler((self._format_cls.preprocessing_function, job))
-            return
-
-        with joblib.parallel_config(**parallel_config):
-            jl = joblib.Parallel()
-            f = jl([joblib.delayed(joblib_handler)((self._format_cls.preprocessing_function, job)) for job in jobs])
-            for res in f:
-                print(res)
+        self.fetch()
 
     def get_attribute(self, key: str) -> Any:
         return getattr(self._attrs, key)
