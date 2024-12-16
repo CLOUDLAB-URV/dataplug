@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+from enum import Enum
 from pprint import pprint
 from typing import TYPE_CHECKING, Optional
 
@@ -10,6 +11,11 @@ if TYPE_CHECKING:
     from .cloudobject import CloudObject
 
 logger = logging.getLogger(__name__)
+
+
+class PreprocessingType(Enum):
+    MONOLITHIC = "monolithic"
+    MAPREDUCE = "mapreduce"
 
 
 class CloudDataFormat:

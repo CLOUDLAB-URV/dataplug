@@ -10,18 +10,14 @@ def main():
 
     # Localhost minio config
     local_minio = {
-        "aws_access_key_id": "minioadmin",
-        "aws_secret_access_key": "minioadmin",
-        "region_name": "us-east-1",
         "endpoint_url": "http://127.0.0.1:9000",
-        "botocore_config_kwargs": {"signature_version": "s3v4"},
         "role_arn": "arn:aws:iam::123456789012:role/S3Access",
     }
 
-    co = CloudObject.from_s3(FASTQGZip, "s3://genomics/SRR6052133_1.fastq.gz", s3_config=local_minio)
+    co = CloudObject.from_s3(FASTQGZip, "s3://genomics/HI.4019.002.index_7.ANN0831_R1.fastq.gz", s3_config=local_minio)
     co.preprocess()
 
-    data_slices = co.partition(partition_reads_batches, num_batches=1234)
+    data_slices = co.partition(partition_reads_batches, num_batches=10)
 
     lines = 0
     for data_slice in data_slices:
@@ -30,13 +26,13 @@ def main():
 
     print(lines)
 
-    batch = data_slices[-1].get()
-    for line in batch[:4]:
-        print(line)
-    print("...")
-    for line in batch[-4:]:
-        print(line)
-    print("---")
+    # batch = data_slices[-1].get()
+    # for line in batch[:4]:
+    #     print(line)
+    # print("...")
+    # for line in batch[-4:]:
+    #     print(line)
+    # print("---")
 
     # batch = '\n'.join(data_slices[1].get())
     # print(batch)
