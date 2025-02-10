@@ -73,7 +73,7 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name,base_dir, local_metadata_p
 
     _create_tarfile(tar_path,local_metadata_path)    
 
-    return empty_files_info, tar_path
+    return empty_files_info, local_metadata_path
 
 
 def _analyze_tiled_columns(ms_path):
@@ -157,7 +157,7 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
             "mutable_files":mutables_list,
             "ms_name":ms_name  
         },
-        metadata_file_path=metadata_path
+        metadata_file_path=metadata_path+".tar"
     )
 
 class Mutable:
@@ -173,9 +173,15 @@ class MS:
     mutable_files: List[Mutable]
     total_rows: int
 
-class MSSLice(CloudObjectSlice):
-     def get(self):
-        # Here you can consult your metadata generated for this format, in here we need to have caution 
+class MSSLice(CloudObjectSlice):    #HERE is where the magic needs to happen. 
+                                    #we recieve a range of rows
+                                    #we then need to get the byte range corresponding to that row range(opposite of original implementation)
+                                    #this for each mutable file
+                                    #and then with the help of the metadata, fill in with empty bytes
+                                    #and then do the cleanup with casacore
+                                    #and then maybe return a path? to the .ms we just created?
+    def get(self):
+        # Here you can consult your metadata generated for this format, in here we need to ha   ve caution 
         metadata = self.cloud_object.s3.get_object(
                 Bucket=self.cloud_object.meta_path.bucket,
                 Key=self.cloud_object.meta_path.bucket
@@ -184,7 +190,7 @@ class MSSLice(CloudObjectSlice):
         # Perform the necessary HTTP GET operations to get the data
         chunk = self.cloud_object.s3.get_object(
                 Bucket=self.cloud_object.path.bucket,
-                Key=self.cloud_object.path.bucket,
+                Key=self.cloud_object.path.bucket,  
                 Range=f"bytes={self.range_0}-{self.range_1}"
         )["Body"]
         
@@ -192,13 +198,36 @@ class MSSLice(CloudObjectSlice):
         return chunk
 
 @PartitioningStrategy(dataformat=MS)    #here we could define 2 partiton strategies, one that where you specify how many rows you want per file and other that you specify how many resulting files
-                                        #you will obtaain?
-def newformat_partitioning_strategy(cloud_object: CloudObject, num_chunks: int):
-    slices = [] #get in heres
+def ms_partitioning_strategy(cloud_object: CloudObject, num_chunks: int):
+    
+    total_rows=cloud_object.get_attribute("total_rows")
+    slices = []
+    
+    rows_per_chunk = total_rows // num_chunks
+    remainder = total_rows % num_chunks
+    start = 0
+
     for i in range(num_chunks):
-        # Here you put the necessary logic for defining the byte ranges required to read a chunk of the data
-        range_0 = ...
-        range_1 = ...
-        slice = MSSLice(range_0, range_1)
+        chunk_size = rows_per_chunk + (1 if i < remainder else 0)
+        end = start + chunk_size - 1
+        slice = MSSLice(start, end)
         slices.append(slice)
+        start = end + 1
+
     return slices
+
+@PartitioningStrategy(dataformat=MS)    #in here we partition by determining how many rows each slice should have
+def ms_partitioning_strategy_rowsize(cloud_object: CloudObject, row_size: int):
+
+    total_rows = cloud_object.get_attribute("total_rows")
+    slices = []
+    start = 0
+    
+    while start < total_rows:
+        end = min(start + row_size - 1, total_rows - 1)
+        slice = MSSLice(start, end)
+        slices.append(slice)
+        start = end + 1
+        
+    return slices
+
