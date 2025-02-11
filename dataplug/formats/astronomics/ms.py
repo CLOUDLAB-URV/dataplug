@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import logging
 import os
+import shutil
 import tarfile
 import re
 from math import ceil
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 def _create_tarfile(output_filename, source_dir):
-    with tarfile.open(output_filename, "w:gz") as tar:
+    with tarfile.open(output_filename, "w") as tar:
         tar.add(source_dir, arcname=os.path.basename(source_dir))
 
 def _calculate_block_size(data_type, shape):
@@ -40,7 +41,7 @@ def _calculate_block_size(data_type, shape):
     return num_elements * type_sizes[data_type]
 
 
-def _retrieve_ms_from_s3(client, bucket_name, ms_name,base_dir, local_metadata_path="template.ms", criterion="_TSM0"):
+def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_path="template.ms", criterion="_TSM0"):
     
     local_metadata_path = os.path.join(base_dir, local_metadata_path)
 
@@ -157,7 +158,7 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
             "mutable_files":mutables_list,
             "ms_name":ms_name  
         },
-        metadata_file_path=metadata_path+".tar"
+        metadata_file_path=metadata_path+".tar" #this is exact path to the item???
     )
 
 class Mutable:
@@ -173,6 +174,26 @@ class MS:
     mutable_files: List[Mutable]
     total_rows: int
 
+def _clone_template(template_path, output_path):            #we need to clone the template in order to create a new .ms 
+    if not os.path.exists(template_path):
+        raise FileNotFoundError(f"The template {template_path} does not exist.")
+
+    if os.path.exists(output_path):
+        if os.path.isdir(output_path):
+            shutil.rmtree(output_path)
+        else:
+            os.remove(output_path)
+
+    for root, dirs, files in os.walk(template_path):
+        for file_name in files:
+            src_file_path = os.path.join(root, file_name)
+            dest_file_path = os.path.join(output_path, os.path.relpath(src_file_path, template_path))
+            os.makedirs(os.path.dirname(dest_file_path), exist_ok=True)
+            with open(src_file_path, 'rb') as src_file, open(dest_file_path, 'wb') as dest_file:
+                dest_file.write(src_file.read())
+
+    print(f"Cloned {template_path} to {output_path}")
+
 class MSSLice(CloudObjectSlice):    #HERE is where the magic needs to happen. 
                                     #we recieve a range of rows
                                     #we then need to get the byte range corresponding to that row range(opposite of original implementation)
@@ -180,7 +201,26 @@ class MSSLice(CloudObjectSlice):    #HERE is where the magic needs to happen.
                                     #and then with the help of the metadata, fill in with empty bytes
                                     #and then do the cleanup with casacore
                                     #and then maybe return a path? to the .ms we just created?
+    
+
     def get(self):
+        ms_name = self.cloud_object.path.key
+        clean_ms_name = ms_name.replace('/', '_')
+        metadata_dir = f"metadata_{clean_ms_name}"
+        template_path = metadata_dir + "/template.ms" #we NEED this template file in order to generate new stuff yeah
+
+        if not os.path.exists(metadata_dir):
+            meta_key = self.cloud_object.meta_path.key
+            meta_bucket = self.cloud_object.meta_path.bucket
+
+            self.cloud_object.storage.download_file(meta_bucket,meta_key,metadata_dir+"/template.ms.tar")
+
+            with tarfile.open(template_path+".tar","r") as tar:
+                tar.extractall(path=template_path)
+        sliced_outcome = "/path"
+        _clone_template(template_path,sliced_outcome)
+        
+
         # Here you can consult your metadata generated for this format, in here we need to ha   ve caution 
         metadata = self.cloud_object.s3.get_object(
                 Bucket=self.cloud_object.meta_path.bucket,
