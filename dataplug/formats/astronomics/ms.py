@@ -10,8 +10,6 @@ from math import ceil
 from typing import TYPE_CHECKING
 from casacore.tables import table
 
-import pandas as pd
-
 from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
 from ...preprocessing.metadata import PreprocessingMetadata
 
@@ -149,7 +147,7 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
         column_filename = column["filename"] + criterion
         for empty_file in empty_files_info:
             if os.path.basename(empty_file["name"]) == column_filename:
-                    new_mutable = Mutable(empty_file["name"],f"{ms_name}/",empty_file["size"],column["bucketsize"],column["block_size"])
+                    new_mutable = Mutable(empty_file["name"],f"{ms_name}/",empty_file["size"],column["bucketsize"],column["block_size"])    #check if this is correct
                     mutables_list.append(new_mutable)
 
     return PreprocessingMetadata(
@@ -195,31 +193,47 @@ def _clone_template(template_path, output_path):            #we need to clone th
     print(f"Cloned {template_path} to {output_path}")
 
 def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, end_row):
-    #we receive the range of rows
-    #we receive attributes in metadata
-    #we receive the name of the ms(necessary? maybe not in this implementation)
-    #output path should correspond to the same we have already cloned the metadata. 
-    #we recieve the s3client wich is itself a proxy from 
-    block_size = metadata
-    
-    starting_byte = block_size * starting_row
-    last_byte = block_size * end_row 
-    byte_size_data = last_byte - starting_byte
-    
-    num_blocks = byte_size_data // block_size
-    if (byte_size_data % block_size != 0):
-        num_blocks = num_blocks + 1
-    padding = byte_size_data - (num_blocks * block_size)
+    for mutable in metadata:
+        file_name = mutable.file_name
+        block_size = mutable.block_size
+        bucketsize = mutable.bucketsize
+        real_size = mutable.real_size
 
-    #if actual file lenght is shorter than byte range + padding, add padding untill completion. This should be done for EACH file
-    #     mutable_files: List[Mutable]
-    #     class Mutable:
-    #       file_name: str
-    #       ms_path: str
-    #       real_size: int
-    #       bucketsize: int
-    #       block_size: int
-    pass
+        key = f"{ms_name}/{file_name}"      #key should remain the swame as we used before?
+
+        start_byte = block_size * starting_row
+        end_byte   = block_size * end_row
+        requested_length = end_byte - start_byte
+
+        actual_end = min(end_byte, real_size) #should somehow range exceed the end? this should never happen
+        if start_byte < real_size:
+            s3_range = f"bytes={start_byte}-{actual_end - 1}"
+            try:
+                response = s3.get_object(Bucket=bucket, Key=key, Range=s3_range)
+                file_data = response["Body"].read()
+            except Exception as e:
+                print(f"Error al recuperar {key} con el rango {s3_range}: {e}")
+                raise
+        else:
+            file_data = b""                     #maybe throw exception
+            print("Error with the range")
+
+        if requested_length % bucketsize == 0:
+            padded_length = requested_length
+        else:
+            padded_length = ((requested_length // bucketsize) + 1) * bucketsize
+
+        current_length = len(file_data)
+        padding_needed = padded_length - current_length if current_length < padded_length else 0
+
+        target_file_path = os.path.join(output_path, file_name)
+        os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
+        with open(target_file_path, "wb") as fout:
+            fout.write(file_data)
+            if padding_needed > 0:
+                fout.write(b'\x00' * padding_needed)
+
+        print(f"Copiado {current_length} bytes de {key} a {target_file_path} con {padding_needed} bytes de padding.") #debug
 
 def _cleanup_ms(input_ms_path, output_ms_path, num_rows):                       #this output path will be what we return in the MSSlice
     if not os.path.exists(input_ms_path):
@@ -273,19 +287,8 @@ class MSSLice(CloudObjectSlice):    #HERE is where the magic needs to happen.
         _copy_byte_range(s3=self.cloud_object.storage,bucket=self.cloud_object.path.bucket, ms_name=ms_name,metadata=self.cloud_object["mutable_files"],starting_row=self.range_0, end_row=self.range_1)
         _cleanup_ms(sliced_outcome, cleaned_sliced_path) #this should work as is
         
+        #error checking here
 
-        # Here you can consult your metadata generated for this format, in here we need to ha   ve caution, probably unused?
-        metadata = self.cloud_object.s3.get_object(
-                Bucket=self.cloud_object.meta_path.bucket,
-                Key=self.cloud_object.meta_path.bucket
-        )["Body"]
-        
-        # Perform the necessary HTTP GET operations to get the data         this will be done inside copy_byte_range
-        chunk = self.cloud_object.s3.get_object(
-                Bucket=self.cloud_object.path.bucket,
-                Key=self.cloud_object.path.bucket,  
-                Range=f"bytes={self.range_0}-{self.range_1}"
-        )["Body"]
         chunk = cleaned_sliced_path #this will point to where the MS is so that you can open it with casacore. Maybe better to return just the name?
         # And finally return the actual chunked data        
         return chunk
