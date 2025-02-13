@@ -194,6 +194,50 @@ def _clone_template(template_path, output_path):            #we need to clone th
 
     print(f"Cloned {template_path} to {output_path}")
 
+def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, end_row):
+    #we receive the range of rows
+    #we receive attributes in metadata
+    #we receive the name of the ms(necessary? maybe not in this implementation)
+    #output path should correspond to the same we have already cloned the metadata. 
+    #we recieve the s3client wich is itself a proxy from 
+    block_size = metadata
+    
+    starting_byte = block_size * starting_row
+    last_byte = block_size * end_row 
+    byte_size_data = last_byte - starting_byte
+    
+    num_blocks = byte_size_data // block_size
+    if (byte_size_data % block_size != 0):
+        num_blocks = num_blocks + 1
+    padding = byte_size_data - (num_blocks * block_size)
+
+    #if actual file lenght is shorter than byte range + padding, add padding untill completion. This should be done for EACH file
+    #     mutable_files: List[Mutable]
+    #     class Mutable:
+    #       file_name: str
+    #       ms_path: str
+    #       real_size: int
+    #       bucketsize: int
+    #       block_size: int
+    pass
+
+def _cleanup_ms(input_ms_path, output_ms_path, num_rows):                       #this output path will be what we return in the MSSlice
+    if not os.path.exists(input_ms_path):
+        return f"Error: MeasurementSet '{input_ms_path}' not found."
+
+    try:
+        ms = table(input_ms_path)
+        
+        selection = ms.selectrows(list(range(0, num_rows))) 
+        selection.copy(output_ms_path, deep=True) 
+        
+        ms.close()
+        
+        return f"Measurement Set processed correctly, stored in: {output_ms_path}"
+    
+    except Exception as e:
+        return f"Error MS: {str(e)}"
+
 class MSSLice(CloudObjectSlice):    #HERE is where the magic needs to happen. 
                                     #we recieve a range of rows
                                     #we then need to get the byte range corresponding to that row range(opposite of original implementation)
@@ -201,8 +245,6 @@ class MSSLice(CloudObjectSlice):    #HERE is where the magic needs to happen.
                                     #and then with the help of the metadata, fill in with empty bytes
                                     #and then do the cleanup with casacore
                                     #and then maybe return a path? to the .ms we just created?
-    
-
     def get(self):
         ms_name = self.cloud_object.path.key
         clean_ms_name = ms_name.replace('/', '_')
@@ -217,23 +259,34 @@ class MSSLice(CloudObjectSlice):    #HERE is where the magic needs to happen.
 
             with tarfile.open(template_path+".tar","r") as tar:
                 tar.extractall(path=template_path)
-        sliced_outcome = "/path"
-        _clone_template(template_path,sliced_outcome)
+        
+        total_rows = self.range_1 - self.range_0
+        slice_number = self.range_0 // total_rows
+
+        if (self.range_0 % slice_number):
+            slice_number = slice_number + 1
+
+        sliced_outcome = f"temp/slice_{slice_number}.ms"       #this will be our file before cleanup, DEBUG
+        cleaned_sliced_path = f"output/slice_{slice_number}.ms"  
+        
+        _clone_template(template_path,sliced_outcome)    #this should work as is
+        _copy_byte_range(s3=self.cloud_object.storage,bucket=self.cloud_object.path.bucket, ms_name=ms_name,metadata=self.cloud_object["mutable_files"],starting_row=self.range_0, end_row=self.range_1)
+        _cleanup_ms(sliced_outcome, cleaned_sliced_path) #this should work as is
         
 
-        # Here you can consult your metadata generated for this format, in here we need to ha   ve caution 
+        # Here you can consult your metadata generated for this format, in here we need to ha   ve caution, probably unused?
         metadata = self.cloud_object.s3.get_object(
                 Bucket=self.cloud_object.meta_path.bucket,
                 Key=self.cloud_object.meta_path.bucket
         )["Body"]
         
-        # Perform the necessary HTTP GET operations to get the data
+        # Perform the necessary HTTP GET operations to get the data         this will be done inside copy_byte_range
         chunk = self.cloud_object.s3.get_object(
                 Bucket=self.cloud_object.path.bucket,
                 Key=self.cloud_object.path.bucket,  
                 Range=f"bytes={self.range_0}-{self.range_1}"
         )["Body"]
-        
+        chunk = cleaned_sliced_path #this will point to where the MS is so that you can open it with casacore. Maybe better to return just the name?
         # And finally return the actual chunked data        
         return chunk
 
