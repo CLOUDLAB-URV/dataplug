@@ -8,7 +8,12 @@ import tarfile
 import re
 from math import ceil
 from typing import TYPE_CHECKING
-from casacore.tables import table
+#from casacore.tables import table
+
+try:    #necessary?
+    from casacore.tables import table
+except ModuleNotFoundError:
+    pass
 
 from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
 from ...preprocessing.metadata import PreprocessingMetadata
