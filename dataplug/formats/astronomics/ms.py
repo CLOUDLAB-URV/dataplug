@@ -8,12 +8,12 @@ import tarfile
 import re
 from math import ceil
 from typing import TYPE_CHECKING
-#from casacore.tables import table
+from casacore.tables import table
 
-try:    #necessary?
-    from casacore.tables import table
-except ModuleNotFoundError:
-    pass
+#try:    #necessary?
+#    from casacore.tables import table
+#except ModuleNotFoundError:
+#    pass
 
 from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
 from ...preprocessing.metadata import PreprocessingMetadata
@@ -48,7 +48,7 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_
     
     local_metadata_path = os.path.join(base_dir, local_metadata_path)
 
-    response = client.list_objects_v2(bucket_name, ms_name)
+    response = client.list_objects_v2(Bucket=bucket_name,Prefix=ms_name)
 
     if 'Contents' not in response:
         print(f"No se encontraron contenidos en el bucket {bucket_name} con el prefijo {ms_name}")  #debug, maybe throw exception?
@@ -124,7 +124,7 @@ def _analyze_tiled_columns(ms_path):
     return tiled_columns, total_rows
 
 def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
-    s3_client = cloud_object.storage()
+    s3_client = cloud_object.storage
     bucket_name = cloud_object.path.bucket
     ms_name = cloud_object.path.key
     criterion = "_TSM0"
@@ -144,7 +144,7 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
         criterion=criterion
     )
 
-    tiled_metadata, total_rows = _analyze_tiled_columns("template.ms")
+    tiled_metadata, total_rows = _analyze_tiled_columns(f"{base_dir}/template.ms")
 
     mutables_list = []
 
@@ -165,11 +165,12 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
     )
 
 class Mutable:
-    file_name: str
-    ms_path: str
-    real_size: int
-    bucketsize: int
-    block_size: int
+    def __init__(self, file_name: str, ms_path: str, real_size: int, bucketsize: int, block_size: int):
+        file_name: str
+        ms_path: str
+        real_size: int
+        bucketsize: int
+        block_size: int
 
 @CloudDataFormat(preprocessing_function=preprocess_ms)
 class MS:

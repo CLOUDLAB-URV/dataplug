@@ -1,30 +1,37 @@
 from dataplug import CloudObject
-from dataplug.formats.ms import MS, ms_partitioning_strategy
-from dataplug.preprocessing import LocalPreprocessor
+from dataplug.formats.astronomics.ms import MS, ms_partitioning_strategy
 
 if __name__ == "__main__":
     # Localhost minio config
     local_minio = {
-        "aws_access_key_id": "minioadmin",
-        "aws_secret_access_key": "minioadmin",
-        #"region_name": "us-east-1",
-        "endpoint_url": "http://localhost:9000",
-        "botocore_config_kwargs": {"signature_version": "s3v4"},
-        #"role_arn": "arn:aws:iam::123456789012:role/S3Access",
-        #"use_token": True,
+        "credentials": {
+            "AccessKeyId": "minioadmin",
+            "SecretAccessKey": "minioadmin",
+        },
+        "endpoint_url": "http://127.0.0.1:9000",  # MinIO server address
+        # "region_name": "us-east-1",  # Optional but recommended
+        # "botocore_config_kwargs": {"signature_version": "s3v4"},  # Optional
     }
 
+    # instalar mc para minio
+    # setuppear un minio con sts
+    # probar si funciona?
+    # crear un bucket y subir el ms
+    # probar este codigo de nuevo
+
     ms_uri = "s3://astronomics/partition_1.ms"
-    true = True
 
     co = CloudObject.from_s3(
         MS,
         ms_uri,
+        False,
         s3_config=local_minio,
+        folder = True
+        #if directory equals true
     )
 
-    backend = LocalPreprocessor()
-    co.preprocess(backend, force=True)
+    parallel_config = {"verbose": 10}
+    co.preprocess(parallel_config, force=True)
 
     # co.preprocessing(backend, force=True)
 
