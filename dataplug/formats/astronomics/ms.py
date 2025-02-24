@@ -135,7 +135,7 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
     if not os.path.exists(base_dir):
         os.makedirs(base_dir)
 
-    empty_files_info, metadata_path = _retrieve_ms_from_s3(        #creates template and returns some metadata
+    empty_files_info, metadata_path = _retrieve_ms_from_s3(  # Crea la plantilla y devuelve metadata
         client=s3_client,
         bucket_name=bucket_name,
         ms_name=ms_name,
@@ -145,37 +145,41 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
     )
 
     tiled_metadata, total_rows = _analyze_tiled_columns(f"{base_dir}/template.ms")
-
     mutables_list = []
 
     for column in tiled_metadata:
         column_filename = column["filename"] + criterion
         for empty_file in empty_files_info:
             if os.path.basename(empty_file["name"]) == column_filename:
-                    new_mutable = Mutable(empty_file["name"],f"{ms_name}/",empty_file["size"],column["bucketsize"],column["block_size"])    #check if this is correct
-                    mutables_list.append(new_mutable)
+                new_mutable = {
+                    "file_name": empty_file["name"],
+                    "ms_path": f"{ms_name}/",
+                    "real_size": empty_file["size"],
+                    "bucketsize": column["bucketsize"],
+                    "block_size": column["block_size"]
+                }
+                mutables_list.append(new_mutable)
 
     return PreprocessingMetadata(
         attributes={
-            "total_rows":total_rows,
-            "mutable_files":mutables_list,
-            "ms_name":ms_name  
+            "total_rows": total_rows,
+            "mutable_files": mutables_list,
+            "ms_name": ms_name
         },
-        metadata_file_path=metadata_path+".tar" #this is exact path to the item???
+        metadata_file_path=metadata_path + ".tar"
     )
-
-class Mutable:
-    def __init__(self, file_name: str, ms_path: str, real_size: int, bucketsize: int, block_size: int):
-        file_name: str
-        ms_path: str
-        real_size: int
-        bucketsize: int
-        block_size: int
+#class Mutable:  #revisar esto para volverlo un diccionario
+#    def __init__(self, file_name: str, ms_path: str, real_size: int, bucketsize: int, block_size: int):
+#        file_name: str
+#        ms_path: str
+#        real_size: int
+#        bucketsize: int
+#        block_size: int
 
 @CloudDataFormat(preprocessing_function=preprocess_ms)
 class MS:
     ms_name: str
-    mutable_files: List[Mutable]
+    mutable_files: List[dict]
     total_rows: int
 
 def _clone_template(template_path, output_path):            #we need to clone the template in order to create a new .ms 
@@ -200,28 +204,34 @@ def _clone_template(template_path, output_path):            #we need to clone th
 
 def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, end_row):
     for mutable in metadata:
-        file_name = mutable.file_name
-        block_size = mutable.block_size
-        bucketsize = mutable.bucketsize
-        real_size = mutable.real_size
+        file_name = mutable["file_name"]
+        block_size = mutable["block_size"]
+        bucketsize = mutable["bucketsize"]
+        real_size = mutable["real_size"]
 
-        key = f"{ms_name}/{file_name}"      #key should remain the swame as we used before?
-
+        key = f"{ms_name}/{file_name}"
         start_byte = block_size * starting_row
-        end_byte   = block_size * end_row
+        end_byte = block_size * end_row
         requested_length = end_byte - start_byte
 
-        actual_end = min(end_byte, real_size) #should somehow range exceed the end? this should never happen
+        actual_end = min(end_byte, real_size)
         if start_byte < real_size:
             s3_range = f"bytes={start_byte}-{actual_end - 1}"
             try:
-                response = s3.get_object(Bucket=bucket, Key=key, Range=s3_range)
+                try:
+                    response = s3.get_object(Bucket=bucket, Key=key, Range=s3_range)
+                except s3.exceptions.NoSuchKey:
+                    print(f"Error: The object {key} does not exist.")
+                    file_data = b""
+                except s3.exceptions.InvalidRange:
+                    print(f"Error: The range {s3_range} is invalid for the object {key}.")
+                    file_data = b""
                 file_data = response["Body"].read()
             except Exception as e:
                 print(f"Error al recuperar {key} con el rango {s3_range}: {e}")
                 raise
         else:
-            file_data = b""                     #maybe throw exception
+            file_data = b""
             print("Error with the range")
 
         if requested_length % bucketsize == 0:
@@ -239,7 +249,8 @@ def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, e
             if padding_needed > 0:
                 fout.write(b'\x00' * padding_needed)
 
-        print(f"Copiado {current_length} bytes de {key} a {target_file_path} con {padding_needed} bytes de padding.") #debug
+        print(f"Copiado {current_length} bytes de {key} a {target_file_path} con {padding_needed} bytes de padding.")
+
 
 def _cleanup_ms(input_ms_path, output_ms_path, num_rows):                       #this output path will be what we return in the MSSlice
     if not os.path.exists(input_ms_path):
@@ -290,9 +301,19 @@ class MSSLice(CloudObjectSlice):    #HERE is where the magic needs to happen.
         cleaned_sliced_path = f"output/slice_{slice_number}.ms"  
         
         _clone_template(template_path,sliced_outcome)    #this should work as is
-        _copy_byte_range(s3=self.cloud_object.storage,bucket=self.cloud_object.path.bucket, ms_name=ms_name,metadata=self.cloud_object["mutable_files"],starting_row=self.range_0, end_row=self.range_1)
-        _cleanup_ms(sliced_outcome, cleaned_sliced_path) #this should work as is
-        
+        _copy_byte_range(
+            s3=self.cloud_object.storage,
+            bucket=self.cloud_object.path.bucket,
+            ms_name=ms_name,
+            metadata=self.cloud_object["mutable_files"],
+            output_path=sliced_outcome,
+            starting_row=self.range_0,
+            end_row=self.range_1
+        )
+        if not os.path.exists("output"):
+            os.makedirs("output")
+        error = _cleanup_ms(sliced_outcome, cleaned_sliced_path,total_rows) #this should work as is
+        print(error)
         #error checking here
 
         chunk = cleaned_sliced_path #this will point to where the MS is so that you can open it with casacore. Maybe better to return just the name?

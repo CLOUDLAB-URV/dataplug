@@ -35,12 +35,12 @@ if __name__ == "__main__":
 
     # co.preprocessing(backend, force=True)
 
-    # print(co.get_attribute('points'))
+    print(co.attributes)
     # print(co.attributes.points)
     # print(co['points'])
 
-    #slices = co.partition(ms_partitioning_strategy, num_chunks=4)
+    slices = co.partition(ms_partitioning_strategy, num_chunks=4)
 
-    #first_slice = slice[1]
-    #slice_data = first_slice.get()
-    #print(slice_data)
+    first_slice = slices[2]
+    slice_data = first_slice.get()
+    print(slice_data)
