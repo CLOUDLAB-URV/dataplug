@@ -9,15 +9,9 @@ if __name__ == "__main__":
             "SecretAccessKey": "minioadmin",
         },
         "endpoint_url": "http://127.0.0.1:9000",  # MinIO server address
-        # "region_name": "us-east-1",  # Optional but recommended
-        # "botocore_config_kwargs": {"signature_version": "s3v4"},  # Optional
+        # "region_name": "us-east-1",                               Optional
+        # "botocore_config_kwargs": {"signature_version": "s3v4"},  Optional
     }
-
-    # instalar mc para minio
-    # setuppear un minio con sts
-    # probar si funciona?
-    # crear un bucket y subir el ms
-    # probar este codigo de nuevo
 
     ms_uri = "s3://astronomics/partition_1.ms"
 
@@ -27,20 +21,15 @@ if __name__ == "__main__":
         False,
         s3_config=local_minio,
         folder = True
-        #if directory equals true
     )
 
     parallel_config = {"verbose": 10}
     co.preprocess(parallel_config, force=True)
 
-    # co.preprocessing(backend, force=True)
-
-    print(co.attributes)
-    # print(co.attributes.points)
-    # print(co['points'])
+    #print(co.attributes)
 
     slices = co.partition(ms_partitioning_strategy, num_chunks=4)
 
-    first_slice = slices[2]
+    first_slice = slices[1]
     slice_data = first_slice.get()
     print(slice_data)

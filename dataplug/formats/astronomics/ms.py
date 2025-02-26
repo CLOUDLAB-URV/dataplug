@@ -1,19 +1,15 @@
 from __future__ import annotations
 
-import io
 import logging
 import os
 import shutil
 import tarfile
 import re
+
 from math import ceil
 from typing import TYPE_CHECKING
-from casacore.tables import table
 
-#try:    #necessary?
-#    from casacore.tables import table
-#except ModuleNotFoundError:
-#    pass
+from casacore.tables import table               #Should we always import or use a try?
 
 from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
 from ...preprocessing.metadata import PreprocessingMetadata
@@ -28,7 +24,7 @@ def _create_tarfile(output_filename, source_dir):
     with tarfile.open(output_filename, "w") as tar:
         tar.add(source_dir, arcname=os.path.basename(source_dir))
 
-def _calculate_block_size(data_type, shape):
+def _calculate_block_size(data_type, shape):    #These are not directly accessible from casacore so we need to hardcode them, they may change
     type_sizes = {
         "double": 8,
         "float": 4,
@@ -43,7 +39,7 @@ def _calculate_block_size(data_type, shape):
         return ceil((num_elements * type_sizes[data_type]) / 8)
     return num_elements * type_sizes[data_type]
 
-
+# For now, we define the default criterion "_TSM0", but in the future, more formats may be used. 
 def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_path="template.ms", criterion="_TSM0"):
     
     local_metadata_path = os.path.join(base_dir, local_metadata_path)
@@ -51,7 +47,7 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_
     response = client.list_objects_v2(Bucket=bucket_name,Prefix=ms_name)
 
     if 'Contents' not in response:
-        print(f"No se encontraron contenidos en el bucket {bucket_name} con el prefijo {ms_name}")  #debug, maybe throw exception?
+        print(f"WARNING: No content in: {bucket_name} with the following name: {ms_name}")  #DEBUG?
         return []
     empty_files_info = []
     
@@ -79,7 +75,6 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_
 
     return empty_files_info, local_metadata_path
 
-
 def _analyze_tiled_columns(ms_path):
     ms = table(ms_path, readonly=True)
     structure = ms.showstructure()
@@ -88,7 +83,8 @@ def _analyze_tiled_columns(ms_path):
     blocks = structure.strip().split("\n\n")
     tiled_columns = []
     total_rows = None
-
+    
+    # As stated before, if more definitions of .ms files appear it may be of interest to not hardcode the type of column
     for block in blocks:
         if "TiledColumnStMan" in block:
             column_metadata = {
@@ -135,7 +131,8 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
     if not os.path.exists(base_dir):
         os.makedirs(base_dir)
 
-    empty_files_info, metadata_path = _retrieve_ms_from_s3(  # Crea la plantilla y devuelve metadata
+    # This both creates the attributes and a .tar file that's the template for later processing
+    empty_files_info, metadata_path = _retrieve_ms_from_s3(
         client=s3_client,
         bucket_name=bucket_name,
         ms_name=ms_name,
@@ -168,13 +165,6 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
         },
         metadata_file_path=metadata_path + ".tar"
     )
-#class Mutable:  #revisar esto para volverlo un diccionario
-#    def __init__(self, file_name: str, ms_path: str, real_size: int, bucketsize: int, block_size: int):
-#        file_name: str
-#        ms_path: str
-#        real_size: int
-#        bucketsize: int
-#        block_size: int
 
 @CloudDataFormat(preprocessing_function=preprocess_ms)
 class MS:
@@ -182,7 +172,7 @@ class MS:
     mutable_files: List[dict]
     total_rows: int
 
-def _clone_template(template_path, output_path):            #we need to clone the template in order to create a new .ms 
+def _clone_template(template_path, output_path):
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"The template {template_path} does not exist.")
 
@@ -221,14 +211,14 @@ def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, e
                 try:
                     response = s3.get_object(Bucket=bucket, Key=key, Range=s3_range)
                 except s3.exceptions.NoSuchKey:
-                    print(f"Error: The object {key} does not exist.")
+                    print(f"Error: The object {key} does not exist.")                       #Debug?
                     file_data = b""
                 except s3.exceptions.InvalidRange:
-                    print(f"Error: The range {s3_range} is invalid for the object {key}.")
+                    print(f"Error: The range {s3_range} is invalid for the object {key}.")  #Debug?
                     file_data = b""
                 file_data = response["Body"].read()
             except Exception as e:
-                print(f"Error al recuperar {key} con el rango {s3_range}: {e}")
+                print(f"Error retrieving {key} with the range {s3_range}: {e}")
                 raise
         else:
             file_data = b""
@@ -249,10 +239,10 @@ def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, e
             if padding_needed > 0:
                 fout.write(b'\x00' * padding_needed)
 
-        print(f"Copiado {current_length} bytes de {key} a {target_file_path} con {padding_needed} bytes de padding.")
+        print(f"Copied {current_length} bytes {key} to {target_file_path} with {padding_needed} empty bytes for padding")
 
-
-def _cleanup_ms(input_ms_path, output_ms_path, num_rows):                       #this output path will be what we return in the MSSlice
+# Per actual definition, returning path to processed slice is a desirable outcome. 
+def _cleanup_ms(input_ms_path, output_ms_path, num_rows):                      
     if not os.path.exists(input_ms_path):
         return f"Error: MeasurementSet '{input_ms_path}' not found."
 
@@ -263,24 +253,19 @@ def _cleanup_ms(input_ms_path, output_ms_path, num_rows):                       
         selection.copy(output_ms_path, deep=True) 
         
         ms.close()
-        
+        #This return, if not checked, will not be displayed. Maybe return nothing?
         return f"Measurement Set processed correctly, stored in: {output_ms_path}"
     
     except Exception as e:
         return f"Error MS: {str(e)}"
 
-class MSSLice(CloudObjectSlice):    #HERE is where the magic needs to happen. 
-                                    #we recieve a range of rows
-                                    #we then need to get the byte range corresponding to that row range(opposite of original implementation)
-                                    #this for each mutable file
-                                    #and then with the help of the metadata, fill in with empty bytes
-                                    #and then do the cleanup with casacore
-                                    #and then maybe return a path? to the .ms we just created?
+class MSSLice(CloudObjectSlice):   
     def get(self):
+        # Maybe paths could be handled in a cleanlier way? Or redefine where data is created/stored?
         ms_name = self.cloud_object.path.key
         clean_ms_name = ms_name.replace('/', '_')
         metadata_dir = f"metadata_{clean_ms_name}"
-        template_path = metadata_dir + "/template.ms" #we NEED this template file in order to generate new stuff yeah
+        template_path = metadata_dir + "/template.ms"
 
         if not os.path.exists(metadata_dir):
             meta_key = self.cloud_object.meta_path.key
@@ -297,10 +282,10 @@ class MSSLice(CloudObjectSlice):    #HERE is where the magic needs to happen.
         if (self.range_0 % slice_number):
             slice_number = slice_number + 1
 
-        sliced_outcome = f"temp/slice_{slice_number}.ms"       #this will be our file before cleanup, DEBUG
+        sliced_outcome = f"temp/slice_{slice_number}.ms"            #DEBUG, should probably delete folder later
         cleaned_sliced_path = f"output/slice_{slice_number}.ms"  
         
-        _clone_template(template_path,sliced_outcome)    #this should work as is
+        _clone_template(template_path,sliced_outcome)
         _copy_byte_range(
             s3=self.cloud_object.storage,
             bucket=self.cloud_object.path.bucket,
@@ -312,15 +297,16 @@ class MSSLice(CloudObjectSlice):    #HERE is where the magic needs to happen.
         )
         if not os.path.exists("output"):
             os.makedirs("output")
-        error = _cleanup_ms(sliced_outcome, cleaned_sliced_path,total_rows) #this should work as is
-        print(error)
-        #error checking here
+        error = _cleanup_ms(sliced_outcome, cleaned_sliced_path,total_rows)
+        print(error)                                                #Debug
 
-        chunk = cleaned_sliced_path #this will point to where the MS is so that you can open it with casacore. Maybe better to return just the name?
-        # And finally return the actual chunked data        
+        # Finally returning the path to the file so you can programatically pass it to casacore for further processing. 
+        chunk = cleaned_sliced_path 
+
         return chunk
 
-@PartitioningStrategy(dataformat=MS)    #here we could define 2 partiton strategies, one that where you specify how many rows you want per file and other that you specify how many resulting files
+# Decide number of resulting chunks (Most optimal)
+@PartitioningStrategy(dataformat=MS)
 def ms_partitioning_strategy(cloud_object: CloudObject, num_chunks: int):
     
     total_rows=cloud_object.get_attribute("total_rows")
@@ -339,7 +325,8 @@ def ms_partitioning_strategy(cloud_object: CloudObject, num_chunks: int):
 
     return slices
 
-@PartitioningStrategy(dataformat=MS)    #in here we partition by determining how many rows each slice should have
+# Decide number of resulting rows per chunk (Most flexible)
+@PartitioningStrategy(dataformat=MS)
 def ms_partitioning_strategy_rowsize(cloud_object: CloudObject, row_size: int):
 
     total_rows = cloud_object.get_attribute("total_rows")
@@ -354,3 +341,4 @@ def ms_partitioning_strategy_rowsize(cloud_object: CloudObject, row_size: int):
         
     return slices
 
+# Decide if we could use a third partitioning strategy, based maybe on default bucket sizes? Or dinamically with metadata usage?

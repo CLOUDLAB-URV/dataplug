@@ -34,7 +34,7 @@ class CloudObject:
             meta_path: S3Path,
             attrs_path: S3Path,
             storage_config: Optional[Dict[str, Any]] = None,
-            is_folder: bool = False
+            is_folder: bool = False                         # Allows to process formats that are defined as folders
     ):
         self._obj_headers: Optional[Dict[str, str]] = None  # Storage headers of the data object
         self._meta_headers: Optional[Dict[str, str]] = None  # Storage headers of the metadata object
@@ -169,7 +169,7 @@ class CloudObject:
     def fetch(self):
         if not self._obj_headers:
             if self._is_folder:
-                self._obj_headers = {'Meta': 'Data'} #Do nothing here??
+                self._obj_headers = {'Meta': 'Data'}        #Dummy metadata to temporarily bypass this. What could we fill this in with? Consider options
             else:
                 logger.info("Fetching object from S3")
                 self._fetch_object()
