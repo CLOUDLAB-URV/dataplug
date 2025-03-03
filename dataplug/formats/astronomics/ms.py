@@ -166,7 +166,7 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
         metadata_file_path=metadata_path + ".tar"
     )
 
-@CloudDataFormat(preprocessing_function=preprocess_ms)
+@CloudDataFormat(preprocessing_function=preprocess_ms, is_folder=True)
 class MS:
     ms_name: str
     mutable_files: List[dict]

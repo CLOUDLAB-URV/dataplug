@@ -110,15 +110,14 @@ class CloudObject:
             storage_uri: str,
             fetch: Optional[bool] = True,
             metadata_bucket: Optional[str] = None,
-            s3_config: Optional[Dict[str, Any]] = None,
-            folder: Optional[bool] = False
+            s3_config: Optional[Dict[str, Any]] = None
     ) -> CloudObject:
         obj_path = S3Path.from_uri(storage_uri)
         if metadata_bucket is None:
             metadata_bucket = obj_path.bucket + ".meta"
         metadata_path = S3Path.from_bucket_key(metadata_bucket, obj_path.key)
         attributes_path = S3Path.from_bucket_key(metadata_bucket, obj_path.key + ".attrs")
-        co = cls(data_format, obj_path, metadata_path, attributes_path, s3_config,folder)
+        co = cls(data_format, obj_path, metadata_path, attributes_path, s3_config,data_format.is_folder)
         if fetch:
             co.fetch()
         return co

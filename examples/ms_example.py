@@ -19,8 +19,7 @@ if __name__ == "__main__":
         MS,
         ms_uri,
         False,
-        s3_config=local_minio,
-        folder = True
+        s3_config=local_minio
     )
 
     parallel_config = {"verbose": 10}
