@@ -1,5 +1,5 @@
 from dataplug import CloudObject
-from dataplug.formats.geospatial.cog import CloudOptimizedGeoTiff, block_window_strategy
+from dataplug.formats.geospatial.cog import CloudOptimizedGeoTiff, grid_partition_strategy
 import rasterio
 from rasterio.windows import Window, from_bounds
 import rasterio.transform
@@ -18,7 +18,7 @@ def main():
     co.preprocess()
     
     # Partition the COG using block windows strategy.
-    data_slices = co.partition(block_window_strategy)
+    data_slices = co.partition(grid_partition_strategy, n_splits=2)
     total_pixels = 0
     for idx, data_slice in enumerate(data_slices):
         try:

@@ -7,12 +7,10 @@ import boto3
 from rasterio.session import AWSSession
 import rasterio
 from rasterio.windows import Window
-import rasterio.transform
 
 from dataplug import CloudObject
 from dataplug.entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
 from dataplug.preprocessing.metadata import PreprocessingMetadata
-from dataplug.util import setup_logging
 
 if TYPE_CHECKING:
     from dataplug.cloudobject import CloudObject
@@ -78,10 +76,13 @@ def extract_meta(cloud_object: CloudObject):
 class BlockWindowSlice(CloudObjectSlice):
     def __init__(self, window: Window):
         self.window = window
+        # Attributes to identify the grid position and tile
+        self.block_x = None
+        self.block_y = None
+        self.tile_key = None
         super().__init__()
 
     def get(self):
-        meta = extract_meta(self.cloud_object)
         file_url = self.cloud_object.storage.generate_presigned_url(
             "get_object",
             Params={
@@ -102,7 +103,6 @@ class BlockWindowSlice(CloudObjectSlice):
             raise
 
     def to_file(self, file_name: str):
-        meta = extract_meta(self.cloud_object)
         file_url = self.cloud_object.storage.generate_presigned_url(
             "get_object",
             Params={
@@ -117,6 +117,7 @@ class BlockWindowSlice(CloudObjectSlice):
                 with rasterio.open(file_url) as src:
                     profile = src.profile
                     profile.update({
+                        "driver": "GTiff",
                         "width": int(self.window.width),
                         "height": int(self.window.height),
                         "transform": rasterio.windows.transform(self.window, src.transform),
@@ -128,17 +129,37 @@ class BlockWindowSlice(CloudObjectSlice):
             logger.error("Error writing file %s for COG %s: %s", file_name, self.cloud_object.path.key, e)
             raise
 
-
 @PartitioningStrategy(CloudOptimizedGeoTiff)
-def block_window_strategy(cloud_object: CloudObject) -> List[BlockWindowSlice]:
+def grid_partition_strategy(cloud_object: CloudObject, n_splits) -> List[BlockWindowSlice]:
     """
-    Partition the COG using its internal block windows.
+    Splits the COG into a grid of n_splits x n_splits.
+
+    - n_splits: Number of splits along each axis.
+
+    Additionally, the tile identifier (tile_key) is extracted from the file name.
     """
     with cloud_object.open("rb") as cog_file:
         with rasterio.open(cog_file) as src:
-            # Retrieve block windows from band 1 (assuming all bands share the same tiling)
-            windows = list(src.block_windows(1))
-    logger.info("Found %d block windows for COG %s", len(windows), cloud_object.path.key)
-    slices = [BlockWindowSlice(window) for _, window in windows]
-    logger.debug("Created %d block window slices for COG %s", len(slices), cloud_object.path.key)
+            # Extract the tile_key from the file name (without extension)
+            tile_key = os.path.basename(cloud_object.path.key)
+            step_w = src.width / n_splits
+            step_h = src.height / n_splits
+
+            slices = []
+            for block_x in range(n_splits):
+                for block_y in range(n_splits):
+                    offset_w = round(step_w * block_y)
+                    offset_h = round(step_h * block_x)
+                    width = math.ceil(step_w * (block_y + 1)) - offset_w
+                    height = math.ceil(step_h * (block_x + 1)) - offset_h
+
+                    window = Window(offset_w, offset_h, width, height)
+                    slice_obj = BlockWindowSlice(window)
+                    slice_obj.block_x = block_x
+                    slice_obj.block_y = block_y
+                    slice_obj.tile_key = tile_key
+                    slices.append(slice_obj)
+
+    logger.info("Created %d grid slices for COG %s with n_splits=%d", 
+                len(slices), cloud_object.path.key, n_splits)
     return slices
