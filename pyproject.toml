@@ -26,7 +26,6 @@ dependencies = [
     "smart_open",
     "tqdm",
     "joblib",
-    "rasterio",
 ]
 
 [project.optional-dependencies]
@@ -35,7 +34,8 @@ metabolomics = [
 ]
 geospatial = [
     "laspy",
-    "PDAL"
+    "PDAL",
+    "rasterio",
 ]
 
 
