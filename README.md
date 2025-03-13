@@ -16,6 +16,7 @@
   - Geospatial
       - [LiDAR](docs/formats/geospatial/lidar.md)
       - [Cloud-Optimized Point Cloud](docs/formats/geospatial/copc.md)
+      - [COG](docs/formats/geospatial/cog.md)
   - Metabolomics
       - [ImzML](docs/formats/metabolomics/imzml.md) 
 

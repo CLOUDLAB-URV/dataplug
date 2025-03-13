@@ -34,7 +34,8 @@ metabolomics = [
 ]
 geospatial = [
     "laspy",
-    "PDAL"
+    "PDAL",
+    "rasterio",
 ]
 
 
