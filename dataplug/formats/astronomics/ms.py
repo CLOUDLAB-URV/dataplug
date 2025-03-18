@@ -268,6 +268,9 @@ class MSSLice(CloudObjectSlice):
         template_path = metadata_dir + "/template.ms"
 
         if not os.path.exists(metadata_dir):
+
+            os.makedirs(metadata_dir, exist_ok=True)    #ensure directory will exist in a worker
+
             meta_key = self.cloud_object.meta_path.key
             meta_bucket = self.cloud_object.meta_path.bucket
 
