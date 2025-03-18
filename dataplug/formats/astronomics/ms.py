@@ -268,7 +268,7 @@ class MSSLice(CloudObjectSlice):
         template_path = metadata_dir + "/template.ms"
 
         if not os.path.exists(metadata_dir):
-
+            print("DEBUG: Trying stuff")
             os.makedirs(metadata_dir, exist_ok=True)    #ensure directory will exist in a worker
 
             meta_key = self.cloud_object.meta_path.key
@@ -277,7 +277,9 @@ class MSSLice(CloudObjectSlice):
             self.cloud_object.storage.download_file(meta_bucket,meta_key,metadata_dir+"/template.ms.tar")
 
             with tarfile.open(template_path+".tar","r") as tar:
-                tar.extractall(path=template_path)
+                tar.extractall(path=metadata_dir)
+
+            os.remove (template_path+".tar")
         
         total_rows = self.range_1 - self.range_0
         slice_number = self.range_0 // total_rows
