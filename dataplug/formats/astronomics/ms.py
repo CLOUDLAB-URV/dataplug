@@ -126,7 +126,7 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
     criterion = "_TSM0"
 
     clean_ms_name = ms_name.replace('/', '_')
-    base_dir = f"metadata_{clean_ms_name}"
+    base_dir = os.path.join("/tmp", f"metadata_{clean_ms_name}")
 
     if not os.path.exists(base_dir):
         os.makedirs(base_dir)
@@ -141,7 +141,7 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
         criterion=criterion
     )
 
-    tiled_metadata, total_rows = _analyze_tiled_columns(f"{base_dir}/template.ms")
+    tiled_metadata, total_rows = _analyze_tiled_columns(os.path.join(base_dir, "template.ms"))
     mutables_list = []
 
     for column in tiled_metadata:
@@ -264,8 +264,8 @@ class MSSLice(CloudObjectSlice):
         # Maybe paths could be handled in a cleanlier way? Or redefine where data is created/stored?
         ms_name = self.cloud_object.path.key
         clean_ms_name = ms_name.replace('/', '_')
-        metadata_dir = f"metadata_{clean_ms_name}"
-        template_path = metadata_dir + "/template.ms"
+        metadata_dir = os.path.join("/tmp", f"metadata_{clean_ms_name}")
+        template_path = os.path.join(metadata_dir, "template.ms")
 
         if not os.path.exists(metadata_dir):
             print("DEBUG: Trying stuff")
@@ -274,12 +274,12 @@ class MSSLice(CloudObjectSlice):
             meta_key = self.cloud_object.meta_path.key
             meta_bucket = self.cloud_object.meta_path.bucket
 
-            self.cloud_object.storage.download_file(meta_bucket,meta_key,metadata_dir+"/template.ms.tar")
+            self.cloud_object.storage.download_file(meta_bucket,meta_key,os.path.join(metadata_dir,"template.ms.tar"))
 
             with tarfile.open(template_path+".tar","r") as tar:
                 tar.extractall(path=metadata_dir)
 
-            os.remove (template_path+".tar")
+            os.remove(template_path+".tar")
         
         total_rows = self.range_1 - self.range_0
         slice_number = self.range_0 // total_rows
@@ -287,8 +287,11 @@ class MSSLice(CloudObjectSlice):
         if (self.range_0 % slice_number):
             slice_number = slice_number + 1
 
-        sliced_outcome = f"temp/slice_{slice_number}.ms"            #DEBUG, should probably delete folder later
-        cleaned_sliced_path = f"output/slice_{slice_number}.ms"  
+        sliced_outcome = os.path.join("/tmp", f"temp/slice_{slice_number}.ms")            #DEBUG, should probably delete folder later
+        cleaned_sliced_path = os.path.join("/tmp", f"output/slice_{slice_number}.ms")  
+        
+        os.makedirs(os.path.dirname(sliced_outcome), exist_ok=True)
+        os.makedirs(os.path.dirname(cleaned_sliced_path), exist_ok=True)
         
         _clone_template(template_path,sliced_outcome)
         _copy_byte_range(
@@ -300,13 +303,14 @@ class MSSLice(CloudObjectSlice):
             starting_row=self.range_0,
             end_row=self.range_1
         )
-        if not os.path.exists("output"):
-            os.makedirs("output")
         error = _cleanup_ms(sliced_outcome, cleaned_sliced_path,total_rows)
         print(error)                                                #Debug
 
+        #os.remove(sliced_outcome)                      
         # Finally returning the path to the file so you can programatically pass it to casacore for further processing. 
         chunk = cleaned_sliced_path 
+        
+        print ( chunk)
 
         return chunk
 
