@@ -27,8 +27,14 @@ if __name__ == "__main__":
 
     #print(co.attributes)
 
-    slices = co.partition(ms_partitioning_strategy, num_chunks=4)
+    slices = co.partition(ms_partitioning_strategy, num_chunks=3)
 
-    first_slice = slices[1]
+    first_slice = slices[0]
+    second_slice = slices[1]
+    third_slice = slices[2]
     slice_data = first_slice.get()
+    print(slice_data)
+    slice_data = second_slice.get()
+    print(slice_data)
+    slice_data = third_slice.get()
     print(slice_data)

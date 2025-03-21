@@ -284,7 +284,7 @@ class MSSLice(CloudObjectSlice):
         total_rows = self.range_1 - self.range_0
         slice_number = self.range_0 // total_rows
 
-        if (self.range_0 % slice_number):
+        if (self.range_0 % (slice_number + 1)):
             slice_number = slice_number + 1
 
         sliced_outcome = os.path.join("/tmp", f"temp/slice_{slice_number}.ms")            #DEBUG, should probably delete folder later
