@@ -82,6 +82,30 @@ class BlockWindowSlice(CloudObjectSlice):
         self.tile_key = None
         super().__init__()
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        # Store the Window as a tuple of numeric values (col_off, row_off, width, height)
+        state['window'] = (
+            float(self.window.col_off),
+            float(self.window.row_off),
+            float(self.window.width),
+            float(self.window.height)
+        )
+        return state
+
+    def __setstate__(self, state):
+        if 'window' in state and isinstance(state['window'], tuple):
+            try:
+                col_off = float(state['window'][0])
+                row_off = float(state['window'][1])
+                width_val = float(state['window'][2])
+                height_val = float(state['window'][3])
+            except Exception as e:
+                logger.error("Error converting tuple window values: %s", state['window'])
+                raise e
+            state['window'] = Window(col_off, row_off, width_val, height_val)
+        self.__dict__.update(state)
+        
     def get(self):
         file_url = self.cloud_object.storage.generate_presigned_url(
             "get_object",
@@ -103,6 +127,41 @@ class BlockWindowSlice(CloudObjectSlice):
             raise
 
     def to_file(self, file_name: str):
+        # Ensure self.window is an instance of Window
+        if not isinstance(self.window, Window):
+            if isinstance(self.window, tuple):
+                try:
+                    col_off = float(self.window[0])
+                    row_off = float(self.window[1])
+                    width_val = float(self.window[2])
+                    height_val = float(self.window[3])
+                except Exception as e:
+                    logger.error("Error converting tuple window values: %s", self.window)
+                    raise e
+                self.window = Window(col_off, row_off, width_val, height_val)
+            elif isinstance(self.window, dict):
+                try:
+                    col_off = float(self.window.get('col_off'))
+                    row_off = float(self.window.get('row_off'))
+                    width_val = float(self.window.get('width'))
+                    height_val = float(self.window.get('height'))
+                except Exception as e:
+                    logger.error("Error converting dict window values: %s", self.window)
+                    raise e
+                self.window = Window(col_off, row_off, width_val, height_val)
+
+        logger.debug("Final value of self.window: %s", self.window)
+        logger.debug("self.window.width: %s", self.window.width)
+        logger.debug("self.window.height: %s", self.window.height)
+
+        # Convert width and height to integers, ensuring they are numeric
+        try:
+            width_int = int(self.window.width)
+            height_int = int(self.window.height)
+        except ValueError as e:
+            logger.error("Window dimensions are not numeric: width=%s, height=%s", self.window.width, self.window.height)
+            raise e
+
         file_url = self.cloud_object.storage.generate_presigned_url(
             "get_object",
             Params={
@@ -118,8 +177,8 @@ class BlockWindowSlice(CloudObjectSlice):
                     profile = src.profile
                     profile.update({
                         "driver": "GTiff",
-                        "width": int(self.window.width),
-                        "height": int(self.window.height),
+                        "width": width_int,
+                        "height": height_int,
                         "transform": rasterio.windows.transform(self.window, src.transform),
                     })
                     logger.debug("Writing block window %s to file %s", self.window, file_name)
@@ -128,6 +187,7 @@ class BlockWindowSlice(CloudObjectSlice):
         except Exception as e:
             logger.error("Error writing file %s for COG %s: %s", file_name, self.cloud_object.path.key, e)
             raise
+
 
 @PartitioningStrategy(CloudOptimizedGeoTiff)
 def grid_partition_strategy(cloud_object: CloudObject, n_splits) -> List[BlockWindowSlice]:
