@@ -1,3 +1,4 @@
+import time 
 from dataplug import CloudObject
 from dataplug.formats.astronomics.ms import MS, ms_partitioning_strategy
 
@@ -13,7 +14,7 @@ if __name__ == "__main__":
         # "botocore_config_kwargs": {"signature_version": "s3v4"},  Optional
     }
 
-    ms_uri = "s3://astronomics/partition_1.ms"
+    ms_uri = "s3://astronomics-test/smallms.ms"
 
     co = CloudObject.from_s3(
         MS,
@@ -23,18 +24,24 @@ if __name__ == "__main__":
     )
 
     parallel_config = {"verbose": 10}
+    start_time = time.time()
     co.preprocess(parallel_config, force=True)
+    end_time = time.time()
 
+    elapsed_time = end_time - start_time
+    print(f"Preprocess stage took {elapsed_time:.2f} seconds.")
     #print(co.attributes)
 
-    slices = co.partition(ms_partitioning_strategy, num_chunks=3)
+    slices = co.partition(ms_partitioning_strategy, num_chunks=2)
 
     first_slice = slices[0]
-    second_slice = slices[1]
-    third_slice = slices[2]
     slice_data = first_slice.get()
     print(slice_data)
+    second_slice = slices[1]
+    #third_slice = slices[2]
+    #slice_data = first_slice.get()
+    #print(slice_data)
     slice_data = second_slice.get()
     print(slice_data)
-    slice_data = third_slice.get()
-    print(slice_data)
+    #slice_data = third_slice.get()
+    #print(slice_data)

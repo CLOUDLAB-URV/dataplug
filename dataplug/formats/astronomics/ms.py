@@ -59,7 +59,8 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_
 
             local_file_path = os.path.join(local_metadata_path, relative_path)
             local_dir = os.path.dirname(local_file_path)
-            if not os.path.exists(local_dir):
+            
+            if not os.path.isdir(local_dir):  # Verifica si ya es un directorio
                 os.makedirs(local_dir)
 
             if key.endswith(criterion):
@@ -201,12 +202,12 @@ def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, e
 
         key = f"{ms_name}/{file_name}"
         start_byte = block_size * starting_row
-        end_byte = block_size * end_row
+        end_byte = block_size * (end_row +1) 
         requested_length = end_byte - start_byte
 
         actual_end = min(end_byte, real_size)
         if start_byte < real_size:
-            s3_range = f"bytes={start_byte}-{actual_end - 1}"
+            s3_range = f"bytes={start_byte}-{actual_end}"   #quizas el -1 es necesario
             try:
                 try:
                     response = s3.get_object(Bucket=bucket, Key=key, Range=s3_range)
@@ -249,7 +250,7 @@ def _cleanup_ms(input_ms_path, output_ms_path, num_rows):
     try:
         ms = table(input_ms_path)
         
-        selection = ms.selectrows(list(range(0, num_rows))) 
+        selection = ms.selectrows(list(range(0, num_rows+1))) 
         selection.copy(output_ms_path, deep=True) 
         
         ms.close()
