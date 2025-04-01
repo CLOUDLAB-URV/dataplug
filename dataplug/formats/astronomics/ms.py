@@ -261,6 +261,10 @@ def _cleanup_ms(input_ms_path, output_ms_path, num_rows):
         return f"Error MS: {str(e)}"
 
 class MSSLice(CloudObjectSlice):   
+    def __init__(self, range_0, range_1, index):
+        super().__init__(range_0, range_1)
+        self.index = index
+
     def get(self):
         # Maybe paths could be handled in a cleanlier way? Or redefine where data is created/stored?
         ms_name = self.cloud_object.path.key
@@ -283,10 +287,11 @@ class MSSLice(CloudObjectSlice):
             os.remove(template_path+".tar")
         
         total_rows = self.range_1 - self.range_0
-        slice_number = self.range_0 // total_rows
+        slice_number = self.index
+        #slice_number = self.range_0 // total_rows
 
-        if (self.range_0 % (slice_number + 1)):
-            slice_number = slice_number + 1
+        #if (self.range_0 % (slice_number + 1)):
+        #    slice_number = slice_number + 1
 
         sliced_outcome = os.path.join("/tmp", f"temp/slice_{slice_number}.ms")            #DEBUG, should probably delete folder later
         cleaned_sliced_path = os.path.join("/tmp", f"output/slice_{slice_number}.ms")  
@@ -329,7 +334,7 @@ def ms_partitioning_strategy(cloud_object: CloudObject, num_chunks: int):
     for i in range(num_chunks):
         chunk_size = rows_per_chunk + (1 if i < remainder else 0)
         end = start + chunk_size - 1
-        slice = MSSLice(start, end)
+        slice = MSSLice(start, end, index=i)
         slices.append(slice)
         start = end + 1
 
