@@ -44,8 +44,12 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_
     
     local_metadata_path = os.path.join(base_dir, local_metadata_path)
 
-    response = client.list_objects_v2(Bucket=bucket_name,Prefix=ms_name)
+    print (f"Local metadata path: {local_metadata_path}")  #DEBUG
+    if os.path.exists(local_metadata_path):
+        shutil.rmtree(local_metadata_path)
 
+    response = client.list_objects_v2(Bucket=bucket_name,Prefix=ms_name)
+    print (response)
     if 'Contents' not in response:
         print(f"WARNING: No content in: {bucket_name} with the following name: {ms_name}")  #DEBUG?
         return []
@@ -54,11 +58,14 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_
     for obj in response['Contents']:
             key = obj['Key']
             size = obj['Size']
-
+            if key.endswith('.zip'):
+                continue
             relative_path = os.path.relpath(key, ms_name)
-
+            print(f"Relative path: {relative_path}")  #DEBUG
             local_file_path = os.path.join(local_metadata_path, relative_path)
+            print(f"Local file path: {local_file_path}")  #DEBUG
             local_dir = os.path.dirname(local_file_path)
+            print(f"Local directory: {local_dir}")  #DEBUG
             
             if not os.path.isdir(local_dir):  # Verifica si ya es un directorio
                 os.makedirs(local_dir)
@@ -79,6 +86,7 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_
 def _analyze_tiled_columns(ms_path):
     ms = table(ms_path, readonly=True)
     structure = ms.showstructure()
+    print (structure)
     ms.close()
 
     blocks = structure.strip().split("\n\n")
@@ -243,14 +251,48 @@ def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, e
         print(f"Copied {current_length} bytes {key} to {target_file_path} with {padding_needed} empty bytes for padding")
 
 # Per actual definition, returning path to processed slice is a desirable outcome. 
-def _cleanup_ms(input_ms_path, output_ms_path, num_rows):                      
+def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range):                      
     if not os.path.exists(input_ms_path):
         return f"Error: MeasurementSet '{input_ms_path}' not found."
-
+    
+    fixed_rows = num_rows +1
+    
     try:
-        ms = table(input_ms_path)
+        ms = table(input_ms_path, readonly=False)
         
-        selection = ms.selectrows(list(range(0, num_rows+1))) 
+        #Fixing columns (statically, maybe necessary for everything?)
+        if starting_range > 0:
+            final_range = starting_range + fixed_rows
+
+            tc = ms.col('TIME')
+            tcc = ms.col('TIME_CENTROID')
+            frc = ms.col ('FLAG_ROW')
+
+            a1c = ms.col('ANTENNA1')
+            a2c = ms.col('ANTENNA2')
+            
+            time_data = tc[:]
+            time_centroid_data = tcc[:]
+            flag_row_data = frc[:]
+
+            antenna1_data = a1c[:]
+            antenna2_data = a2c[:]
+
+            sliced_tdata = time_data[starting_range:final_range]
+            sliced_tcdata = time_centroid_data[starting_range:final_range]
+            sliced_frdata = flag_row_data[starting_range:final_range]
+
+            sliced_a1data = antenna1_data[starting_range:final_range]
+            sliced_a2data = antenna2_data[starting_range:final_range]
+            
+            tc[:fixed_rows] = sliced_tdata
+            tcc[:fixed_rows] = sliced_tcdata
+            frc[:fixed_rows] = sliced_frdata
+
+            a1c[:fixed_rows] = sliced_a1data
+            a2c[:fixed_rows] = sliced_a2data
+        
+        selection = ms.selectrows(list(range(0, fixed_rows))) 
         selection.copy(output_ms_path, deep=True) 
         
         ms.close()
@@ -309,7 +351,7 @@ class MSSLice(CloudObjectSlice):
             starting_row=self.range_0,
             end_row=self.range_1
         )
-        error = _cleanup_ms(sliced_outcome, cleaned_sliced_path,total_rows)
+        error = _cleanup_ms(sliced_outcome, cleaned_sliced_path,total_rows, self.range_0)
         print(error)                                                #Debug
 
         #os.remove(sliced_outcome)                      
