@@ -83,10 +83,32 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_
 
     return empty_files_info, local_metadata_path
 
+def _get_rows_per_time(ms):
+    tc = ms.col('TIME')
+    time_data = tc[:]
+    
+    time_counts = {}
+    
+    for t in time_data:
+        if t not in time_counts:
+            time_counts[t] = 1
+        else:
+            time_counts[t] += 1
+
+    time_keys = list(time_counts.keys())
+
+    if time_counts[time_keys[0]] == time_counts[time_keys[-1]]:
+        rows_per_time = time_counts[time_keys[0]]
+    else:
+        rows_per_time = time_counts[time_keys[0]]
+
+    return rows_per_time
+
 def _analyze_tiled_columns(ms_path):
     ms = table(ms_path, readonly=True)
     structure = ms.showstructure()
     print (structure)
+    rows_per_time = _get_rows_per_time(ms)
     ms.close()
 
     blocks = structure.strip().split("\n\n")
@@ -126,7 +148,7 @@ def _analyze_tiled_columns(ms_path):
         if match_rows:
             total_rows = int(match_rows.group(1))
 
-    return tiled_columns, total_rows
+    return tiled_columns, total_rows, rows_per_time
 
 def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
     s3_client = cloud_object.storage
@@ -150,7 +172,7 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
         criterion=criterion
     )
 
-    tiled_metadata, total_rows = _analyze_tiled_columns(os.path.join(base_dir, "template.ms"))
+    tiled_metadata, total_rows, rows_per_time = _analyze_tiled_columns(os.path.join(base_dir, "template.ms"))
     mutables_list = []
 
     for column in tiled_metadata:
@@ -170,7 +192,8 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
         attributes={
             "total_rows": total_rows,
             "mutable_files": mutables_list,
-            "ms_name": ms_name
+            "ms_name": ms_name, 
+            "rows_per_time": rows_per_time
         },
         metadata_file_path=metadata_path + ".tar"
     )
@@ -180,6 +203,7 @@ class MS:
     ms_name: str
     mutable_files: List[dict]
     total_rows: int
+    rows_per_time: int
 
 def _clone_template(template_path, output_path):
     if not os.path.exists(template_path):
@@ -362,25 +386,40 @@ class MSSLice(CloudObjectSlice):
 
         return chunk
 
-# Decide number of resulting chunks (Most optimal)
+# Decide number of resulting chunks (Most optimal) with rows per time
 @PartitioningStrategy(dataformat=MS)
 def ms_partitioning_strategy(cloud_object: CloudObject, num_chunks: int):
     
-    total_rows=cloud_object.get_attribute("total_rows")
+    total_rows = cloud_object.get_attribute("total_rows")
+    rows_per_time = cloud_object.get_attribute("rows_per_time") 
+
+    if (num_chunks > total_rows/rows_per_time):
+        num_chunks = total_rows // rows_per_time
+
     slices = []
-    
+
+    print(rows_per_time)
+
     rows_per_chunk = total_rows // num_chunks
     remainder = total_rows % num_chunks
+    
     start = 0
-
     for i in range(num_chunks):
         chunk_size = rows_per_chunk + (1 if i < remainder else 0)
+        
+        if chunk_size % rows_per_time != 0:
+            chunk_size = ((chunk_size // rows_per_time) + 1) * rows_per_time
+
+        if start + chunk_size > total_rows:
+            chunk_size = total_rows - start
+
         end = start + chunk_size - 1
         slice = MSSLice(start, end, index=i)
         slices.append(slice)
         start = end + 1
 
     return slices
+
 
 # Decide number of resulting rows per chunk (Most flexible)
 @PartitioningStrategy(dataformat=MS)
