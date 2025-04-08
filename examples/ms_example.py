@@ -32,11 +32,11 @@ if __name__ == "__main__":
     print(f"Preprocess stage took {elapsed_time:.2f} seconds.")
     #print(co.attributes)
 
-    slices = co.partition(ms_partitioning_strategy, num_chunks=5)
+    slices = co.partition(ms_partitioning_strategy, num_chunks=13)
     for slice in slices:
         print(slice)
-        slice_data = slice.get()
-        print(slice_data)
+        #slice_data = slice.get()
+        #print(slice_data)
 
     # first_slice = slices[0]
     # slice_data = first_slice.get()

@@ -393,27 +393,23 @@ def ms_partitioning_strategy(cloud_object: CloudObject, num_chunks: int):
     total_rows = cloud_object.get_attribute("total_rows")
     rows_per_time = cloud_object.get_attribute("rows_per_time") 
 
-    if (num_chunks > total_rows/rows_per_time):
-        num_chunks = total_rows // rows_per_time
+    max_chunks = total_rows // rows_per_time
+    num_chunks = min(num_chunks, max_chunks)
 
     slices = []
 
-    print(rows_per_time)
+    times_per_chunk = max_chunks // num_chunks
+    remainder = max_chunks % num_chunks
 
-    rows_per_chunk = total_rows // num_chunks
-    remainder = total_rows % num_chunks
-    
     start = 0
     for i in range(num_chunks):
-        chunk_size = rows_per_chunk + (1 if i < remainder else 0)
-        
-        if chunk_size % rows_per_time != 0:
-            chunk_size = ((chunk_size // rows_per_time) + 1) * rows_per_time
+        my_times = times_per_chunk
+        if remainder > 0:
+            my_times = times_per_chunk + 1
+            remainder -= 1
 
-        if start + chunk_size > total_rows:
-            chunk_size = total_rows - start
-
-        end = start + chunk_size - 1
+        end = start + my_times*rows_per_time - 1
+        print(end)
         slice = MSSLice(start, end, index=i)
         slices.append(slice)
         start = end + 1
