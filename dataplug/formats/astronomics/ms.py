@@ -113,11 +113,14 @@ def _analyze_tiled_columns(ms_path):
 
     blocks = structure.strip().split("\n\n")
     tiled_columns = []
+    static_columns = []
+
     total_rows = None
     
     # As stated before, if more definitions of .ms files appear it may be of interest to not hardcode the type of column
     for block in blocks:
         if "TiledColumnStMan" in block:
+
             column_metadata = {
                 "filename": None,
                 "type": None,
@@ -144,11 +147,20 @@ def _analyze_tiled_columns(ms_path):
                 )
                 tiled_columns.append(column_metadata)
 
+        elif "StandardStMan" in block or "IncrementalStMan" in block:
+            
+            column_names = re.findall(r"^\s*([A-Z0-9_]+)\s+(?:Int|double|float|Complex|Bool)\b", block, re.MULTILINE)
+            static_columns.extend(column_names)
+
+        elif "StMan" in block:  #Any other type of non-virtual StorageManager may be treated, for now, the same as any other non-tiled column. 
+            column_names = re.findall(r"^\s*([A-Z0-9_]+)\s+(?:Int|double|float|Complex|Bool)\b", block, re.MULTILINE)
+            static_columns.extend(column_names)
+            
         match_rows = re.search(r"(\d+)\s*rows", block)
         if match_rows:
             total_rows = int(match_rows.group(1))
 
-    return tiled_columns, total_rows, rows_per_time
+    return tiled_columns, total_rows, rows_per_time, static_columns
 
 def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
     s3_client = cloud_object.storage
@@ -172,7 +184,7 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
         criterion=criterion
     )
 
-    tiled_metadata, total_rows, rows_per_time = _analyze_tiled_columns(os.path.join(base_dir, "template.ms"))
+    tiled_metadata, total_rows, rows_per_time, static_columns = _analyze_tiled_columns(os.path.join(base_dir, "template.ms"))
     mutables_list = []
 
     for column in tiled_metadata:
@@ -193,7 +205,8 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
             "total_rows": total_rows,
             "mutable_files": mutables_list,
             "ms_name": ms_name, 
-            "rows_per_time": rows_per_time
+            "rows_per_time": rows_per_time,
+            "static_columns": static_columns
         },
         metadata_file_path=metadata_path + ".tar"
     )
@@ -204,6 +217,7 @@ class MS:
     mutable_files: List[dict]
     total_rows: int
     rows_per_time: int
+    static_columns: List[str]
 
 def _clone_template(template_path, output_path):
     if not os.path.exists(template_path):
@@ -275,7 +289,7 @@ def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, e
         print(f"Copied {current_length} bytes {key} to {target_file_path} with {padding_needed} empty bytes for padding")
 
 # Per actual definition, returning path to processed slice is a desirable outcome. 
-def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range):                      
+def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range, static_columns=None):                      
     if not os.path.exists(input_ms_path):
         return f"Error: MeasurementSet '{input_ms_path}' not found."
     
@@ -284,37 +298,49 @@ def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range):
     try:
         ms = table(input_ms_path, readonly=False)
         
-        #Fixing columns (statically, maybe necessary for everything?)
-        if starting_range > 0:
+        #Fixing columns dinamically v1.0, super slow?
+        if starting_range > 0 and static_columns is not None:
+
             final_range = starting_range + fixed_rows
+            for column in static_columns:
+                try:
+                    column = ms.col(column)
+                    data = column[:]
+                    sliced_data = data[starting_range:final_range]
+                    data[:fixed_rows] = sliced_data                
+                except Exception as e:
+                    print(f"Error: {e}")     #Debug 
+                    continue
+                #if column != "FLAG_CATEGORY":
+                    
 
-            tc = ms.col('TIME')
-            tcc = ms.col('TIME_CENTROID')
-            frc = ms.col ('FLAG_ROW')
+            # tc = ms.col('TIME')
+            # tcc = ms.col('TIME_CENTROID')
+            # frc = ms.col ('FLAG_ROW')
 
-            a1c = ms.col('ANTENNA1')
-            a2c = ms.col('ANTENNA2')
+            # a1c = ms.col('ANTENNA1')
+            # a2c = ms.col('ANTENNA2')
             
-            time_data = tc[:]
-            time_centroid_data = tcc[:]
-            flag_row_data = frc[:]
+            # time_data = tc[:]
+            # time_centroid_data = tcc[:]
+            # flag_row_data = frc[:]
 
-            antenna1_data = a1c[:]
-            antenna2_data = a2c[:]
+            # antenna1_data = a1c[:]
+            # antenna2_data = a2c[:]
 
-            sliced_tdata = time_data[starting_range:final_range]
-            sliced_tcdata = time_centroid_data[starting_range:final_range]
-            sliced_frdata = flag_row_data[starting_range:final_range]
+            # sliced_tdata = time_data[starting_range:final_range]
+            # sliced_tcdata = time_centroid_data[starting_range:final_range]
+            # sliced_frdata = flag_row_data[starting_range:final_range]
 
-            sliced_a1data = antenna1_data[starting_range:final_range]
-            sliced_a2data = antenna2_data[starting_range:final_range]
+            # sliced_a1data = antenna1_data[starting_range:final_range]
+            # sliced_a2data = antenna2_data[starting_range:final_range]
             
-            tc[:fixed_rows] = sliced_tdata
-            tcc[:fixed_rows] = sliced_tcdata
-            frc[:fixed_rows] = sliced_frdata
+            # tc[:fixed_rows] = sliced_tdata
+            # tcc[:fixed_rows] = sliced_tcdata
+            # frc[:fixed_rows] = sliced_frdata
 
-            a1c[:fixed_rows] = sliced_a1data
-            a2c[:fixed_rows] = sliced_a2data
+            # a1c[:fixed_rows] = sliced_a1data
+            # a2c[:fixed_rows] = sliced_a2data
         
         selection = ms.selectrows(list(range(0, fixed_rows))) 
         selection.copy(output_ms_path, deep=True) 
@@ -375,7 +401,8 @@ class MSSLice(CloudObjectSlice):
             starting_row=self.range_0,
             end_row=self.range_1
         )
-        error = _cleanup_ms(sliced_outcome, cleaned_sliced_path,total_rows, self.range_0)
+
+        error = _cleanup_ms(sliced_outcome, cleaned_sliced_path,total_rows, self.range_0, static_columns=self.cloud_object["static_columns"])
         print(error)                                                #Debug
 
         #os.remove(sliced_outcome)                      
@@ -415,6 +442,30 @@ def ms_partitioning_strategy(cloud_object: CloudObject, num_chunks: int):
         start = end + 1
 
     return slices
+
+@PartitioningStrategy(dataformat=MS)
+def ms_partitioning_strategy_experimental(cloud_object: CloudObject, num_chunks: int):
+    total_rows = cloud_object.get_attribute("total_rows")
+
+    rows_per_chunk = total_rows // num_chunks
+    remainder = total_rows % num_chunks
+
+    slices = []
+
+    start = 0
+    for i in range(num_chunks):
+        my_rows = rows_per_chunk
+        if remainder > 0:
+            my_rows += 1
+            remainder -= 1
+
+        end = start + my_rows - 1
+        slice = MSSLice(start, end, index=i)
+        slices.append(slice)
+        start = end + 1
+    
+    return slices
+
 
 
 # Decide number of resulting rows per chunk (Most flexible)
