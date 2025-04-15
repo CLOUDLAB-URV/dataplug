@@ -44,14 +44,15 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_
     
     local_metadata_path = os.path.join(base_dir, local_metadata_path)
 
-    print (f"Local metadata path: {local_metadata_path}")  #DEBUG
+    print (f"[DATAPLUG] Local metadata path: {local_metadata_path}")  #DEBUG
+    
     if os.path.exists(local_metadata_path):
         shutil.rmtree(local_metadata_path)
 
     response = client.list_objects_v2(Bucket=bucket_name,Prefix=ms_name)
-    print (response)
+    #print (response) DEBUG 
     if 'Contents' not in response:
-        print(f"WARNING: No content in: {bucket_name} with the following name: {ms_name}")  #DEBUG?
+        print(f"[DATAPLUG] WARNING: No content in: {bucket_name} with the following name: {ms_name}")  #DEBUG?
         return []
     empty_files_info = []
     
@@ -61,11 +62,11 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_
             if key.endswith('.zip'):
                 continue
             relative_path = os.path.relpath(key, ms_name)
-            print(f"Relative path: {relative_path}")  #DEBUG
+            #print(f"Relative path: {relative_path}")  #DEBUG
             local_file_path = os.path.join(local_metadata_path, relative_path)
-            print(f"Local file path: {local_file_path}")  #DEBUG
+            #print(f"Local file path: {local_file_path}")  #DEBUG
             local_dir = os.path.dirname(local_file_path)
-            print(f"Local directory: {local_dir}")  #DEBUG
+            #print(f"Local directory: {local_dir}")  #DEBUG
             
             if not os.path.isdir(local_dir):  # Verifica si ya es un directorio
                 os.makedirs(local_dir)
@@ -107,7 +108,7 @@ def _get_rows_per_time(ms):
 def _analyze_tiled_columns(ms_path):
     ms = table(ms_path, readonly=True)
     structure = ms.showstructure()
-    print (structure)
+    # print (structure) DEBUG   
     rows_per_time = _get_rows_per_time(ms)
     ms.close()
 
@@ -237,7 +238,7 @@ def _clone_template(template_path, output_path):
             with open(src_file_path, 'rb') as src_file, open(dest_file_path, 'wb') as dest_file:
                 dest_file.write(src_file.read())
 
-    print(f"Cloned {template_path} to {output_path}")
+    print(f"[DATAPLUG] Cloned {template_path} to {output_path}")
 
 def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, end_row):
     for mutable in metadata:
@@ -258,18 +259,18 @@ def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, e
                 try:
                     response = s3.get_object(Bucket=bucket, Key=key, Range=s3_range)
                 except s3.exceptions.NoSuchKey:
-                    print(f"Error: The object {key} does not exist.")                       #Debug?
+                    print(f"[DATAPLUG] Error: The object {key} does not exist.")                       #Debug?
                     file_data = b""
                 except s3.exceptions.InvalidRange:
-                    print(f"Error: The range {s3_range} is invalid for the object {key}.")  #Debug?
+                    print(f"[DATAPLUG] Error: The range {s3_range} is invalid for the object {key}.")  #Debug?
                     file_data = b""
                 file_data = response["Body"].read()
             except Exception as e:
-                print(f"Error retrieving {key} with the range {s3_range}: {e}")
+                print(f"[DATAPLUG] Error retrieving {key} with the range {s3_range}: {e}")
                 raise
         else:
             file_data = b""
-            print("Error with the range")
+            print("[DATAPLUG] Error with the range")
 
         if requested_length % bucketsize == 0:
             padded_length = requested_length
@@ -286,19 +287,19 @@ def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, e
             if padding_needed > 0:
                 fout.write(b'\x00' * padding_needed)
 
-        print(f"Copied {current_length} bytes {key} to {target_file_path} with {padding_needed} empty bytes for padding")
+        print(f"[DATAPLUG] Copied {current_length} bytes {key} to {target_file_path} with {padding_needed} empty bytes for padding")
 
 # Per actual definition, returning path to processed slice is a desirable outcome. 
 def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range, static_columns=None):                      
     if not os.path.exists(input_ms_path):
-        return f"Error: MeasurementSet '{input_ms_path}' not found."
+        return f"[DATAPLUG] Error: MeasurementSet '{input_ms_path}' not found."
     
     fixed_rows = num_rows +1
     
     try:
         ms = table(input_ms_path, readonly=False)
         
-        #Fixing columns dinamically v1.0, super slow?
+        #Fixing columns dinamically v1.1, still seems slow, but functional and since should be parallelized, should not be a problem
         if starting_range > 0 and static_columns is not None:
 
             final_range = starting_range + fixed_rows
@@ -309,44 +310,14 @@ def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range, static_
                     sliced_data = data[starting_range:final_range]
                     data[:fixed_rows] = sliced_data                
                 except Exception as e:
-                    print(f"Error: {e}")     #Debug 
+                    #print(f"Error: {e}")     #Debug 
                     continue
-                #if column != "FLAG_CATEGORY":
-                    
 
-            # tc = ms.col('TIME')
-            # tcc = ms.col('TIME_CENTROID')
-            # frc = ms.col ('FLAG_ROW')
-
-            # a1c = ms.col('ANTENNA1')
-            # a2c = ms.col('ANTENNA2')
-            
-            # time_data = tc[:]
-            # time_centroid_data = tcc[:]
-            # flag_row_data = frc[:]
-
-            # antenna1_data = a1c[:]
-            # antenna2_data = a2c[:]
-
-            # sliced_tdata = time_data[starting_range:final_range]
-            # sliced_tcdata = time_centroid_data[starting_range:final_range]
-            # sliced_frdata = flag_row_data[starting_range:final_range]
-
-            # sliced_a1data = antenna1_data[starting_range:final_range]
-            # sliced_a2data = antenna2_data[starting_range:final_range]
-            
-            # tc[:fixed_rows] = sliced_tdata
-            # tcc[:fixed_rows] = sliced_tcdata
-            # frc[:fixed_rows] = sliced_frdata
-
-            # a1c[:fixed_rows] = sliced_a1data
-            # a2c[:fixed_rows] = sliced_a2data
-        
         selection = ms.selectrows(list(range(0, fixed_rows))) 
         selection.copy(output_ms_path, deep=True) 
         
         ms.close()
-        #This return, if not checked, will not be displayed. Maybe return nothing?
+        # TODO: This return, if not checked, will not be displayed. Maybe return nothing?
         return f"Measurement Set processed correctly, stored in: {output_ms_path}"
     
     except Exception as e:
@@ -358,15 +329,14 @@ class MSSLice(CloudObjectSlice):
         self.index = index
 
     def get(self):
-        # Maybe paths could be handled in a cleanlier way? Or redefine where data is created/stored?
+        # TODO: Maybe paths could be handled in a cleanlier way? Or redefine where data is created/stored?
         ms_name = self.cloud_object.path.key
         clean_ms_name = ms_name.replace('/', '_')
         metadata_dir = os.path.join("/tmp", f"metadata_{clean_ms_name}")
         template_path = os.path.join(metadata_dir, "template.ms")
 
         if not os.path.exists(metadata_dir):
-            print("DEBUG: Trying stuff")
-            os.makedirs(metadata_dir, exist_ok=True)    #ensure directory will exist in a worker
+            os.makedirs(metadata_dir, exist_ok=True)    # Ensure directory exists in remote worker
 
             meta_key = self.cloud_object.meta_path.key
             meta_bucket = self.cloud_object.meta_path.bucket
@@ -380,12 +350,8 @@ class MSSLice(CloudObjectSlice):
         
         total_rows = self.range_1 - self.range_0
         slice_number = self.index
-        #slice_number = self.range_0 // total_rows
 
-        #if (self.range_0 % (slice_number + 1)):
-        #    slice_number = slice_number + 1
-
-        sliced_outcome = os.path.join("/tmp", f"temp/slice_{slice_number}.ms")            #DEBUG, should probably delete folder later
+        sliced_outcome = os.path.join("/tmp", f"temp/slice_{slice_number}.ms")
         cleaned_sliced_path = os.path.join("/tmp", f"output/slice_{slice_number}.ms")  
         
         os.makedirs(os.path.dirname(sliced_outcome), exist_ok=True)
@@ -402,49 +368,23 @@ class MSSLice(CloudObjectSlice):
             end_row=self.range_1
         )
 
-        error = _cleanup_ms(sliced_outcome, cleaned_sliced_path,total_rows, self.range_0, static_columns=self.cloud_object["static_columns"])
-        print(error)                                                #Debug
-
-        #os.remove(sliced_outcome)                      
-        # Finally returning the path to the file so you can programatically pass it to casacore for further processing. 
-        chunk = cleaned_sliced_path 
+        #error = 
+        _cleanup_ms(sliced_outcome, cleaned_sliced_path,total_rows, self.range_0, static_columns=self.cloud_object["static_columns"])
         
-        print ( chunk)
+        #print(error)  #DEBUG
+        
+        shutil.rmtree(sliced_outcome)
+        
+        chunk = cleaned_sliced_path #Returns path to file so casacore can process it further
+        
+        # print (chunk) #DEBUG
 
         return chunk
 
-# Decide number of resulting chunks (Most optimal) with rows per time
+
+# Reimplemented and tested, seems to be working. Allows for most-even distribution of rows based on chunks. 
 @PartitioningStrategy(dataformat=MS)
 def ms_partitioning_strategy(cloud_object: CloudObject, num_chunks: int):
-    
-    total_rows = cloud_object.get_attribute("total_rows")
-    rows_per_time = cloud_object.get_attribute("rows_per_time") 
-
-    max_chunks = total_rows // rows_per_time
-    num_chunks = min(num_chunks, max_chunks)
-
-    slices = []
-
-    times_per_chunk = max_chunks // num_chunks
-    remainder = max_chunks % num_chunks
-
-    start = 0
-    for i in range(num_chunks):
-        my_times = times_per_chunk
-        if remainder > 0:
-            my_times = times_per_chunk + 1
-            remainder -= 1
-
-        end = start + my_times*rows_per_time - 1
-        print(end)
-        slice = MSSLice(start, end, index=i)
-        slices.append(slice)
-        start = end + 1
-
-    return slices
-
-@PartitioningStrategy(dataformat=MS)
-def ms_partitioning_strategy_experimental(cloud_object: CloudObject, num_chunks: int):
     total_rows = cloud_object.get_attribute("total_rows")
 
     rows_per_chunk = total_rows // num_chunks
@@ -466,22 +406,47 @@ def ms_partitioning_strategy_experimental(cloud_object: CloudObject, num_chunks:
     
     return slices
 
-
-
-# Decide number of resulting rows per chunk (Most flexible)
+# Decide number of resulting chunks with rows per time (Likely most optimal for smaller sets, but number of chunks scales inversely with measurements per timestamp)
 @PartitioningStrategy(dataformat=MS)
-def ms_partitioning_strategy_rowsize(cloud_object: CloudObject, row_size: int):
-
-    total_rows = cloud_object.get_attribute("total_rows")
-    slices = []
-    start = 0
+def ms_partitioning_strategy_time(cloud_object: CloudObject, num_chunks: int):
     
-    while start < total_rows:
-        end = min(start + row_size - 1, total_rows - 1)
-        slice = MSSLice(start, end)
-        slices.append(slice)
+    total_rows = cloud_object.get_attribute("total_rows")
+    rows_per_timestamp = cloud_object.get_attribute("rows_per_time")
+
+    max_chunks = total_rows // rows_per_timestamp
+    num_chunks = min(num_chunks, max_chunks)
+
+    slices = []
+
+    base_timestamps = max_chunks // num_chunks
+    extra = max_chunks % num_chunks
+
+    start = 0
+    for index in range(num_chunks):
+        timestamps = base_timestamps + 1 if extra > 0 else base_timestamps
+        if extra > 0:
+            extra -= 1
+
+        end = start + timestamps * rows_per_timestamp - 1
+        slices.append(MSSLice(start, end, index=index))
         start = end + 1
-        
+
     return slices
 
-# Decide if we could use a third partitioning strategy, based maybe on default bucket sizes? Or dinamically with metadata usage?
+
+
+# Decides number of resulting slices by ensuring N rows per chunk (Most flexible, likely most inefficient)
+@PartitioningStrategy(dataformat=MS)
+def ms_partitioning_strategy_rows(cloud_object: CloudObject, row_size: int):
+    total_rows = cloud_object.get_attribute("total_rows")
+    slices = []
+
+    num_slices = (total_rows + row_size - 1) // row_size  # Ceiling division
+
+    for i in range(num_slices):
+        start = i * row_size
+        end = min(start + row_size - 1, total_rows - 1)
+        slice = MSSLice(start, end, index=i)
+        slices.append(slice)
+
+    return slices
