@@ -9,7 +9,7 @@ import re
 from math import ceil
 from typing import TYPE_CHECKING
 
-from casacore.tables import table               #Should we always import or use a try?
+from casacore.tables import table
 
 from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
 from ...preprocessing.metadata import PreprocessingMetadata
@@ -24,7 +24,7 @@ def _create_tarfile(output_filename, source_dir):
     with tarfile.open(output_filename, "w") as tar:
         tar.add(source_dir, arcname=os.path.basename(source_dir))
 
-def _calculate_block_size(data_type, shape):    #These are not directly accessible from casacore so we need to hardcode them, they may change
+def _calculate_block_size(data_type, shape):    # These are not directly accessible from casacore so we need to hardcode them, they may change, but is highly unlikely 
     type_sizes = {
         "double": 8,
         "float": 4,
@@ -39,7 +39,7 @@ def _calculate_block_size(data_type, shape):    #These are not directly accessib
         return ceil((num_elements * type_sizes[data_type]) / 8)
     return num_elements * type_sizes[data_type]
 
-# For now, we define the default criterion "_TSM0", but in the future, more formats may be used. 
+# Default criterion is defined as "_TSM0", but in the future, different managers may be used and would need to be treated accordingly
 def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_path="template.ms", criterion="_TSM0"):
     
     local_metadata_path = os.path.join(base_dir, local_metadata_path)
@@ -50,25 +50,25 @@ def _retrieve_ms_from_s3(client, bucket_name, ms_name, base_dir, local_metadata_
         shutil.rmtree(local_metadata_path)
 
     response = client.list_objects_v2(Bucket=bucket_name,Prefix=ms_name)
-    #print (response) DEBUG 
+
     if 'Contents' not in response:
-        print(f"[DATAPLUG] WARNING: No content in: {bucket_name} with the following name: {ms_name}")  #DEBUG?
+        print(f"[DATAPLUG] WARNING: No content in: {bucket_name} with the following name: {ms_name}")
         return []
+    
     empty_files_info = []
     
     for obj in response['Contents']:
             key = obj['Key']
             size = obj['Size']
+            
             if key.endswith('.zip'):
                 continue
-            relative_path = os.path.relpath(key, ms_name)
-            #print(f"Relative path: {relative_path}")  #DEBUG
-            local_file_path = os.path.join(local_metadata_path, relative_path)
-            #print(f"Local file path: {local_file_path}")  #DEBUG
-            local_dir = os.path.dirname(local_file_path)
-            #print(f"Local directory: {local_dir}")  #DEBUG
             
-            if not os.path.isdir(local_dir):  # Verifica si ya es un directorio
+            relative_path = os.path.relpath(key, ms_name)
+            local_file_path = os.path.join(local_metadata_path, relative_path)
+            local_dir = os.path.dirname(local_file_path)
+            
+            if not os.path.isdir(local_dir):
                 os.makedirs(local_dir)
 
             if key.endswith(criterion):
@@ -107,9 +107,11 @@ def _get_rows_per_time(ms):
 
 def _analyze_tiled_columns(ms_path):
     ms = table(ms_path, readonly=True)
+    
     structure = ms.showstructure()
-    # print (structure) DEBUG   
+    
     rows_per_time = _get_rows_per_time(ms)
+    
     ms.close()
 
     blocks = structure.strip().split("\n\n")
@@ -118,8 +120,7 @@ def _analyze_tiled_columns(ms_path):
 
     total_rows = None
     
-    # As stated before, if more definitions of .ms files appear it may be of interest to not hardcode the type of column
-    for block in blocks:
+    for block in blocks:                                    # More Columns definitions may be added in the future
         if "TiledColumnStMan" in block:
 
             column_metadata = {
@@ -153,7 +154,7 @@ def _analyze_tiled_columns(ms_path):
             column_names = re.findall(r"^\s*([A-Z0-9_]+)\s+(?:Int|double|float|Complex|Bool)\b", block, re.MULTILINE)
             static_columns.extend(column_names)
 
-        elif "StMan" in block:  #Any other type of non-virtual StorageManager may be treated, for now, the same as any other non-tiled column. 
+        elif "StMan" in block:                              # Any other type of non-virtual StorageManager may be treated, for now, they are treated the same as any other non-tiled column. 
             column_names = re.findall(r"^\s*([A-Z0-9_]+)\s+(?:Int|double|float|Complex|Bool)\b", block, re.MULTILINE)
             static_columns.extend(column_names)
             
@@ -175,8 +176,8 @@ def preprocess_ms(cloud_object: CloudObject) -> PreprocessingMetadata:
     if not os.path.exists(base_dir):
         os.makedirs(base_dir)
 
-    # This both creates the attributes and a .tar file that's the template for later processing
-    empty_files_info, metadata_path = _retrieve_ms_from_s3(
+    empty_files_info, metadata_path = _retrieve_ms_from_s3( # This both creates the attributes and a .tar file, containing the template for later processing
+
         client=s3_client,
         bucket_name=bucket_name,
         ms_name=ms_name,
@@ -222,7 +223,7 @@ class MS:
 
 def _clone_template(template_path, output_path):
     if not os.path.exists(template_path):
-        raise FileNotFoundError(f"The template {template_path} does not exist.")
+        raise FileNotFoundError(f"[DATAPLUG] The template {template_path} does not exist.")
 
     if os.path.exists(output_path):
         if os.path.isdir(output_path):
@@ -254,15 +255,15 @@ def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, e
 
         actual_end = min(end_byte, real_size)
         if start_byte < real_size:
-            s3_range = f"bytes={start_byte}-{actual_end}"   #quizas el -1 es necesario
+            s3_range = f"bytes={start_byte}-{actual_end}"   # Consider if adjusting the range is needed
             try:
                 try:
                     response = s3.get_object(Bucket=bucket, Key=key, Range=s3_range)
                 except s3.exceptions.NoSuchKey:
-                    print(f"[DATAPLUG] Error: The object {key} does not exist.")                       #Debug?
+                    print(f"[DATAPLUG] Error: The object {key} does not exist.")                       
                     file_data = b""
                 except s3.exceptions.InvalidRange:
-                    print(f"[DATAPLUG] Error: The range {s3_range} is invalid for the object {key}.")  #Debug?
+                    print(f"[DATAPLUG] Error: The range {s3_range} is invalid for the object {key}.")  
                     file_data = b""
                 file_data = response["Body"].read()
             except Exception as e:
@@ -289,7 +290,6 @@ def _copy_byte_range(s3, bucket, ms_name, metadata, output_path, starting_row, e
 
         print(f"[DATAPLUG] Copied {current_length} bytes {key} to {target_file_path} with {padding_needed} empty bytes for padding")
 
-# Per actual definition, returning path to processed slice is a desirable outcome. 
 def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range, static_columns=None):                      
     if not os.path.exists(input_ms_path):
         return f"[DATAPLUG] Error: MeasurementSet '{input_ms_path}' not found."
@@ -299,7 +299,6 @@ def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range, static_
     try:
         ms = table(input_ms_path, readonly=False)
         
-        #Fixing columns dinamically v1.1, still seems slow, but functional and since should be parallelized, should not be a problem
         if starting_range > 0 and static_columns is not None:
 
             final_range = starting_range + fixed_rows
@@ -310,18 +309,18 @@ def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range, static_
                     sliced_data = data[starting_range:final_range]
                     data[:fixed_rows] = sliced_data                
                 except Exception as e:
-                    #print(f"Error: {e}")     #Debug 
+                    #print(f"Error: {e}")               # For now, we find that it is correct and functional to ignore the cases that have no data or more complex data 
                     continue
 
         selection = ms.selectrows(list(range(0, fixed_rows))) 
         selection.copy(output_ms_path, deep=True) 
         
         ms.close()
-        # TODO: This return, if not checked, will not be displayed. Maybe return nothing?
-        return f"Measurement Set processed correctly, stored in: {output_ms_path}"
+
+        return f"[DATAPLUG] Measurement Set processed correctly, stored in: {output_ms_path}"  # This return may be used for logging or debugging purposes
     
     except Exception as e:
-        return f"Error MS: {str(e)}"
+        return f"[DATAPLUG] Error MS: {str(e)}"
 
 class MSSLice(CloudObjectSlice):   
     def __init__(self, range_0, range_1, index):
@@ -329,7 +328,6 @@ class MSSLice(CloudObjectSlice):
         self.index = index
 
     def get(self):
-        # TODO: Maybe paths could be handled in a cleanlier way? Or redefine where data is created/stored?
         ms_name = self.cloud_object.path.key
         clean_ms_name = ms_name.replace('/', '_')
         metadata_dir = os.path.join("/tmp", f"metadata_{clean_ms_name}")
@@ -368,47 +366,16 @@ class MSSLice(CloudObjectSlice):
             end_row=self.range_1
         )
 
-        #error = 
         _cleanup_ms(sliced_outcome, cleaned_sliced_path,total_rows, self.range_0, static_columns=self.cloud_object["static_columns"])
-        
-        #print(error)  #DEBUG
         
         shutil.rmtree(sliced_outcome)
         
-        chunk = cleaned_sliced_path #Returns path to file so casacore can process it further
+        chunk = cleaned_sliced_path                     # Returns a path to the chunked file for further processing
         
-        # print (chunk) #DEBUG
-
         return chunk
 
-
-# Reimplemented and tested, seems to be working. Allows for most-even distribution of rows based on chunks. 
-@PartitioningStrategy(dataformat=MS)
+@PartitioningStrategy(dataformat=MS)                    #As of now, this is the only tested strategy that will work for every case tested. 
 def ms_partitioning_strategy(cloud_object: CloudObject, num_chunks: int):
-    total_rows = cloud_object.get_attribute("total_rows")
-
-    rows_per_chunk = total_rows // num_chunks
-    remainder = total_rows % num_chunks
-
-    slices = []
-
-    start = 0
-    for i in range(num_chunks):
-        my_rows = rows_per_chunk
-        if remainder > 0:
-            my_rows += 1
-            remainder -= 1
-
-        end = start + my_rows - 1
-        slice = MSSLice(start, end, index=i)
-        slices.append(slice)
-        start = end + 1
-    
-    return slices
-
-# Decide number of resulting chunks with rows per time (Likely most optimal for smaller sets, but number of chunks scales inversely with measurements per timestamp)
-@PartitioningStrategy(dataformat=MS)
-def ms_partitioning_strategy_time(cloud_object: CloudObject, num_chunks: int):
     
     total_rows = cloud_object.get_attribute("total_rows")
     rows_per_timestamp = cloud_object.get_attribute("rows_per_time")
@@ -430,23 +397,5 @@ def ms_partitioning_strategy_time(cloud_object: CloudObject, num_chunks: int):
         end = start + timestamps * rows_per_timestamp - 1
         slices.append(MSSLice(start, end, index=index))
         start = end + 1
-
-    return slices
-
-
-
-# Decides number of resulting slices by ensuring N rows per chunk (Most flexible, likely most inefficient)
-@PartitioningStrategy(dataformat=MS)
-def ms_partitioning_strategy_rows(cloud_object: CloudObject, row_size: int):
-    total_rows = cloud_object.get_attribute("total_rows")
-    slices = []
-
-    num_slices = (total_rows + row_size - 1) // row_size  # Ceiling division
-
-    for i in range(num_slices):
-        start = i * row_size
-        end = min(start + row_size - 1, total_rows - 1)
-        slice = MSSLice(start, end, index=i)
-        slices.append(slice)
 
     return slices

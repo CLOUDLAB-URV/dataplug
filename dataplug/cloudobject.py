@@ -168,7 +168,8 @@ class CloudObject:
     def fetch(self):
         if not self._obj_headers:
             if self._is_folder:
-                self._obj_headers = {'Meta': 'Data'}        #TODO: Dummy metadata to temporarily bypass this. What could we fill this in with? Consider options
+                logger.info("Working with folder from S3")
+                self._obj_headers = {'Information': 'The data was marked as a folder, therefore it cannot generate headers correctly. This is set in place of the headers'} 
             else:
                 logger.info("Fetching object from S3")
                 self._fetch_object()

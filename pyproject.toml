@@ -36,6 +36,9 @@ geospatial = [
     "laspy",
     "PDAL"
 ]
+astronomics = [
+    "casacore"
+]
 
 
 [tool.setuptools]
