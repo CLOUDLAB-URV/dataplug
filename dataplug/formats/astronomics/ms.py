@@ -303,14 +303,20 @@ def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range, static_
 
             final_range = starting_range + fixed_rows
             for column in static_columns:
-                try:
-                    column = ms.col(column)
-                    data = column[:]
-                    sliced_data = data[starting_range:final_range]
-                    data[:fixed_rows] = sliced_data                
-                except Exception as e:
-                    #print(f"Error: {e}")               # For now, we find that it is correct and functional to ignore the cases that have no data or more complex data 
+                if column in ['FLAG_ROW', 'TIME', 'TIME_CENTROID']:
+                    print (column)
+                    try:
+                        print ("i'm working here")
+                        column = ms.col(column)
+                        data = column[:]
+                        sliced_data = data[starting_range:final_range]
+                        data[:fixed_rows] = sliced_data
+                    except Exception as e:
+                        # print(f"Error: {e}")  # Ignoramos columnas sin datos o con estructuras más complejas
+                        continue
+                else:
                     continue
+
 
         selection = ms.selectrows(list(range(0, fixed_rows))) 
         selection.copy(output_ms_path, deep=True) 
