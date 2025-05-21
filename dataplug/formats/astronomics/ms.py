@@ -5,6 +5,7 @@ import os
 import shutil
 import tarfile
 import re
+import numpy as np
 
 from math import ceil
 from typing import TYPE_CHECKING
@@ -302,22 +303,50 @@ def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range, static_
         if starting_range > 0 and static_columns is not None:
 
             final_range = starting_range + fixed_rows
-            for column in static_columns:
-                if column in ['FLAG_ROW', 'TIME', 'TIME_CENTROID']:
-                    print (column)
-                    try:
-                        print ("i'm working here")
-                        column = ms.col(column)
-                        data = column[:]
-                        sliced_data = data[starting_range:final_range]
-                        data[:fixed_rows] = sliced_data
-                    except Exception as e:
-                        # print(f"Error: {e}")  # Ignoramos columnas sin datos o con estructuras más complejas
-                        continue
-                else:
+
+            for colname in static_columns:
+                if colname not in ['FLAG_ROW', 'TIME', 'TIME_CENTROID']:
                     continue
 
+                print(colname)
+                try:
+                    print("I'm working here")
 
+                    desc = ms.getcoldesc(colname)
+                    ndim = desc.get('ndim', 0)
+
+                    # Caso 1: columna escalar (optimizado con acceso parcial)
+                    if ndim == 0:
+                        print("scalar (optimized)")
+                        sliced_data = ms.getcol(colname, startrow=starting_range, nrow=fixed_rows)
+                        ms.putcol(colname, sliced_data, startrow=0)
+                        continue
+
+
+                    # Caso 2: columna con arrays por celda
+                    print("array")
+                    cell_shape = desc['shape']  # e.g. [4] o [2,2]
+                    buf_shape = (fixed_rows, *cell_shape)
+                    buf = np.empty(buf_shape, dtype=ms.getcol(colname).dtype)
+
+                    blc = [0] * len(cell_shape)
+                    trc = [d - 1 for d in cell_shape]
+
+                    ms.getcolslice(colname, blc, trc,
+                                   startrow=starting_range,
+                                   nrow=fixed_rows,
+                                   rowincr=1,
+                                   out_array=buf)
+
+                    ms.putcolslice(colname, buf, blc, trc,
+                                   startrow=0,
+                                   nrow=fixed_rows)
+
+                except Exception as e:
+                    # print(f"Error procesando columna '{colname}': {e}")
+                    continue
+
+        # Copiar primeras filas al nuevo MS
         selection = ms.selectrows(list(range(0, fixed_rows))) 
         selection.copy(output_ms_path, deep=True) 
         
