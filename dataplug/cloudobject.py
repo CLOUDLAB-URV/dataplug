@@ -33,7 +33,8 @@ class CloudObject:
             object_path: S3Path,
             meta_path: S3Path,
             attrs_path: S3Path,
-            storage_config: Optional[Dict[str, Any]] = None
+            storage_config: Optional[Dict[str, Any]] = None,
+            is_folder: bool = False                         # Allows to process formats that are defined as folders
     ):
         self._obj_headers: Optional[Dict[str, str]] = None  # Storage headers of the data object
         self._meta_headers: Optional[Dict[str, str]] = None  # Storage headers of the metadata object
@@ -51,6 +52,8 @@ class CloudObject:
 
         self._attrs_path = attrs_path  # S3 Path for the attributes object
         self._attrs: Optional[SimpleNamespace] = None
+
+        self._is_folder = is_folder
 
         storage_config = storage_config or {}
         self._s3: S3Client = PickleableS3ClientProxy(**storage_config)
@@ -107,14 +110,14 @@ class CloudObject:
             storage_uri: str,
             fetch: Optional[bool] = True,
             metadata_bucket: Optional[str] = None,
-            s3_config: Optional[Dict[str, Any]] = None,
+            s3_config: Optional[Dict[str, Any]] = None
     ) -> CloudObject:
         obj_path = S3Path.from_uri(storage_uri)
         if metadata_bucket is None:
             metadata_bucket = obj_path.bucket + ".meta"
         metadata_path = S3Path.from_bucket_key(metadata_bucket, obj_path.key)
         attributes_path = S3Path.from_bucket_key(metadata_bucket, obj_path.key + ".attrs")
-        co = cls(data_format, obj_path, metadata_path, attributes_path, s3_config)
+        co = cls(data_format, obj_path, metadata_path, attributes_path, s3_config,data_format.is_folder)
         if fetch:
             co.fetch()
         return co
@@ -164,15 +167,19 @@ class CloudObject:
 
     def fetch(self):
         if not self._obj_headers:
-            logger.info("Fetching object from S3")
-            self._fetch_object()
+            if self._is_folder:
+                logger.info("Working with folder from S3")
+                self._obj_headers = {'Information': 'The data was marked as a folder, therefore it cannot generate headers correctly. This is set in place of the headers'} 
+            else:
+                logger.info("Fetching object from S3")
+                self._fetch_object()
         if not self._meta_headers:
             logger.info("Fetching metadata from S3")
             self._fetch_metadata()
 
     def _fetch_object(self):
         self._obj_headers, _ = head_object(self._s3, self._obj_path.bucket, self._obj_path.key)
-
+    
     def _fetch_metadata(self):
         try:
             res, _ = head_object(self._s3, self._meta_path.bucket, self._meta_path.key)
