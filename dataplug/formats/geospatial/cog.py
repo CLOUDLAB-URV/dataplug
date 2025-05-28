@@ -198,9 +198,8 @@ def grid_partition_strategy(cloud_object: CloudObject, n_splits) -> List[BlockWi
 
     Additionally, the tile identifier (tile_key) is extracted from the file name.
     """
-    with cloud_object.open("rb") as cog_file:
-        with rasterio.open(cog_file) as src:
-            # Extract the tile_key from the file name (without extension)
+    with rasterio.Env(aws_session=aws_session):
+        with rasterio.open(uri) as src:
             tile_key = os.path.basename(cloud_object.path.key)
             step_w = src.width / n_splits
             step_h = src.height / n_splits
