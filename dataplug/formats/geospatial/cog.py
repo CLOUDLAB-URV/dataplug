@@ -29,8 +29,9 @@ aws_session = AWSSession(boto3.Session(), requester_pays=True)
 
 def preprocess_cog(cloud_object: CloudObject) -> PreprocessingMetadata:
     logger.info("Starting COG preprocessing: %s", cloud_object.path.key)
-    with cloud_object.open(mode="rb") as cog_file:
-        with rasterio.open(cog_file) as src:
+    uri = f"s3://{cloud_object.path.bucket}/{cloud_object.path.key}"
+    with rasterio.Env(aws_session=aws_session):
+        with rasterio.open(uri) as src:
             meta = src.meta
             bounds = src.bounds
             crs = src.crs.to_string()
@@ -107,7 +108,7 @@ class BlockWindowSlice(CloudObjectSlice):
         self.__dict__.update(state)
         
     def get(self):
-        file_url = self.cloud_object.storage.generate_presigned_url(
+        url = self.cloud_object.storage.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": self.cloud_object.path.bucket,
@@ -116,15 +117,10 @@ class BlockWindowSlice(CloudObjectSlice):
             },
             ExpiresIn=300,
         )
-        try:
-            with rasterio.Env(aws_session=aws_session):
-                with rasterio.open(file_url) as src:
-                    logger.debug("Reading block window %s from COG %s", self.window, self.cloud_object.path.key)
-                    data = src.read(window=self.window)
-            return data
-        except Exception as e:
-            logger.error("Error fetching data from COG %s: %s", self.cloud_object.path.key, e)
-            raise
+        with rasterio.Env(aws_session=aws_session):
+            with rasterio.open(url) as src:
+                data = src.read(window=self.window)
+        return data
 
     def to_file(self, file_name: str):
         # Ensure self.window is an instance of Window
@@ -174,7 +170,7 @@ class BlockWindowSlice(CloudObjectSlice):
         try:
             with rasterio.Env(aws_session=aws_session):
                 with rasterio.open(file_url) as src:
-                    profile = src.profile
+                    profile = src.profile.copy()
                     profile.update({
                         "driver": "GTiff",
                         "width": width_int,
@@ -190,7 +186,7 @@ class BlockWindowSlice(CloudObjectSlice):
 
 
 @PartitioningStrategy(CloudOptimizedGeoTiff)
-def grid_partition_strategy(cloud_object: CloudObject, n_splits) -> List[BlockWindowSlice]:
+def grid_partition_strategy(cloud_object: CloudObject, n_splits: int) -> List[BlockWindowSlice]:
     """
     Splits the COG into a grid of n_splits x n_splits.
 
@@ -198,28 +194,33 @@ def grid_partition_strategy(cloud_object: CloudObject, n_splits) -> List[BlockWi
 
     Additionally, the tile identifier (tile_key) is extracted from the file name.
     """
-    with cloud_object.open("rb") as cog_file:
-        with rasterio.open(cog_file) as src:
-            # Extract the tile_key from the file name (without extension)
-            tile_key = os.path.basename(cloud_object.path.key)
+    # Validate n_splits
+    if not isinstance(n_splits, int) or n_splits < 1:
+        raise ValueError(f"n_splits must be a positive integer, got {n_splits}")
+
+    tile_key = os.path.basename(cloud_object.path.key)
+    uri = f"s3://{cloud_object.path.bucket}/{cloud_object.path.key}"
+    slices: List[BlockWindowSlice] = []
+
+    with rasterio.Env(aws_session=aws_session):
+        with rasterio.open(uri) as src:
             step_w = src.width / n_splits
             step_h = src.height / n_splits
 
-            slices = []
-            for block_x in range(n_splits):
-                for block_y in range(n_splits):
-                    offset_w = round(step_w * block_y)
-                    offset_h = round(step_h * block_x)
-                    width = math.ceil(step_w * (block_y + 1)) - offset_w
-                    height = math.ceil(step_h * (block_x + 1)) - offset_h
+            for bx in range(n_splits):
+                for by in range(n_splits):
+                    off_w = round(step_w * by)
+                    off_h = round(step_h * bx)
+                    w = math.ceil(step_w * (by + 1)) - off_w
+                    h = math.ceil(step_h * (bx + 1)) - off_h
 
-                    window = Window(offset_w, offset_h, width, height)
-                    slice_obj = BlockWindowSlice(window)
-                    slice_obj.block_x = block_x
-                    slice_obj.block_y = block_y
-                    slice_obj.tile_key = tile_key
-                    slices.append(slice_obj)
+                    window = Window(off_w, off_h, w, h)
+                    sl = BlockWindowSlice(window)
+                    sl.block_x = bx
+                    sl.block_y = by
+                    sl.tile_key = tile_key
+                    slices.append(sl)
 
-    logger.info("Created %d grid slices for COG %s with n_splits=%d", 
+    logger.info("Created %d grid slices for COG %s with n_splits=%d",
                 len(slices), cloud_object.path.key, n_splits)
     return slices
