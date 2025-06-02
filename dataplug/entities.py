@@ -19,11 +19,12 @@ class PreprocessingType(Enum):
 
 
 class CloudDataFormat:
-    def __init__(self, preprocessing_function: Callable = None, finalizer_function: Callable = None):
+    def __init__(self, preprocessing_function: Callable = None, finalizer_function: Callable = None, is_folder=False):
         self.co_class: object = None
 
         self.preprocessing_function = preprocessing_function
         self.finalizer_function = finalizer_function
+        self.is_folder = is_folder
         self.attrs_types = {}
         self.default_attrs = {}
 
