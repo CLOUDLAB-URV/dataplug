@@ -20,7 +20,7 @@
   - Metabolomics
       - [ImzML](docs/formats/metabolomics/imzml.md)
   - Astronomics 
-      - [MeasurementSet](formats/astronomics/ms.md)  
+      - [MeasurementSet](docs/formats/astronomics/ms.md)  
 
 - Dataplug follows a **read-only cloud-aware pre-processing** approach to enable **on-the-fly dynamic partitioning of scientific unstructured data**.
   - It is **cloud-aware** because it specifically targets cold raw data residing in huge repositories in object storage (e.g. Amazon S3).
