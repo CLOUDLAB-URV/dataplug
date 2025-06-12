@@ -1,25 +1,22 @@
 from dataplug import CloudObject
 from dataplug.formats.metabolomics.imzml import ImzML, partition_chunks_strategy
-from dataplug.preprocessing import LocalPreprocessor
 
 import numpy as np
 
 if __name__ == "__main__":
-    ImzML.check()
-
     aws_config = {
-        "aws_access_key_id": "",
-        "aws_secret_access_key": "",
-        "region_name": "us-east-1",
-        "endpoint_url": None,
-        "use_token": False,
+        "credentials": {
+            "AccessKeyId": "",
+            "SecretAccessKey": "",
+        },
+        "region_name": "",
+        "endpoint_url": ""
     }
 
     # Sample: https://ms-imaging.org/wp-content/uploads/2019/03/S042_Continuous_imzML1.1.1.zip
-    co = CloudObject.from_path(ImzML, "s3://samples/S042_Continuous.ibd", storage_config=aws_config)
+    co = CloudObject.from_s3(ImzML, "s3://samples/S042_Continuous.ibd", s3_config=aws_config)
 
-    backend = LocalPreprocessor()
-    co.preprocess(backend, force=True)
+    co.preprocess(force=True)
 
     # Using a small chunk size since this dataset is small
     data_slices = co.partition(partition_chunks_strategy, chunk_size=10 * 1024**2)

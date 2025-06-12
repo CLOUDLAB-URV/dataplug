@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 
 from ...cloudobject import CloudObject
 from ...entities import CloudDataFormat, CloudObjectSlice, PartitioningStrategy
-from ...preprocessing.preprocessor import PreprocessingMetadata
+from ...preprocessing.metadata import PreprocessingMetadata
 
 if TYPE_CHECKING:
     from typing import List, Tuple
@@ -20,21 +20,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@CloudDataFormat
-class ImzML:
-    is_continuous: bool
-    coordinates: List[Tuple[int, int, int]]
-    mz_precision: str
-    int_precision: str
-    mz_size: int
-    int_size: int
-    mz_offsets: List[int]
-    int_offsets: List[int]
-    mz_lengths: List[int]
-    int_lengths: List[int]
-
-
-def preprocess_imzml(self, cloud_object: CloudObject) -> PreprocessingMetadata:
+def preprocess_imzml(cloud_object: CloudObject) -> PreprocessingMetadata:
     obj_res = cloud_object.storage.get_object(
         Bucket=cloud_object.path.bucket, Key=cloud_object.path.key.replace(".ibd", ".imzML")
     )
@@ -79,6 +65,20 @@ def preprocess_imzml(self, cloud_object: CloudObject) -> PreprocessingMetadata:
     }
 
     return PreprocessingMetadata(attributes=attrs)
+
+
+@CloudDataFormat(preprocessing_function=preprocess_imzml)
+class ImzML:
+    is_continuous: bool
+    coordinates: List[Tuple[int, int, int]]
+    mz_precision: str
+    int_precision: str
+    mz_size: int
+    int_size: int
+    mz_offsets: List[int]
+    int_offsets: List[int]
+    mz_lengths: List[int]
+    int_lengths: List[int]
 
 
 class ImzMLSlice(CloudObjectSlice):
