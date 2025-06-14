@@ -308,18 +308,15 @@ def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range, static_
                 if colname not in ['FLAG_ROW', 'TIME', 'TIME_CENTROID']:
                     continue
 
-                print(colname)
                 try:
-                    print("I'm working here")
 
                     desc = ms.getcoldesc(colname)
                     ndim = desc.get('ndim', 0)
 
-                    # Caso 1: columna escalar (optimizado con acceso parcial)
                     if ndim == 0:
-                        print("scalar (optimized)")
                         sliced_data = ms.getcol(colname, startrow=starting_range, nrow=fixed_rows)
-                        ms.putcol(colname, sliced_data, startrow=0)
+                        ms.putcol(colname, value=sliced_data, startrow=0, nrow=fixed_rows)
+                        print("[DATAPLUG] Scalar column processed successfully.")
                         continue
 
 
@@ -341,12 +338,11 @@ def _cleanup_ms(input_ms_path, output_ms_path, num_rows, starting_range, static_
                     ms.putcolslice(colname, buf, blc, trc,
                                    startrow=0,
                                    nrow=fixed_rows)
+                    print("[DATAPLUG] Experimental: Array column processed successfully.")
 
                 except Exception as e:
-                    # print(f"Error procesando columna '{colname}': {e}")
                     continue
 
-        # Copiar primeras filas al nuevo MS
         selection = ms.selectrows(list(range(0, fixed_rows))) 
         selection.copy(output_ms_path, deep=True) 
         
@@ -413,9 +409,10 @@ class MSSLice(CloudObjectSlice):
 def ms_partitioning_strategy(cloud_object: CloudObject, num_chunks: int):
     
     total_rows = cloud_object.get_attribute("total_rows")
-    rows_per_timestamp = cloud_object.get_attribute("rows_per_time")
-
+    rows_per_timestamp = int(cloud_object.get_attribute("rows_per_time"))
+    print(f"[DATAPLUG] Total rows: {total_rows}, Rows per timestamp: {rows_per_timestamp}")
     max_chunks = total_rows // rows_per_timestamp
+    print(f"[DATAPLUG] Partition cap: {max_chunks}")  #DEBUG
     num_chunks = min(num_chunks, max_chunks)
 
     slices = []
