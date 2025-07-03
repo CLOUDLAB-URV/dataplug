@@ -10,7 +10,6 @@ import numpy as np
 try:
     import laspy
     import laspy.copc
-    import pdal
 except ModuleNotFoundError:
     pass
 
