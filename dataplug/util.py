@@ -47,7 +47,8 @@ def head_object(s3client, bucket, key):
     metadata = {}
     try:
         head_res = s3client.head_object(Bucket=bucket, Key=key)
-        del head_res["ResponseMetadata"]
+        if "ResponseMetadata" in head_res:
+            del head_res["ResponseMetadata"]
         response = head_res
         if "Metadata" in head_res:
             metadata.update(head_res["Metadata"])
