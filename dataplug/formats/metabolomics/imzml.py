@@ -93,6 +93,13 @@ class ImzMLSlice(CloudObjectSlice):
         self.mz_range_1 = mz_range_1
         super().__init__(*args, **kwargs)
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        
     def __fetch_range_into_buffer(self, first_byte: int, last_byte: int, buffer: io.BufferedIOBase):
         get_response = self.cloud_object.storage.get_object(
             Bucket=self.cloud_object.path.bucket,
