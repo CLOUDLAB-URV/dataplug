@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import json
 import logging
+import posixpath
 import time
 import uuid
-from contextlib import suppress
-from pathlib import _PosixFlavour, PurePath
 from typing import TYPE_CHECKING
 
 import boto3
@@ -268,32 +267,28 @@ class PickleableS3ClientProxy:
         return response
 
 
-class _S3Flavour(_PosixFlavour):
-    is_supported = True
-
-    def parse_parts(self, parts):
-        drv, root, parsed = super().parse_parts(parts)
-        for part in parsed[1:]:
-            if part == "..":
-                index = parsed.index(part)
-                parsed.pop(index - 1)
-                parsed.remove(part)
-        return drv, root, parsed
-
-    def make_uri(self, path):
-        uri = super().make_uri(path)
-        return uri.replace("file:///", "s3://")
-
-
-class S3Path(PurePath):
+class S3Path:
     """
-    PurePath subclass for AWS S3 service.
+    Path-like class for AWS S3 URIs.
     Source: https://github.com/liormizr/s3path
     S3 is not a file-system but we can look at it like a POSIX system.
+
+    This implementation uses the standard-library ``posixpath`` module for
+    all joining and normalisation, avoiding any dependency on ``pathlib``
+    internals that break across Python versions.
     """
 
-    _flavour = _S3Flavour()
-    __slots__ = ()
+    _sep = "/"
+    __slots__ = ("_path",)
+
+    def __init__(self, *args):
+        segments = []
+        for arg in args:
+            if isinstance(arg, S3Path):
+                segments.append(arg._path)
+            else:
+                segments.append(str(arg))
+        self._path = posixpath.normpath(posixpath.join(*segments))
 
     @classmethod
     def from_uri(cls, uri: str) -> "S3Path":
@@ -317,7 +312,7 @@ class S3Path(PurePath):
         >> PureS3Path.from_bucket_key(bucket='<bucket>', key='<key>')
         << PureS3Path('/<bucket>/<key>')
         """
-        bucket = cls(cls._flavour.sep, bucket)
+        bucket = cls(cls._sep, bucket)
         if len(bucket.parts) != 2:
             raise ValueError(
                 "bucket argument contains more then one path element: {}".format(bucket)
@@ -328,15 +323,25 @@ class S3Path(PurePath):
         return bucket / key
 
     @property
+    def parts(self):
+        if self._path == self._sep:
+            return (self._sep,)
+        if self._path.startswith(self._sep):
+            split = self._path.split(self._sep)
+            return (self._sep,) + tuple(p for p in split[1:] if p)
+        return tuple(p for p in self._path.split(self._sep) if p)
+
+    def is_absolute(self):
+        return self._path.startswith(self._sep)
+
+    @property
     def bucket(self) -> str:
         """
         The AWS S3 Bucket name, or ''
         """
         self._absolute_path_validation()
-        with suppress(ValueError):
-            _, bucket, *_ = self.parts
-            return bucket
-        return ""
+        parts = self.parts
+        return parts[1] if len(parts) > 1 else ""
 
     @property
     def key(self) -> str:
@@ -344,8 +349,8 @@ class S3Path(PurePath):
         The AWS S3 Key name, or ''
         """
         self._absolute_path_validation()
-        key = self._flavour.sep.join(self.parts[2:])
-        return key
+        parts = self.parts
+        return self._sep.join(parts[2:]) if len(parts) > 2 else ""
 
     @property
     def virtual_directory(self) -> str:
@@ -360,13 +365,47 @@ class S3Path(PurePath):
         """
         Return the path as a 's3' URI.
         """
-        return super().as_uri()
+        if not self.is_absolute():
+            raise ValueError("relative path can't be expressed as a file URI")
+        return f"s3://{self.bucket}/{self.key}"
 
     def _absolute_path_validation(self):
         if not self.is_absolute():
             raise ValueError("relative path have no bucket, key specification")
 
+    def relative_to(self, other):
+        other = self.__class__(other) if not isinstance(other, self.__class__) else other
+        if not other.is_absolute():
+            other = self.__class__(self._sep, str(other).lstrip(self._sep))
+
+        self_parts = list(self.parts)
+        other_parts = list(other.parts)
+
+        if not self_parts[: len(other_parts)] == other_parts:
+            raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+
+        rel_parts = self_parts[len(other_parts) :]
+        if not rel_parts:
+            return self.__class__(".")
+        return self.__class__(self._sep.join(rel_parts))
+
+    def __truediv__(self, other):
+        if isinstance(other, S3Path):
+            return self.__class__(posixpath.join(self._path, other._path))
+        return self.__class__(posixpath.join(self._path, other))
+
+    def __str__(self):
+        return self._path
+
     def __repr__(self) -> str:
         return "{}(bucket={},key={})".format(
             self.__class__.__name__, self.bucket, self.key
         )
+
+    def __eq__(self, other):
+        if isinstance(other, S3Path):
+            return self._path == other._path
+        return NotImplemented
+
+    def __hash__(self):
+        return hash(self._path)
