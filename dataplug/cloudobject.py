@@ -58,7 +58,7 @@ class CloudObject:
         storage_config = storage_config or {}
         self._s3: S3Client = PickleableS3ClientProxy(**storage_config)
 
-        logger.info(f"Created reference for %s", self)
+        logger.info("Created reference for %s", self)
         logger.debug(f"{self._obj_path=},{self._meta_path=}")
 
     @property
@@ -229,7 +229,7 @@ class CloudObject:
             meta_bucket_head = None
 
         if not meta_bucket_head:
-            logger.info("Creating meta bucket %s".format(self.meta_path.bucket))
+            logger.info("Creating meta bucket %s", self.meta_path.bucket)
             try:
                 self.storage.create_bucket(Bucket=self.meta_path.bucket)
             except botocore.exceptions.ClientError as error:
